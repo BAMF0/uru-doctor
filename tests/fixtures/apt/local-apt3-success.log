@@ -1,0 +1,447 @@
+Log time: 2026-06-23 11:09:40.142795
+Log time: 2026-06-23 11:09:48.502270
+Log time: 2026-06-23 11:10:15.675574
+  MarkInstall supermin:amd64 < 5.2.2-7.1ubuntu1 -> 5.2.2-8ubuntu1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on linux-image-amd64:amd64
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu4 -> 2.0.1-0ubuntu5 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall libguestfs0t64:amd64 < 1:1.58.1-3ubuntu3 -> 1:1.58.1-5ubuntu2 @ii umU Ib > FU=0
+  Installing libtsk23:amd64 as Depends of libguestfs0t64:amd64
+    MarkInstall libtsk23:amd64 < none -> 4.14.0+dfsg-1 @un uN Ib > FU=0
+    Installing libvslvm1t64:amd64 as Depends of libtsk23:amd64
+      MarkInstall libvslvm1t64:amd64 < none -> 20240504-2build1 @un uN > FU=0
+  MarkInstall ssh-import-id:amd64 < 5.11-0ubuntu4 @ii gK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on openssh-server:amd64
+  MarkInstall texlive-pictures:amd64 < 2025.20260124-1 -> 2026.20260527-3 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ruby:amd64
+  ignore old unsatisfied important dependency on tk:amd64
+  MarkInstall docker-compose-v2:amd64 < 2.40.3+ds1-0ubuntu1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on docker.io:amd64
+  MarkInstall asciidoc:amd64 < 10.2.1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on asciidoc-dblatex:amd64
+  MarkInstall libbz2-dev:amd64 < 1.0.8-6build2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on bzip2-doc:amd64
+  MarkInstall libhyprwire3:amd64 < 0.3.0-3 -> 0.3.1-3 @ii umU Ib > FU=0
+  Installing libhyprutils12:amd64 as Depends of libhyprwire3:amd64
+    MarkInstall libhyprutils12:amd64 < none -> 0.13.1-2 @un uN > FU=0
+  MarkInstall libvte-2.91-gtk4-0:amd64 < 0.84.0-2 -> 0.84.0-2build1 @ii umU Ib > FU=0
+  Installing libsimdutf33:amd64 as Depends of libvte-2.91-gtk4-0:amd64
+    MarkInstall libsimdutf33:amd64 < none -> 8.2.0-1 @un uN > FU=0
+  MarkInstall vim:amd64 < 2:9.1.2141-1ubuntu4.3 -> 2:9.2.0461-1ubuntu1 @ii umU Ib > FU=0
+  Installing libsodium26:amd64 as Depends of vim:amd64
+    MarkInstall libsodium26:amd64 < none -> 1.0.22-2 @un uN > FU=0
+  MarkInstall asciidoc-base:amd64 < 10.2.1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on xmlto:amd64
+  MarkInstall texlive-font-utils:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ps2eps:amd64
+  MarkInstall libass9:amd64 < 1:0.17.4-2 -> 1:0.17.4-2build1 @ii umU Ib > FU=0
+  Installing libunibreak7:amd64 as Depends of libass9:amd64
+    MarkInstall libunibreak7:amd64 < none -> 7.0-2 @un uN > FU=0
+  MarkInstall python3-virtualenv:amd64 < 20.36.1+ds-1 -> 21.4.1+ds-1 @ii umU Ib > FU=0
+  Installing python3-discovery:amd64 as Depends of python3-virtualenv:amd64
+    MarkInstall python3-discovery:amd64 < none -> 1.4.2-1 @un uN IPb > FU=0
+    Installing libjs-d3:amd64 as Recommends of python3-discovery:amd64
+      MarkInstall libjs-d3:amd64 < none -> 3.5.17-4build1 @un uN > FU=0
+  MarkInstall libftdi1-dev:amd64 < 1.6~rc1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libftdi1-doc:amd64
+   Delayed Removing: libjpeg-turbo8:amd64 as upgrade is not an option for libjpeg8:amd64 (1:3.1.3-4ubuntu2)
+  MarkInstall libjpeg8:amd64 < 8c-2ubuntu12 -> 1:3.1.3-4ubuntu2 @ii umU Ib > FU=0
+  MarkDelete libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > FU=0
+  MarkInstall libpng-dev:amd64 < 1.6.57-1 -> 1.6.58-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libpng-tools:amd64
+  libqt5x11extras5:amd64 Depends on libqt5core5t64:amd64 < 5.15.18+dfsg-1ubuntu1 @ii mK > (>= 5.15.19+dfsg~) can't be satisfied!
+  MarkInstall libusb-1.0-0-dev:amd64 < 2:1.0.29-2build1 -> 2:1.0.30-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libusb-1.0-doc:amd64
+  MarkInstall libcmocka-dev:amd64 < 2.0.2-1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on cmocka-doc:amd64
+  MarkInstall abigail-tools:amd64 < 2.9-3 -> 2.10-2 @ii umU Ib > FU=0
+  Installing libabigail9:amd64 as Depends of abigail-tools:amd64
+    MarkInstall libabigail9:amd64 < none -> 2.10-2 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall hyprland:amd64 < 0.53.3+ds-4 -> 0.55.4+ds-2 @ii umU Ib > FU=0
+  Installing libaquamarine11:amd64 as Depends of hyprland:amd64
+    MarkInstall libaquamarine11:amd64 < none -> 0.12.1-1 @un uN > FU=0
+  Installing liblua5.5-0:amd64 as Depends of hyprland:amd64
+    MarkInstall liblua5.5-0:amd64 < none -> 5.5.0-3 @un uN > FU=0
+  MarkInstall hyprland-qtutils:amd64 < 0.1.5-1build1 -> 0.2.1-3 @ii umU Ib > FU=0
+  Installing hyprland-guiutils:amd64 as Depends of hyprland-qtutils:amd64
+    MarkInstall hyprland-guiutils:amd64 < none -> 0.2.1-3 @un uN > FU=0
+  MarkInstall network-manager:amd64 < 1.54.3-2ubuntu3 -> 1.56.1-1ubuntu1 @ii umU IPb > FU=0
+  new important dependency: network-manager-tui:amd64
+  Installing network-manager-tui:amd64 as Recommends of network-manager:amd64
+    MarkInstall network-manager-tui:amd64 < none -> 1.56.1-1ubuntu1 @un uN > FU=0
+   Delayed Removing: python3-cryptography:amd64 as upgrade is not an option for python3-cryptography-vectors:amd64 (46.0.7-1)
+  MarkInstall python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+  MarkDelete python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mK > FU=0
+  MarkInstall liblmdb-dev:amd64 < 0.9.31-1build2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on lmdb-doc:amd64
+  MarkInstall python3-jwt:amd64 < 2.10.1-4ubuntu1 -> 2.12.1-1 @ii umU IPb > FU=0
+  previously satisfied important dependency on python3-cryptography:amd64
+  Installing python3-cryptography:amd64 as Recommends of python3-jwt:amd64
+      MarkKeep python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mR > FU=0
+  MarkInstall libtool:amd64 < 2.5.4-9 -> 2.5.4-11 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libltdl-dev:amd64
+  MarkInstall libhpmud0:amd64 < 3.24.4+dfsg0-0ubuntu8 -> 3.24.4+dfsg0-0ubuntu10 @ii umU Ib > FU=0
+  Installing libsnmp45:amd64 as Depends of libhpmud0:amd64
+    MarkInstall libsnmp45:amd64 < none -> 5.9.5.2+dfsg-2.1ubuntu2 @un uN > FU=0
+  MarkInstall libtoml-tiny-perl:amd64 < 0.20-1 -> 0.22-1 @ii umU Ib > FU=0
+  Installing libdatetime-format-iso8601-perl:amd64 as Depends of libtoml-tiny-perl:amd64
+    MarkInstall libdatetime-format-iso8601-perl:amd64 < none -> 0.19-1 @un uN Ib > FU=0
+    Installing libdatetime-format-builder-perl:amd64 as Depends of libdatetime-format-iso8601-perl:amd64
+      MarkInstall libdatetime-format-builder-perl:amd64 < none -> 0.8300-1 @un uN Ib > FU=0
+      Installing libdatetime-format-strptime-perl:amd64 as Depends of libdatetime-format-builder-perl:amd64
+        MarkInstall libdatetime-format-strptime-perl:amd64 < none -> 1.8000-1 @un uN Ib > FU=0
+        Installing libdatetime-locale-perl:amd64 as Depends of libdatetime-format-strptime-perl:amd64
+          MarkInstall libdatetime-locale-perl:amd64 < none -> 1:1.45-1 @un uN > FU=0
+        Installing libdatetime-perl:amd64 as Depends of libdatetime-format-strptime-perl:amd64
+          MarkInstall libdatetime-perl:amd64 < none -> 2:1.65-1build3 @un uN Ib > FU=0
+          Installing libdatetime-timezone-perl:amd64 as Depends of libdatetime-perl:amd64
+            MarkInstall libdatetime-timezone-perl:amd64 < none -> 1:2.68-1+2026b @un uN Ib > FU=0
+            Installing libclass-singleton-perl:amd64 as Depends of libdatetime-timezone-perl:amd64
+              MarkInstall libclass-singleton-perl:amd64 < none -> 1.6-2 @un uN > FU=0
+  Installing libdatetime-format-rfc3339-perl:amd64 as Depends of libtoml-tiny-perl:amd64
+    MarkInstall libdatetime-format-rfc3339-perl:amd64 < none -> 1.10.0-1 @un uN > FU=0
+  MarkInstall libtasn1-6-dev:amd64 < 4.21.0-2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libtasn1-doc:amd64
+  MarkInstall fonts-noto:amd64 < 20201225-2build1 -> 20201225-6 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on fonts-noto-cjk-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-ui-core:amd64
+  ignore old unsatisfied important dependency on fonts-noto-ui-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-unhinted:amd64
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.570 -> 1.571 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on dracut:amd64
+  new important dependency: gst-audio-thumbnailer:amd64
+  Installing gst-audio-thumbnailer:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall gst-audio-thumbnailer:amd64 < none -> 1.0.0-2ubuntu1 @un uN > FU=0
+  new important dependency: gst-video-thumbnailer:amd64
+  Installing gst-video-thumbnailer:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall gst-video-thumbnailer:amd64 < none -> 1.0.0-2ubuntu1 @un uN > FU=0
+  MarkInstall sway:amd64 < 1.11-3 -> 1.12-1 @ii umU Ib > FU=0
+  Installing libwlroots-0.20:amd64 as Depends of sway:amd64
+    MarkInstall libwlroots-0.20:amd64 < none -> 0.20.1-1 @un uN > FU=0
+  MarkInstall python3-nltk:amd64 < 3.9.2-1 -> 3.9.3-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on prover9:amd64
+  MarkInstall nautilus:amd64 < 1:50.0-0ubuntu2 -> 1:50.1-2ubuntu1 @ii umU Ib > FU=0
+  Installing libgexiv2-0.16-4:amd64 as Depends of nautilus:amd64
+    MarkInstall libgexiv2-0.16-4:amd64 < none -> 0.16.0-3 @un uN > FU=0
+  MarkInstall libfile-stripnondeterminism-perl:amd64 < 1.15.0-1build1 -> 1.15.1-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libarchive-cpio-perl:amd64
+  MarkInstall gstreamer1.0-plugins-bad:amd64 < 1.28.2-1ubuntu1.1 -> 1.28.2-1ubuntu2 @ii umU Ib > FU=0
+  Installing libopenexr-3-4-33:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+     Delayed Removing: libopenexr-3-1-30:amd64 as upgrade is not an option for libopenexr-3-4-33:amd64 (3.4.6+ds-4ubuntu3)
+    MarkInstall libopenexr-3-4-33:amd64 < none -> 3.4.6+ds-4ubuntu3 @un uN Ib > FU=0
+    Installing libopenjph0.28:amd64 as Depends of libopenexr-3-4-33:amd64
+      MarkInstall libopenjph0.28:amd64 < none -> 0.28.1-1 @un uN > FU=0
+    MarkDelete libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > FU=0
+  Installing libsvtav1enc4:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+    MarkInstall libsvtav1enc4:amd64 < none -> 4.1.0+dfsg-1 @un uN > FU=0
+  Installing libzxing4:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+    MarkInstall libzxing4:amd64 < none -> 3.0.2+ds-2 @un uN > FU=0
+  MarkInstall libzbar0t64:amd64 < 0.23.93-9ubuntu1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libmagickcore-7.q16-10-extra:amd64
+  MarkInstall texlive-extra-utils:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ruby:amd64
+  MarkInstall texlive-latex-extra:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libspreadsheet-parseexcel-perl:amd64
+  MarkInstall clevis:amd64 < 20-1ubuntu2 -> 23-1 @ii umU IPb > FU=0
+  new important dependency: opensc:amd64
+  Installing opensc:amd64 as Recommends of clevis:amd64
+    MarkInstall opensc:amd64 < none -> 0.27.1-2 @un uN Ib > FU=0
+    Installing opensc-pkcs11:amd64 as Depends of opensc:amd64
+      MarkInstall opensc-pkcs11:amd64 < none -> 0.27.1-2 @un uN Ib > FU=0
+      Installing libeac3:amd64 as Depends of opensc-pkcs11:amd64
+        MarkInstall libeac3:amd64 < none -> 1.1.2+ds+git20220117+453c3d6b03a0-1.1build3 @un uN > FU=0
+    Installing pcscd:amd64 as Recommends of opensc:amd64
+      MarkInstall pcscd:amd64 < none -> 2.4.1-1 @un uN Ib > FU=0
+      Installing libccid:amd64 as Depends of pcscd:amd64
+        MarkInstall libccid:amd64 < none -> 1.8.2-1 @un uN > FU=0
+  MarkInstall inkscape:amd64 < 1.4.3-0ubuntu2 -> 1.4.3-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on imagemagick:amd64
+  ignore old unsatisfied important dependency on libimage-magick-perl:amd64
+    MarkKeep libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mR > FU=0
+    MarkKeep libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mR > FU=0
+Starting pkgProblemResolver with broken count: 3
+Starting 2 pkgProblemResolver with broken count: 3
+Investigating (0) libjpeg8:amd64 < 8c-2ubuntu12 -> 1:3.1.3-4ubuntu2 @ii umU Ib >
+Broken libjpeg8:amd64 Breaks on libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > (< 3)
+  Considering libjpeg-turbo8:amd64 -1 as a solution to libjpeg8:amd64 233
+  Added libjpeg-turbo8:amd64 to the remove list
+  MarkDelete libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > FU=0
+  Fixing libjpeg8:amd64 via remove of libjpeg-turbo8:amd64
+Investigating (0) python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib >
+Broken python3-cryptography-vectors:amd64 Breaks on python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mK > (< 46.0.7~)
+  Considering python3-cryptography:amd64 15 as a solution to python3-cryptography-vectors:amd64 0
+  MarkKeep python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+  Holding Back python3-cryptography-vectors:amd64 rather than change python3-cryptography:amd64
+Investigating (0) libopenexr-3-4-33:amd64 < none -> 3.4.6+ds-4ubuntu3 @un uN Ib >
+Broken libopenexr-3-4-33:amd64 Breaks on libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > (< 3.4.6+ds-3)
+  Considering libopenexr-3-1-30:amd64 -1 as a solution to libopenexr-3-4-33:amd64 0
+  Added libopenexr-3-1-30:amd64 to the remove list
+  MarkDelete libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > FU=0
+  Fixing libopenexr-3-4-33:amd64 via remove of libopenexr-3-1-30:amd64
+ Try to Re-Instate (1) python3-cryptography-vectors:amd64
+  MarkKeep python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+Done
+Entering ResolveByKeep
+Log time: 2026-06-23 11:13:23.656613
+  MarkInstall supermin:amd64 < 5.2.2-7.1ubuntu1 -> 5.2.2-8ubuntu1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on linux-image-amd64:amd64
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu4 -> 2.0.1-0ubuntu5 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall libguestfs0t64:amd64 < 1:1.58.1-3ubuntu3 -> 1:1.58.1-5ubuntu2 @ii umU Ib > FU=0
+  Installing libtsk23:amd64 as Depends of libguestfs0t64:amd64
+    MarkInstall libtsk23:amd64 < none -> 4.14.0+dfsg-1 @un uN Ib > FU=0
+    Installing libvslvm1t64:amd64 as Depends of libtsk23:amd64
+      MarkInstall libvslvm1t64:amd64 < none -> 20240504-2build1 @un uN > FU=0
+  MarkInstall ssh-import-id:amd64 < 5.11-0ubuntu4 @ii gK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on openssh-server:amd64
+  MarkInstall texlive-pictures:amd64 < 2025.20260124-1 -> 2026.20260527-3 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ruby:amd64
+  ignore old unsatisfied important dependency on tk:amd64
+  MarkInstall docker-compose-v2:amd64 < 2.40.3+ds1-0ubuntu1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on docker.io:amd64
+  MarkInstall asciidoc:amd64 < 10.2.1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on asciidoc-dblatex:amd64
+  MarkInstall libbz2-dev:amd64 < 1.0.8-6build2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on bzip2-doc:amd64
+  MarkInstall libhyprwire3:amd64 < 0.3.0-3 -> 0.3.1-3 @ii umU Ib > FU=0
+  Installing libhyprutils12:amd64 as Depends of libhyprwire3:amd64
+    MarkInstall libhyprutils12:amd64 < none -> 0.13.1-2 @un uN > FU=0
+  MarkInstall libvte-2.91-gtk4-0:amd64 < 0.84.0-2 -> 0.84.0-2build1 @ii umU Ib > FU=0
+  Installing libsimdutf33:amd64 as Depends of libvte-2.91-gtk4-0:amd64
+    MarkInstall libsimdutf33:amd64 < none -> 8.2.0-1 @un uN > FU=0
+  MarkInstall vim:amd64 < 2:9.1.2141-1ubuntu4.3 -> 2:9.2.0461-1ubuntu1 @ii umU Ib > FU=0
+  Installing libsodium26:amd64 as Depends of vim:amd64
+    MarkInstall libsodium26:amd64 < none -> 1.0.22-2 @un uN > FU=0
+  MarkInstall asciidoc-base:amd64 < 10.2.1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on xmlto:amd64
+  MarkInstall texlive-font-utils:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ps2eps:amd64
+  MarkInstall libass9:amd64 < 1:0.17.4-2 -> 1:0.17.4-2build1 @ii umU Ib > FU=0
+  Installing libunibreak7:amd64 as Depends of libass9:amd64
+    MarkInstall libunibreak7:amd64 < none -> 7.0-2 @un uN > FU=0
+  MarkInstall python3-virtualenv:amd64 < 20.36.1+ds-1 -> 21.4.1+ds-1 @ii umU Ib > FU=0
+  Installing python3-discovery:amd64 as Depends of python3-virtualenv:amd64
+    MarkInstall python3-discovery:amd64 < none -> 1.4.2-1 @un uN IPb > FU=0
+    Installing libjs-d3:amd64 as Recommends of python3-discovery:amd64
+      MarkInstall libjs-d3:amd64 < none -> 3.5.17-4build1 @un uN > FU=0
+  MarkInstall libftdi1-dev:amd64 < 1.6~rc1-1build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libftdi1-doc:amd64
+   Delayed Removing: libjpeg-turbo8:amd64 as upgrade is not an option for libjpeg8:amd64 (1:3.1.3-4ubuntu2)
+  MarkInstall libjpeg8:amd64 < 8c-2ubuntu12 -> 1:3.1.3-4ubuntu2 @ii umU Ib > FU=0
+  MarkDelete libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > FU=0
+  MarkInstall libpng-dev:amd64 < 1.6.57-1 -> 1.6.58-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libpng-tools:amd64
+  libqt5x11extras5:amd64 Depends on libqt5core5t64:amd64 < 5.15.18+dfsg-1ubuntu1 @ii mK > (>= 5.15.19+dfsg~) can't be satisfied!
+  MarkInstall libusb-1.0-0-dev:amd64 < 2:1.0.29-2build1 -> 2:1.0.30-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libusb-1.0-doc:amd64
+  MarkInstall libcmocka-dev:amd64 < 2.0.2-1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on cmocka-doc:amd64
+  MarkInstall abigail-tools:amd64 < 2.9-3 -> 2.10-2 @ii umU Ib > FU=0
+  Installing libabigail9:amd64 as Depends of abigail-tools:amd64
+    MarkInstall libabigail9:amd64 < none -> 2.10-2 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall hyprland:amd64 < 0.53.3+ds-4 -> 0.55.4+ds-2 @ii umU Ib > FU=0
+  Installing libaquamarine11:amd64 as Depends of hyprland:amd64
+    MarkInstall libaquamarine11:amd64 < none -> 0.12.1-1 @un uN > FU=0
+  Installing liblua5.5-0:amd64 as Depends of hyprland:amd64
+    MarkInstall liblua5.5-0:amd64 < none -> 5.5.0-3 @un uN > FU=0
+  MarkInstall hyprland-qtutils:amd64 < 0.1.5-1build1 -> 0.2.1-3 @ii umU Ib > FU=0
+  Installing hyprland-guiutils:amd64 as Depends of hyprland-qtutils:amd64
+    MarkInstall hyprland-guiutils:amd64 < none -> 0.2.1-3 @un uN > FU=0
+  MarkInstall network-manager:amd64 < 1.54.3-2ubuntu3 -> 1.56.1-1ubuntu1 @ii umU IPb > FU=0
+  new important dependency: network-manager-tui:amd64
+  Installing network-manager-tui:amd64 as Recommends of network-manager:amd64
+    MarkInstall network-manager-tui:amd64 < none -> 1.56.1-1ubuntu1 @un uN > FU=0
+   Delayed Removing: python3-cryptography:amd64 as upgrade is not an option for python3-cryptography-vectors:amd64 (46.0.7-1)
+  MarkInstall python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+  MarkDelete python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mK > FU=0
+  MarkInstall liblmdb-dev:amd64 < 0.9.31-1build2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on lmdb-doc:amd64
+  MarkInstall python3-jwt:amd64 < 2.10.1-4ubuntu1 -> 2.12.1-1 @ii umU IPb > FU=0
+  previously satisfied important dependency on python3-cryptography:amd64
+  Installing python3-cryptography:amd64 as Recommends of python3-jwt:amd64
+      MarkKeep python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mR > FU=0
+  MarkInstall libtool:amd64 < 2.5.4-9 -> 2.5.4-11 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libltdl-dev:amd64
+  MarkInstall libhpmud0:amd64 < 3.24.4+dfsg0-0ubuntu8 -> 3.24.4+dfsg0-0ubuntu10 @ii umU Ib > FU=0
+  Installing libsnmp45:amd64 as Depends of libhpmud0:amd64
+    MarkInstall libsnmp45:amd64 < none -> 5.9.5.2+dfsg-2.1ubuntu2 @un uN > FU=0
+  MarkInstall libtoml-tiny-perl:amd64 < 0.20-1 -> 0.22-1 @ii umU Ib > FU=0
+  Installing libdatetime-format-iso8601-perl:amd64 as Depends of libtoml-tiny-perl:amd64
+    MarkInstall libdatetime-format-iso8601-perl:amd64 < none -> 0.19-1 @un uN Ib > FU=0
+    Installing libdatetime-format-builder-perl:amd64 as Depends of libdatetime-format-iso8601-perl:amd64
+      MarkInstall libdatetime-format-builder-perl:amd64 < none -> 0.8300-1 @un uN Ib > FU=0
+      Installing libdatetime-format-strptime-perl:amd64 as Depends of libdatetime-format-builder-perl:amd64
+        MarkInstall libdatetime-format-strptime-perl:amd64 < none -> 1.8000-1 @un uN Ib > FU=0
+        Installing libdatetime-locale-perl:amd64 as Depends of libdatetime-format-strptime-perl:amd64
+          MarkInstall libdatetime-locale-perl:amd64 < none -> 1:1.45-1 @un uN > FU=0
+        Installing libdatetime-perl:amd64 as Depends of libdatetime-format-strptime-perl:amd64
+          MarkInstall libdatetime-perl:amd64 < none -> 2:1.65-1build3 @un uN Ib > FU=0
+          Installing libdatetime-timezone-perl:amd64 as Depends of libdatetime-perl:amd64
+            MarkInstall libdatetime-timezone-perl:amd64 < none -> 1:2.68-1+2026b @un uN Ib > FU=0
+            Installing libclass-singleton-perl:amd64 as Depends of libdatetime-timezone-perl:amd64
+              MarkInstall libclass-singleton-perl:amd64 < none -> 1.6-2 @un uN > FU=0
+  Installing libdatetime-format-rfc3339-perl:amd64 as Depends of libtoml-tiny-perl:amd64
+    MarkInstall libdatetime-format-rfc3339-perl:amd64 < none -> 1.10.0-1 @un uN > FU=0
+  MarkInstall libtasn1-6-dev:amd64 < 4.21.0-2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libtasn1-doc:amd64
+  MarkInstall fonts-noto:amd64 < 20201225-2build1 -> 20201225-6 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on fonts-noto-cjk-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-ui-core:amd64
+  ignore old unsatisfied important dependency on fonts-noto-ui-extra:amd64
+  ignore old unsatisfied important dependency on fonts-noto-unhinted:amd64
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.570 -> 1.571 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on dracut:amd64
+  new important dependency: gst-audio-thumbnailer:amd64
+  Installing gst-audio-thumbnailer:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall gst-audio-thumbnailer:amd64 < none -> 1.0.0-2ubuntu1 @un uN > FU=0
+  new important dependency: gst-video-thumbnailer:amd64
+  Installing gst-video-thumbnailer:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall gst-video-thumbnailer:amd64 < none -> 1.0.0-2ubuntu1 @un uN > FU=0
+  MarkInstall sway:amd64 < 1.11-3 -> 1.12-1 @ii umU Ib > FU=0
+  Installing libwlroots-0.20:amd64 as Depends of sway:amd64
+    MarkInstall libwlroots-0.20:amd64 < none -> 0.20.1-1 @un uN > FU=0
+  MarkInstall python3-nltk:amd64 < 3.9.2-1 -> 3.9.3-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on prover9:amd64
+  MarkInstall nautilus:amd64 < 1:50.0-0ubuntu2 -> 1:50.1-2ubuntu1 @ii umU Ib > FU=0
+  Installing libgexiv2-0.16-4:amd64 as Depends of nautilus:amd64
+    MarkInstall libgexiv2-0.16-4:amd64 < none -> 0.16.0-3 @un uN > FU=0
+  MarkInstall libfile-stripnondeterminism-perl:amd64 < 1.15.0-1build1 -> 1.15.1-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libarchive-cpio-perl:amd64
+  MarkInstall gstreamer1.0-plugins-bad:amd64 < 1.28.2-1ubuntu1.1 -> 1.28.2-1ubuntu2 @ii umU Ib > FU=0
+  Installing libopenexr-3-4-33:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+     Delayed Removing: libopenexr-3-1-30:amd64 as upgrade is not an option for libopenexr-3-4-33:amd64 (3.4.6+ds-4ubuntu3)
+    MarkInstall libopenexr-3-4-33:amd64 < none -> 3.4.6+ds-4ubuntu3 @un uN Ib > FU=0
+    Installing libopenjph0.28:amd64 as Depends of libopenexr-3-4-33:amd64
+      MarkInstall libopenjph0.28:amd64 < none -> 0.28.1-1 @un uN > FU=0
+    MarkDelete libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > FU=0
+  Installing libsvtav1enc4:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+    MarkInstall libsvtav1enc4:amd64 < none -> 4.1.0+dfsg-1 @un uN > FU=0
+  Installing libzxing4:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+    MarkInstall libzxing4:amd64 < none -> 3.0.2+ds-2 @un uN > FU=0
+  MarkInstall libzbar0t64:amd64 < 0.23.93-9ubuntu1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libmagickcore-7.q16-10-extra:amd64
+  MarkInstall texlive-extra-utils:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on ruby:amd64
+  MarkInstall texlive-latex-extra:amd64 < 2025.20260124-1 -> 2026.20260527-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libspreadsheet-parseexcel-perl:amd64
+  MarkInstall clevis:amd64 < 20-1ubuntu2 -> 23-1 @ii umU IPb > FU=0
+  new important dependency: opensc:amd64
+  Installing opensc:amd64 as Recommends of clevis:amd64
+    MarkInstall opensc:amd64 < none -> 0.27.1-2 @un uN Ib > FU=0
+    Installing opensc-pkcs11:amd64 as Depends of opensc:amd64
+      MarkInstall opensc-pkcs11:amd64 < none -> 0.27.1-2 @un uN Ib > FU=0
+      Installing libeac3:amd64 as Depends of opensc-pkcs11:amd64
+        MarkInstall libeac3:amd64 < none -> 1.1.2+ds+git20220117+453c3d6b03a0-1.1build3 @un uN > FU=0
+    Installing pcscd:amd64 as Recommends of opensc:amd64
+      MarkInstall pcscd:amd64 < none -> 2.4.1-1 @un uN Ib > FU=0
+      Installing libccid:amd64 as Depends of pcscd:amd64
+        MarkInstall libccid:amd64 < none -> 1.8.2-1 @un uN > FU=0
+  MarkInstall inkscape:amd64 < 1.4.3-0ubuntu2 -> 1.4.3-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on imagemagick:amd64
+  ignore old unsatisfied important dependency on libimage-magick-perl:amd64
+    MarkKeep libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mR > FU=0
+    MarkKeep libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mR > FU=0
+Starting pkgProblemResolver with broken count: 3
+Starting 2 pkgProblemResolver with broken count: 3
+Investigating (0) libjpeg8:amd64 < 8c-2ubuntu12 -> 1:3.1.3-4ubuntu2 @ii umU Ib >
+Broken libjpeg8:amd64 Breaks on libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > (< 3)
+  Considering libjpeg-turbo8:amd64 -1 as a solution to libjpeg8:amd64 233
+  Added libjpeg-turbo8:amd64 to the remove list
+  MarkDelete libjpeg-turbo8:amd64 < 2.1.5-4ubuntu4 @ii mK > FU=0
+  Fixing libjpeg8:amd64 via remove of libjpeg-turbo8:amd64
+Investigating (0) python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib >
+Broken python3-cryptography-vectors:amd64 Breaks on python3-cryptography:amd64 < 46.0.5-1ubuntu2 @ii mK > (< 46.0.7~)
+  Considering python3-cryptography:amd64 15 as a solution to python3-cryptography-vectors:amd64 0
+  MarkKeep python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+  Holding Back python3-cryptography-vectors:amd64 rather than change python3-cryptography:amd64
+Investigating (0) libopenexr-3-4-33:amd64 < none -> 3.4.6+ds-4ubuntu3 @un uN Ib >
+Broken libopenexr-3-4-33:amd64 Breaks on libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > (< 3.4.6+ds-3)
+  Considering libopenexr-3-1-30:amd64 -1 as a solution to libopenexr-3-4-33:amd64 0
+  Added libopenexr-3-1-30:amd64 to the remove list
+  MarkDelete libopenexr-3-1-30:amd64 < 3.1.13-2build1 @ii mK > FU=0
+  Fixing libopenexr-3-4-33:amd64 via remove of libopenexr-3-1-30:amd64
+ Try to Re-Instate (1) python3-cryptography-vectors:amd64
+  MarkKeep python3-cryptography-vectors:amd64 < 46.0.5-1 -> 46.0.7-1 @ii umU Ib > FU=0
+Done
+Entering ResolveByKeep
+Log time: 2026-06-23 11:27:29.891031
+  MarkPurge qemu-efi-arm:amd64 < 2025.02-8ubuntu3 @ii gK > FU=1
+  MarkPurge libheif-plugin-libde265:amd64 < 1.21.2-3 @ii gK > FU=1
+  MarkPurge linux-tools-7.0.0-22:amd64 < 7.0.0-22.22 @ii mK > FU=1
+  MarkPurge guile-3.0-libs:amd64 < 3.0.11-2 @ii gK > FU=1
+  MarkPurge qml6-module-org-hyprland-style:amd64 < 0.1.0-1build1 @ii gK > FU=1
+  MarkPurge libmailutils9t64:amd64 < 1:3.20-3build1 @ii gK Ib > FU=1
+  MarkPurge libmbedcrypto16:amd64 < 3.6.6-0.1ubuntu1 @ii gK > FU=1
+  MarkPurge mailutils:amd64 < 1:3.20-3build1 @ii gK Ib > FU=1
+  MarkPurge libtsk19t64:amd64 < 4.12.1+dfsg-3build1 @ii gK > FU=1
+  MarkPurge graphicsmagick:amd64 < 1.4+really1.3.46-2 @ii gK > FU=1
+  MarkPurge qml6-module-qtquick-layouts:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge libqt6quickcontrols2-6:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge python3-pycryptodome:amd64 < 3.20.0+dfsg-3build1 @ii gK > FU=1
+  MarkPurge qml6-module-qtquick-shapes:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge linux-tools-7.0.0-15:amd64 < 7.0.0-15.15 @ii mK > FU=1
+  MarkPurge libunibreak6:amd64 < 6.1-3build1 @ii gK > FU=1
+  MarkPurge libsnmp40t64:amd64 < 5.9.4+dfsg-2ubuntu3 @ii gK > FU=1
+  MarkPurge mailutils-common:amd64 < 1:3.20-3build1 @ii gK > FU=1
+  MarkPurge tk8.6-blt2.5:amd64 < 2.5.3+dfsg-9 @ii gK > FU=1
+  MarkPurge linux-image-7.0.0-15-generic:amd64 < 7.0.0-15.15 @ii mK > FU=1
+  MarkPurge linux-main-modules-zfs-7.0.0-15-generic:amd64 < 7.0.0-15.15+1 @ii mK Ib > FU=1
+  MarkPurge libell0:amd64 < 0.83-1 @ii gK > FU=1
+  MarkPurge linux-headers-7.0.0-22:amd64 < 7.0.0-22.22 @ii mK > FU=1
+  MarkPurge postfix:amd64 < 3.10.6-4ubuntu2.1 @ii gK > FU=1
+  MarkPurge linux-headers-7.0.0-15-generic:amd64 < 7.0.0-15.15 @ii mK > FU=1
+  MarkPurge libgssglue1:amd64 < 0.9-2 @ii gK > FU=1
+  MarkPurge networkd-dispatcher:amd64 < 2.2.4-1.1ubuntu2 @ii gK > FU=1
+  MarkPurge systemd-userdbd:amd64 < 259.5-0ubuntu3 @ii gK > FU=1
+  MarkPurge libkyotocabinet16v5:amd64 < 1.2.80-2build1 @ii gK > FU=1
+  MarkPurge ead:amd64 < 3.10-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge ssh-import-id:amd64 < 5.11-0ubuntu4 @ii gK NPb IPb > FU=1
+  MarkPurge qml6-module-qtqml:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge libwlroots-0.19:amd64 < 0.19.3-1 @ii gK > FU=1
+  MarkPurge blt:amd64 < 2.5.3+dfsg-9 @ii gK Ib > FU=1
+  MarkPurge qml6-module-qtqml-workerscript:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge qml6-module-qtquick-templates:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge qml6-module-qtqml-models:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge qml6-module-qt-labs-qmlmodels:amd64 < 6.10.2+dfsg-6 @ii gK Ib > FU=1
+  MarkPurge qml6-module-qtquick-window:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge libteamdctl0:amd64 < 1.31-1build4 @ii gK > FU=1
+  MarkPurge qml6-module-qtquick-controls:amd64 < 6.10.2+dfsg-6 @ii gK Ib > FU=1
+  MarkPurge cmake-data:amd64 < 4.3.2-1ubuntu1 @ii gK > FU=1
+  MarkPurge libzxing3:amd64 < 2.3.0-5 @ii gK > FU=1
+  MarkPurge libqt6quickshapes6:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge libaquamarine9:amd64 < 0.10.0-2build1 @ii gK > FU=1
+  MarkPurge gsasl-common:amd64 < 2.2.4-1 @ii gK > FU=1
+  MarkPurge linux-tools-7.0.0-15-generic:amd64 < 7.0.0-15.15 @ii mK Ib > FU=1
+  MarkPurge qml6-module-qtquick:amd64 < 6.10.2+dfsg-6 @ii gK Ib > FU=1
+  MarkPurge libabigail8:amd64 < 2.9-3 @ii gK > FU=1
+  MarkPurge mysql-common:amd64 < 5.8+1.1.1ubuntu2 @ii gK > FU=1
+  MarkPurge libmu-dbm9t64:amd64 < 1:3.20-3build1 @ii gK Ib > FU=1
+  MarkPurge libpq5:amd64 < 18.4-0ubuntu0.26.04.1 @ii gK > FU=1
+  MarkPurge libgsasl18:amd64 < 2.2.4-1 @ii gK Ib > FU=1
+  MarkPurge libmysqlclient24:amd64 < 8.4.9-0ubuntu0.26.04.1 @ii gK Ib > FU=1
+  MarkPurge libqt6quicktemplates2-6:amd64 < 6.10.2+dfsg-6 @ii gK > FU=1
+  MarkPurge gtk2-engines-murrine:amd64 < 0.98.2-4ubuntu1 @ii gK > FU=1
+  MarkPurge linux-headers-7.0.0-15:amd64 < 7.0.0-15.15 @ii mK > FU=1
+  MarkPurge python3-keyrings.alt:amd64 < 5.0.2-1build1 @ii gK Ib > FU=1
+  MarkPurge linux-modules-7.0.0-15-generic:amd64 < 7.0.0-15.15 @ii mK Ib > FU=1
+Entering ResolveByKeep
+  Dependencies are not satisfied for linux-tools-7.0.0-22-generic:amd64 < 7.0.0-22.22 @ii mK Ib >
+Keeping package linux-tools-7.0.0-22-generic:amd64
+  Dependencies are not satisfied for linux-tools-7.0.0-22-generic:amd64 < 7.0.0-22.22 @ii mK Ib >
+Package linux-tools-7.0.0-22-generic:amd64 linux-tools-7.0.0-22-generic:amd64 Depends on linux-tools-7.0.0-22:amd64 < 7.0.0-22.22 @ii mP >
+  Keeping Package linux-tools-7.0.0-22:amd64 due to Depends
+  MarkKeep linux-tools-7.0.0-22:amd64 < 7.0.0-22.22 @ii mP > FU=0
+  Dependencies are not satisfied for linux-headers-7.0.0-22-generic:amd64 < 7.0.0-22.22 @ii mK Ib >
+Keeping package linux-headers-7.0.0-22-generic:amd64
+  Dependencies are not satisfied for linux-headers-7.0.0-22-generic:amd64 < 7.0.0-22.22 @ii mK Ib >
+Package linux-headers-7.0.0-22-generic:amd64 linux-headers-7.0.0-22-generic:amd64 Depends on linux-headers-7.0.0-22:amd64 < 7.0.0-22.22 @ii mP >
+  Keeping Package linux-headers-7.0.0-22:amd64 due to Depends
+  MarkKeep linux-headers-7.0.0-22:amd64 < 7.0.0-22.22 @ii mP > FU=0

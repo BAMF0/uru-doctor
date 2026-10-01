@@ -1,0 +1,22 @@
+# Local state: the record store, LLM verdict cache, and the attachment cache.
+# Safe to delete; it is only a cache. Re-ingesting rebuilds it from the logs.
+.uru-doctor/
+
+# Downloaded bug logs. These are other people's machines -- never commit them.
+# Redacted fixtures under tests/fixtures/ are the exception and are committed.
+bugs/
+logs/
+
+# Generated reports, exports and retitle proposals.
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/

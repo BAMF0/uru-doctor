@@ -1,0 +1,834 @@
+Log time: 2026-01-16 13:17:13.800118
+Log time: 2026-01-16 13:17:15.420130
+Log time: 2026-01-16 13:17:35.404152
+  MarkInstall linux-headers-generic-hwe-24.04:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU Ib > FU=0
+  Installing linux-headers-6.18.0-8-generic:amd64 as Depends of linux-headers-generic-hwe-24.04:amd64
+    MarkInstall linux-headers-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-headers-6.18.0-8:amd64 as Depends of linux-headers-6.18.0-8-generic:amd64
+      MarkInstall linux-headers-6.18.0-8:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall linux-generic-hwe-24.04:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU IPb > FU=0
+  new important dependency: linux-tools-6.18.0-8-generic:amd64
+  Installing linux-tools-6.18.0-8-generic:amd64 as Recommends of linux-generic-hwe-24.04:amd64
+    MarkInstall linux-tools-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-tools-6.18.0-8:amd64 as Depends of linux-tools-6.18.0-8-generic:amd64
+      MarkInstall linux-tools-6.18.0-8:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall python3-pyflakes:amd64 < 3.2.0-3 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on pyflakes3:amd64
+  MarkInstall libclang-dev:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing libclang-21-dev:amd64 as Depends of libclang-dev:amd64
+    MarkInstall libclang-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+    Installing libobjc-15-dev:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libobjc-15-dev:amd64 < none -> 15.2.0-11ubuntu1 @un uN > FU=0
+    Installing libclang1-21:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libclang1-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+      Installing libllvm21:amd64 as Depends of libclang1-21:amd64
+        MarkInstall libllvm21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+    Installing libclang-common-21-dev:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libclang-common-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN IPb > FU=0
+      Installing libclang-rt-21-dev:amd64 as Recommends of libclang-common-21-dev:amd64
+        MarkInstall libclang-rt-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libbpfcc:amd64 < 0.31.0+ds-7ubuntu2 -> 0.35.0+ds-1ubuntu1 @ii umU Ib > FU=0
+  Installing libclang-cpp21:amd64 as Depends of libbpfcc:amd64
+    MarkInstall libclang-cpp21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libtinysparql-3.0-0:amd64 < 3.8.2-7build1 -> 3.10.1-4 @ii umU Ib > FU=0
+  Installing libicu78:amd64 as Depends of libtinysparql-3.0-0:amd64
+    MarkInstall libicu78:amd64 < none -> 78.2-1ubuntu1 @un uN > FU=0
+  libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build2) can't be satisfied!
+  MarkInstall golang-go:amd64 < 2:1.24~2 -> 2:1.25~1 @ii umU Ib > FU=0
+  Installing golang-1.25-go:amd64 as Depends of golang-go:amd64
+    MarkInstall golang-1.25-go:amd64 < none -> 1.25.0-0ubuntu1 @un uN Ib > FU=0
+    Installing golang-1.25-src:amd64 as Depends of golang-1.25-go:amd64
+      MarkInstall golang-1.25-src:amd64 < none -> 1.25.0-0ubuntu1 @un uN > FU=0
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu3.25.10.1 -> 2.0.1-0ubuntu4 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall python3-tk:amd64 < 3.13.5-1 -> 3.13.9-1 @ii umU Ib > FU=0
+  Installing python3.14-tk:amd64 as Depends of python3-tk:amd64
+    MarkInstall python3.14-tk:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall clang-format:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clang-format-21:amd64 as Depends of clang-format:amd64
+    MarkInstall clang-format-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libopencc1.1:amd64 < 1.1.9+ds1-2 -> 1.1.9+ds1-4 @ii umU Ib > FU=0
+  Installing libmarisa1:amd64 as Depends of libopencc1.1:amd64
+    MarkInstall libmarisa1:amd64 < none -> 0.3.1+git20250817-1 @un uN > FU=0
+  MarkInstall libbz2-dev:amd64 < 1.0.8-6build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on bzip2-doc:amd64
+  MarkInstall clangd:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clangd-21:amd64 as Depends of clangd:amd64
+    MarkInstall clangd-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libpng-dev:amd64 < 1.6.50-1ubuntu0.3 -> 1.6.53-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libpng-tools:amd64
+  MarkInstall libmutter-17-0:amd64 < 49.0-2ubuntu5.3 -> 49.2-1ubuntu1 @ii umU Ib > FU=0
+  Installing libdisplay-info3:amd64 as Depends of libmutter-17-0:amd64
+    MarkInstall libdisplay-info3:amd64 < none -> 0.3.0-1 @un uN > FU=0
+  MarkInstall libshout3:amd64 < 2.4.6-1build2 -> 2.4.6-1build3 @ii umU Ib > FU=0
+  Installing libtheora1:amd64 as Depends of libshout3:amd64
+    MarkInstall libtheora1:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  MarkInstall udisks2:amd64 < 2.10.1-12.1ubuntu2 -> 2.10.91-1ubuntu1 @ii umU Ib > FU=0
+  Installing libblockdev-smart3:amd64 as Depends of udisks2:amd64
+    MarkInstall libblockdev-smart3:amd64 < none -> 3.4.0-1 @un uN > FU=0
+  MarkInstall libnss-systemd:amd64 < 257.9-0ubuntu2 -> 259-1ubuntu2 @ii umU IPb > FU=0
+  new important dependency: systemd-userdbd:amd64
+  Installing systemd-userdbd:amd64 as Recommends of libnss-systemd:amd64
+    MarkInstall systemd-userdbd:amd64 < none -> 259-1ubuntu2 @un uN > FU=0
+  MarkInstall po-debconf:amd64 < 1.0.21+nmu1 -> 1.0.22 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libmail-sendmail-perl:amd64
+  MarkInstall papers:amd64 < 48.0-1ubuntu1.25.10.3 -> 49.2-3ubuntu1 @ii umU Ib > FU=0
+  Installing libppsdocument-4.0-6:amd64 as Depends of papers:amd64
+    MarkInstall libppsdocument-4.0-6:amd64 < none -> 49.2-3ubuntu1 @un uN > FU=0
+  Installing libppsview-4.0-5:amd64 as Depends of papers:amd64
+    MarkInstall libppsview-4.0-5:amd64 < none -> 49.2-3ubuntu1 @un uN > FU=0
+  MarkInstall swtpm:amd64 < 0.7.3-0ubuntu8 -> 0.10.1+ds-1ubuntu3 @ii umU Ib > FU=0
+  Installing swtpm-libs:amd64 as Depends of swtpm:amd64
+    MarkInstall swtpm-libs:amd64 < none -> 0.10.1+ds-1ubuntu3 @un uN > FU=0
+  MarkInstall python3-coverage:amd64 < 7.8.2+dfsg1-1 -> 7.8.2+dfsg1-1ubuntu1 @ii umU Ib > FU=0
+  Installing python3.14:amd64 as Depends of python3-coverage:amd64
+    MarkInstall python3.14:amd64 < none -> 3.14.2-1 @un uN Ib > FU=0
+    Installing python3.14-minimal:amd64 as Depends of python3.14:amd64
+      MarkInstall python3.14-minimal:amd64 < none -> 3.14.2-1 @un uN Ib > FU=0
+      Installing libpython3.14-minimal:amd64 as Depends of python3.14-minimal:amd64
+        MarkInstall libpython3.14-minimal:amd64 < none -> 3.14.2-1 @un uN IPb > FU=0
+        Installing libpython3.14-stdlib:amd64 as Recommends of libpython3.14-minimal:amd64
+          MarkInstall libpython3.14-stdlib:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2 -> 1.8.2-2build1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall python3-gdbm:amd64 < 3.13.5-1 -> 3.13.9-1 @ii umU Ib > FU=0
+  Installing python3.14-gdbm:amd64 as Depends of python3-gdbm:amd64
+    MarkInstall python3.14-gdbm:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall devscripts:amd64 < 2.25.19ubuntu2 -> 2.26.4 @ii umU Ib > FU=0
+  Installing libconfig-inifiles-perl:amd64 as Depends of devscripts:amd64
+    MarkInstall libconfig-inifiles-perl:amd64 < none -> 3.000003-4 @un uN > FU=0
+  MarkInstall sbuild:amd64 < 0.88.3ubuntu3 -> 0.91.2ubuntu1 @ii umU IPb > FU=0
+  new important dependency: sbuild-schroot:amd64
+  Installing sbuild-schroot:amd64 as Recommends of sbuild:amd64
+    MarkInstall sbuild-schroot:amd64 < none -> 0.91.2ubuntu1 @un uN > FU=0
+  MarkInstall libc6:amd64 < 2.42-0ubuntu3 -> 2.42-2ubuntu2 @ii umU Ib > FU=0
+  Installing libc-gconv-modules-extra:amd64 as Depends of libc6:amd64
+    MarkInstall libc-gconv-modules-extra:amd64 < none -> 2.42-2ubuntu2 @un uN > FU=0
+  MarkInstall libavcodec61:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing librav1e0.8:amd64 as Depends of libavcodec61:amd64
+    MarkInstall librav1e0.8:amd64 < none -> 0.8.1-6ubuntu2 @un uN > FU=0
+  Installing libtheoradec2:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libtheoradec2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  Installing libtheoraenc2:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libtheoraenc2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  Installing libvpx11:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libvpx11:amd64 < none -> 1.15.2-2 @un uN > FU=0
+  Installing libx264-165:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libx264-165:amd64 < none -> 2:0.165.3222+gitb35605ac-3build1 @un uN > FU=0
+  MarkInstall python3-docutils:amd64 < 0.21.2+dfsg-2 -> 0.22.4+dfsg-1 @ii umU Ib > FU=0
+  Installing python3-roman-numerals:amd64 as Depends of python3-docutils:amd64
+    MarkInstall python3-roman-numerals:amd64 < none -> 4.1.0-1 @un uN > FU=0
+  MarkInstall libavfilter10:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing libplacebo351:amd64 as Depends of libavfilter10:amd64
+    MarkInstall libplacebo351:amd64 < none -> 7.351.0-2 @un uN > FU=0
+   Delayed Removing: python3-cryptography:amd64 as upgrade is not an option for python3-cryptography-vectors:amd64 (46.0.1-1)
+  MarkInstall python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+  MarkDelete python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mK > FU=0
+  MarkInstall login:amd64 < 1:4.16.0-2+really2.41-4ubuntu4.1 -> 1:4.16.0-2+really2.41.2-4ubuntu2 @ii umU IPb > FU=0
+  new important dependency: util-linux-extra:amd64
+  Installing util-linux-extra:amd64 as Recommends of login:amd64
+    MarkInstall util-linux-extra:amd64 < none -> 2.41.2-4ubuntu2 @un uN > FU=0
+  MarkInstall tinysparql:amd64 < 3.8.2-7build1 -> 3.10.1-4 @ii umU IPb > FU=0
+  previously satisfied important dependency on localsearch:amd64
+  Installing localsearch:amd64 as Recommends of tinysparql:amd64
+    MarkInstall localsearch:amd64 < none -> 3.8.2-10 @un umN > FU=0
+  MarkInstall linux-image-generic:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU Ib > FU=0
+  Installing linux-image-6.18.0-8-generic:amd64 as Depends of linux-image-generic:amd64
+    MarkInstall linux-image-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-modules-6.18.0-8-generic:amd64 as Depends of linux-image-6.18.0-8-generic:amd64
+      MarkInstall linux-modules-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall python3-jwt:amd64 < 2.10.1-2 -> 2.10.1-4 @ii umU IPb > FU=0
+  previously satisfied important dependency on python3-cryptography:amd64
+  Installing python3-cryptography:amd64 as Recommends of python3-jwt:amd64
+      MarkKeep python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mR > FU=0
+  MarkInstall libtool:amd64 < 2.5.4-4build1 -> 2.5.4-9 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libltdl-dev:amd64
+  MarkInstall libsdl2-2.0-0:amd64 < 2.32.4+dfsg-1 -> 2.32.10+dfsg-6 @ii umU Ib > FU=0
+  Installing libsdl2-classic:amd64 as Depends of libsdl2-2.0-0:amd64
+    MarkInstall libsdl2-classic:amd64 < none -> 2.32.10+dfsg-6 @un uN > FU=0
+  MarkInstall gnome-control-center:amd64 < 1:49.0-1ubuntu2 -> 1:49.2.2-1ubuntu1 @ii umU Ib > FU=0
+  Installing libmalcontent-0-0:amd64 as Depends of gnome-control-center:amd64
+    MarkInstall libmalcontent-0-0:amd64 < none -> 0.13.1-2ubuntu2 @un uN > FU=0
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.560 -> 1.563 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on dracut:amd64
+  new important dependency: resources:amd64
+  Installing resources:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall resources:amd64 < none -> 1.9.1-0ubuntu3 @un uN > FU=0
+  MarkInstall yelp:amd64 < 42.3-3ubuntu1 -> 49.0-5 @ii umU Ib > FU=0
+  Installing libyelp-1-0:amd64 as Depends of yelp:amd64
+    MarkInstall libyelp-1-0:amd64 < none -> 49.0-5 @un uN > FU=0
+  Installing user-session-migration:amd64 as Depends of yelp:amd64
+    MarkInstall user-session-migration:amd64 < none -> 0.5.1 @un uN > FU=0
+  MarkInstall cargo:amd64 < 1.85.1ubuntu1 -> 1.88.0ubuntu3 @ii umU Ib > FU=0
+  Installing cargo-1.88:amd64 as Depends of cargo:amd64
+    MarkInstall cargo-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+    Installing rustc-1.88:amd64 as Depends of cargo-1.88:amd64
+      MarkInstall rustc-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+      Installing libstd-rust-1.88-dev:amd64 as Depends of rustc-1.88:amd64
+        MarkInstall libstd-rust-1.88-dev:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+        Installing libstd-rust-1.88:amd64 as Depends of libstd-rust-1.88-dev:amd64
+          MarkInstall libstd-rust-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN > FU=0
+  MarkInstall libavformat61:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing libbluray3:amd64 as Depends of libavformat61:amd64
+    MarkInstall libbluray3:amd64 < none -> 1:1.4.0-4 @un uN Ib > FU=0
+    Installing libudfread3:amd64 as Depends of libbluray3:amd64
+      MarkInstall libudfread3:amd64 < none -> 1.2.0-2 @un uN > FU=0
+  MarkInstall libfile-stripnondeterminism-perl:amd64 < 1.14.2-1 -> 1.15.0-1build1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libarchive-cpio-perl:amd64
+  MarkInstall libvirglrenderer1:amd64 < 1.1.0-2 -> 1.2.0-2 @ii umU IPb > FU=0
+  new important dependency: virgl-server:amd64
+  Installing virgl-server:amd64 as Recommends of libvirglrenderer1:amd64
+    MarkInstall virgl-server:amd64 < none -> 1.2.0-2 @un uN > FU=0
+  MarkInstall timg:amd64 < 1.6.0-1build2 -> 1.6.3-1build1 @ii umU Ib > FU=0
+  Installing libavcodec62:amd64 as Depends of timg:amd64
+    MarkInstall libavcodec62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+    Installing libavutil60:amd64 as Depends of libavcodec62:amd64
+      MarkInstall libavutil60:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+    Installing libswresample6:amd64 as Depends of libavcodec62:amd64
+      MarkInstall libswresample6:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+  Installing libavdevice62:amd64 as Depends of timg:amd64
+    MarkInstall libavdevice62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+    Installing libavfilter11:amd64 as Depends of libavdevice62:amd64
+      MarkInstall libavfilter11:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+      Installing libavformat62:amd64 as Depends of libavfilter11:amd64
+        MarkInstall libavformat62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+      Installing libswscale9:amd64 as Depends of libavfilter11:amd64
+        MarkInstall libswscale9:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+  MarkInstall clang-tidy:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clang-tidy-21:amd64 as Depends of clang-tidy:amd64
+    MarkInstall clang-tidy-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+    Installing clang-tools-21:amd64 as Depends of clang-tidy-21:amd64
+      MarkInstall clang-tools-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+      Installing clang-21:amd64 as Depends of clang-tools-21:amd64
+        MarkInstall clang-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+        Installing llvm-21-linker-tools:amd64 as Depends of clang-21:amd64
+          MarkInstall llvm-21-linker-tools:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+        Installing llvm-21-dev:amd64 as Recommends of clang-21:amd64
+          MarkInstall llvm-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+          Installing llvm-21:amd64 as Depends of llvm-21-dev:amd64
+            MarkInstall llvm-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+            Installing llvm-21-runtime:amd64 as Depends of llvm-21:amd64
+              MarkInstall llvm-21-runtime:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+          Installing llvm-21-tools:amd64 as Depends of llvm-21-dev:amd64
+            MarkInstall llvm-21-tools:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+Starting pkgProblemResolver with broken count: 2
+Starting 2 pkgProblemResolver with broken count: 2
+Investigating (0) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 2
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+Investigating (0) libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib >
+Broken libmount-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libmount-dev:amd64 1
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib > FU=0
+  Removing libmount-dev:amd64 rather than change libselinux1-dev:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+Investigating (0) python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib >
+Broken python3-cryptography-vectors:amd64 Breaks on python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mK > (< 46.0.1~)
+  Considering python3-cryptography:amd64 9 as a solution to python3-cryptography-vectors:amd64 0
+  MarkKeep python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+  Holding Back python3-cryptography-vectors:amd64 rather than change python3-cryptography:amd64
+Investigating (0) libfuse3-dev:amd64 < 3.17.4-1 -> 3.18.1-1 @ii umU Ib >
+Broken libfuse3-dev:amd64 Depends on libselinux-dev:amd64 < none | 3.9-4 @un umH >
+  Considering libselinux-dev:amd64 0 as a solution to libfuse3-dev:amd64 0
+  MarkKeep libfuse3-dev:amd64 < 3.17.4-1 -> 3.18.1-1 @ii umU Ib > FU=0
+  Removing libfuse3-dev:amd64 rather than change libselinux-dev:amd64
+  MarkDelete libfuse3-dev:amd64 < 3.17.4-1 | 3.18.1-1 @ii umH Ib > FU=0
+Investigating (1) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 1 as a solution to libgio-2.0-dev:amd64 9
+  Added libmount-dev:amd64 to the remove list
+Broken libgio-2.0-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libgio-2.0-dev:amd64 9
+  Added libselinux1-dev:amd64 to the remove list
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libmount-dev:amd64
+  MarkKeep libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libselinux1-dev:amd64
+Investigating (1) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 2
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+ Try to Re-Instate (1) libmount-dev:amd64
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib > FU=0
+Investigating (1) libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib >
+Broken libmount-dev:amd64 Depends on libmount1:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU > (= 2.41-4ubuntu4.1)
+  Considering libmount1:amd64 576 as a solution to libmount-dev:amd64 1
+  Removing libmount-dev:amd64 rather than change libmount1:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+ Try to Re-Instate (1) python3-cryptography-vectors:amd64
+  MarkKeep python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+Investigating (2) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 1 as a solution to libgio-2.0-dev:amd64 9
+  Added libmount-dev:amd64 to the remove list
+Broken libgio-2.0-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libgio-2.0-dev:amd64 9
+  Added libselinux1-dev:amd64 to the remove list
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libmount-dev:amd64
+  MarkKeep libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libselinux1-dev:amd64
+Investigating (2) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 9
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+Investigating (2) libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib >
+Broken libmount-dev:amd64 Depends on libmount1:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU > (= 2.41-4ubuntu4.1)
+  Considering libmount1:amd64 576 as a solution to libmount-dev:amd64 9
+  Removing libmount-dev:amd64 rather than change libmount1:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+Investigating (3) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 576 as a solution to libgio-2.0-dev:amd64 9
+  MarkKeep libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib > FU=0
+  Removing libgio-2.0-dev:amd64 rather than change libmount-dev:amd64
+  MarkDelete libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umH Ib > FU=0
+Investigating (4) libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libglib2.0-dev:amd64 Depends on libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR > (= 2.86.3-4)
+  Considering libgio-2.0-dev:amd64 576 as a solution to libglib2.0-dev:amd64 20
+  MarkKeep libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib > FU=0
+  Removing libglib2.0-dev:amd64 rather than change libgio-2.0-dev:amd64
+  MarkDelete libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umH Ib > FU=0
+Investigating (4) libcairo2-dev:amd64 < 1.18.4-1build1 -> 1.18.4-3 @ii umU Ib >
+Broken libcairo2-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libcairo2-dev:amd64 4
+  MarkKeep libcairo2-dev:amd64 < 1.18.4-1build1 -> 1.18.4-3 @ii umU Ib > FU=0
+  Removing libcairo2-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libcairo2-dev:amd64 < 1.18.4-1build1 | 1.18.4-3 @ii umH Ib > FU=0
+Investigating (4) libatk1.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatk1.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libatk1.0-dev:amd64 4
+  MarkKeep libatk1.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatk1.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libatk1.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libharfbuzz-dev:amd64 < 10.2.0-1 -> 12.3.0-4 @ii umU Ib >
+Broken libharfbuzz-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libharfbuzz-dev:amd64 3
+  MarkKeep libharfbuzz-dev:amd64 < 10.2.0-1 -> 12.3.0-4 @ii umU Ib > FU=0
+  Removing libharfbuzz-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libharfbuzz-dev:amd64 < 10.2.0-1 | 12.3.0-4 @ii umH Ib > FU=0
+Investigating (4) libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 -> 2.44.4+dfsg-1 @ii umU Ib >
+Broken libgdk-pixbuf-2.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libgdk-pixbuf-2.0-dev:amd64 2
+  MarkKeep libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 -> 2.44.4+dfsg-1 @ii umU Ib > FU=0
+  Removing libgdk-pixbuf-2.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 | 2.44.4+dfsg-1 @ii umH Ib > FU=0
+Investigating (4) libatspi2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatspi2.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libatspi2.0-dev:amd64 2
+  MarkKeep libatspi2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatspi2.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libatspi2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libpango1.0-dev:amd64 < 1.56.3-1build1 -> 1.56.4-1 @ii umU Ib >
+Broken libpango1.0-dev:amd64 Depends on libcairo2-dev:amd64 < 1.18.4-1build1 | 1.18.4-3 @ii umR > (>= 1.18.0)
+  Considering libcairo2-dev:amd64 576 as a solution to libpango1.0-dev:amd64 2
+  MarkKeep libpango1.0-dev:amd64 < 1.56.3-1build1 -> 1.56.4-1 @ii umU Ib > FU=0
+  Removing libpango1.0-dev:amd64 rather than change libcairo2-dev:amd64
+  MarkDelete libpango1.0-dev:amd64 < 1.56.3-1build1 | 1.56.4-1 @ii umH Ib > FU=0
+Investigating (4) libatk-bridge2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatk-bridge2.0-dev:amd64 Depends on libatk1.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umR >
+  Considering libatk1.0-dev:amd64 576 as a solution to libatk-bridge2.0-dev:amd64 1
+  MarkKeep libatk-bridge2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatk-bridge2.0-dev:amd64 rather than change libatk1.0-dev:amd64
+  MarkDelete libatk-bridge2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libgtk-3-dev:amd64 < 3.24.50-1ubuntu2 @ii mK Ib >
+Broken libgtk-3-dev:amd64 Depends on libatk-bridge2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umR > (>= 2.15.1)
+  Considering libatk-bridge2.0-dev:amd64 576 as a solution to libgtk-3-dev:amd64 0
+  Removing libgtk-3-dev:amd64 rather than change libatk-bridge2.0-dev:amd64
+  MarkDelete libgtk-3-dev:amd64 < 3.24.50-1ubuntu2 @ii mK Ib > FU=0
+Done
+Entering ResolveByKeep
+Log time: 2026-01-16 13:21:57.849566
+  MarkInstall linux-headers-generic-hwe-24.04:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU Ib > FU=0
+  Installing linux-headers-6.18.0-8-generic:amd64 as Depends of linux-headers-generic-hwe-24.04:amd64
+    MarkInstall linux-headers-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-headers-6.18.0-8:amd64 as Depends of linux-headers-6.18.0-8-generic:amd64
+      MarkInstall linux-headers-6.18.0-8:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall linux-generic-hwe-24.04:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU IPb > FU=0
+  new important dependency: linux-tools-6.18.0-8-generic:amd64
+  Installing linux-tools-6.18.0-8-generic:amd64 as Recommends of linux-generic-hwe-24.04:amd64
+    MarkInstall linux-tools-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-tools-6.18.0-8:amd64 as Depends of linux-tools-6.18.0-8-generic:amd64
+      MarkInstall linux-tools-6.18.0-8:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall python3-pyflakes:amd64 < 3.2.0-3 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on pyflakes3:amd64
+  MarkInstall libclang-dev:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing libclang-21-dev:amd64 as Depends of libclang-dev:amd64
+    MarkInstall libclang-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+    Installing libobjc-15-dev:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libobjc-15-dev:amd64 < none -> 15.2.0-11ubuntu1 @un uN > FU=0
+    Installing libclang1-21:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libclang1-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+      Installing libllvm21:amd64 as Depends of libclang1-21:amd64
+        MarkInstall libllvm21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+    Installing libclang-common-21-dev:amd64 as Depends of libclang-21-dev:amd64
+      MarkInstall libclang-common-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN IPb > FU=0
+      Installing libclang-rt-21-dev:amd64 as Recommends of libclang-common-21-dev:amd64
+        MarkInstall libclang-rt-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libbpfcc:amd64 < 0.31.0+ds-7ubuntu2 -> 0.35.0+ds-1ubuntu1 @ii umU Ib > FU=0
+  Installing libclang-cpp21:amd64 as Depends of libbpfcc:amd64
+    MarkInstall libclang-cpp21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libtinysparql-3.0-0:amd64 < 3.8.2-7build1 -> 3.10.1-4 @ii umU Ib > FU=0
+  Installing libicu78:amd64 as Depends of libtinysparql-3.0-0:amd64
+    MarkInstall libicu78:amd64 < none -> 78.2-1ubuntu1 @un uN > FU=0
+  libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build2) can't be satisfied!
+  MarkInstall golang-go:amd64 < 2:1.24~2 -> 2:1.25~1 @ii umU Ib > FU=0
+  Installing golang-1.25-go:amd64 as Depends of golang-go:amd64
+    MarkInstall golang-1.25-go:amd64 < none -> 1.25.0-0ubuntu1 @un uN Ib > FU=0
+    Installing golang-1.25-src:amd64 as Depends of golang-1.25-go:amd64
+      MarkInstall golang-1.25-src:amd64 < none -> 1.25.0-0ubuntu1 @un uN > FU=0
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu3.25.10.1 -> 2.0.1-0ubuntu4 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall python3-tk:amd64 < 3.13.5-1 -> 3.13.9-1 @ii umU Ib > FU=0
+  Installing python3.14-tk:amd64 as Depends of python3-tk:amd64
+    MarkInstall python3.14-tk:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall clang-format:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clang-format-21:amd64 as Depends of clang-format:amd64
+    MarkInstall clang-format-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libopencc1.1:amd64 < 1.1.9+ds1-2 -> 1.1.9+ds1-4 @ii umU Ib > FU=0
+  Installing libmarisa1:amd64 as Depends of libopencc1.1:amd64
+    MarkInstall libmarisa1:amd64 < none -> 0.3.1+git20250817-1 @un uN > FU=0
+  MarkInstall libbz2-dev:amd64 < 1.0.8-6build1 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on bzip2-doc:amd64
+  MarkInstall clangd:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clangd-21:amd64 as Depends of clangd:amd64
+    MarkInstall clangd-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+  MarkInstall libpng-dev:amd64 < 1.6.50-1ubuntu0.3 -> 1.6.53-1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libpng-tools:amd64
+  MarkInstall libmutter-17-0:amd64 < 49.0-2ubuntu5.3 -> 49.2-1ubuntu1 @ii umU Ib > FU=0
+  Installing libdisplay-info3:amd64 as Depends of libmutter-17-0:amd64
+    MarkInstall libdisplay-info3:amd64 < none -> 0.3.0-1 @un uN > FU=0
+  MarkInstall libshout3:amd64 < 2.4.6-1build2 -> 2.4.6-1build3 @ii umU Ib > FU=0
+  Installing libtheora1:amd64 as Depends of libshout3:amd64
+    MarkInstall libtheora1:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  MarkInstall udisks2:amd64 < 2.10.1-12.1ubuntu2 -> 2.10.91-1ubuntu1 @ii umU Ib > FU=0
+  Installing libblockdev-smart3:amd64 as Depends of udisks2:amd64
+    MarkInstall libblockdev-smart3:amd64 < none -> 3.4.0-1 @un uN > FU=0
+  MarkInstall libnss-systemd:amd64 < 257.9-0ubuntu2 -> 259-1ubuntu2 @ii umU IPb > FU=0
+  new important dependency: systemd-userdbd:amd64
+  Installing systemd-userdbd:amd64 as Recommends of libnss-systemd:amd64
+    MarkInstall systemd-userdbd:amd64 < none -> 259-1ubuntu2 @un uN > FU=0
+  MarkInstall po-debconf:amd64 < 1.0.21+nmu1 -> 1.0.22 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libmail-sendmail-perl:amd64
+  MarkInstall papers:amd64 < 48.0-1ubuntu1.25.10.3 -> 49.2-3ubuntu1 @ii umU Ib > FU=0
+  Installing libppsdocument-4.0-6:amd64 as Depends of papers:amd64
+    MarkInstall libppsdocument-4.0-6:amd64 < none -> 49.2-3ubuntu1 @un uN > FU=0
+  Installing libppsview-4.0-5:amd64 as Depends of papers:amd64
+    MarkInstall libppsview-4.0-5:amd64 < none -> 49.2-3ubuntu1 @un uN > FU=0
+  MarkInstall swtpm:amd64 < 0.7.3-0ubuntu8 -> 0.10.1+ds-1ubuntu3 @ii umU Ib > FU=0
+  Installing swtpm-libs:amd64 as Depends of swtpm:amd64
+    MarkInstall swtpm-libs:amd64 < none -> 0.10.1+ds-1ubuntu3 @un uN > FU=0
+  MarkInstall python3-coverage:amd64 < 7.8.2+dfsg1-1 -> 7.8.2+dfsg1-1ubuntu1 @ii umU Ib > FU=0
+  Installing python3.14:amd64 as Depends of python3-coverage:amd64
+    MarkInstall python3.14:amd64 < none -> 3.14.2-1 @un uN Ib > FU=0
+    Installing python3.14-minimal:amd64 as Depends of python3.14:amd64
+      MarkInstall python3.14-minimal:amd64 < none -> 3.14.2-1 @un uN Ib > FU=0
+      Installing libpython3.14-minimal:amd64 as Depends of python3.14-minimal:amd64
+        MarkInstall libpython3.14-minimal:amd64 < none -> 3.14.2-1 @un uN IPb > FU=0
+        Installing libpython3.14-stdlib:amd64 as Recommends of libpython3.14-minimal:amd64
+          MarkInstall libpython3.14-stdlib:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2 -> 1.8.2-2build1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall python3-gdbm:amd64 < 3.13.5-1 -> 3.13.9-1 @ii umU Ib > FU=0
+  Installing python3.14-gdbm:amd64 as Depends of python3-gdbm:amd64
+    MarkInstall python3.14-gdbm:amd64 < none -> 3.14.2-1 @un uN > FU=0
+  MarkInstall devscripts:amd64 < 2.25.19ubuntu2 -> 2.26.4 @ii umU Ib > FU=0
+  Installing libconfig-inifiles-perl:amd64 as Depends of devscripts:amd64
+    MarkInstall libconfig-inifiles-perl:amd64 < none -> 3.000003-4 @un uN > FU=0
+  MarkInstall sbuild:amd64 < 0.88.3ubuntu3 -> 0.91.2ubuntu1 @ii umU IPb > FU=0
+  new important dependency: sbuild-schroot:amd64
+  Installing sbuild-schroot:amd64 as Recommends of sbuild:amd64
+    MarkInstall sbuild-schroot:amd64 < none -> 0.91.2ubuntu1 @un uN > FU=0
+  MarkInstall libc6:amd64 < 2.42-0ubuntu3 -> 2.42-2ubuntu2 @ii umU Ib > FU=0
+  Installing libc-gconv-modules-extra:amd64 as Depends of libc6:amd64
+    MarkInstall libc-gconv-modules-extra:amd64 < none -> 2.42-2ubuntu2 @un uN > FU=0
+  MarkInstall libavcodec61:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing librav1e0.8:amd64 as Depends of libavcodec61:amd64
+    MarkInstall librav1e0.8:amd64 < none -> 0.8.1-6ubuntu2 @un uN > FU=0
+  Installing libtheoradec2:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libtheoradec2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  Installing libtheoraenc2:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libtheoraenc2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+  Installing libvpx11:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libvpx11:amd64 < none -> 1.15.2-2 @un uN > FU=0
+  Installing libx264-165:amd64 as Depends of libavcodec61:amd64
+    MarkInstall libx264-165:amd64 < none -> 2:0.165.3222+gitb35605ac-3build1 @un uN > FU=0
+  MarkInstall python3-docutils:amd64 < 0.21.2+dfsg-2 -> 0.22.4+dfsg-1 @ii umU Ib > FU=0
+  Installing python3-roman-numerals:amd64 as Depends of python3-docutils:amd64
+    MarkInstall python3-roman-numerals:amd64 < none -> 4.1.0-1 @un uN > FU=0
+  MarkInstall libavfilter10:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing libplacebo351:amd64 as Depends of libavfilter10:amd64
+    MarkInstall libplacebo351:amd64 < none -> 7.351.0-2 @un uN > FU=0
+   Delayed Removing: python3-cryptography:amd64 as upgrade is not an option for python3-cryptography-vectors:amd64 (46.0.1-1)
+  MarkInstall python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+  MarkDelete python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mK > FU=0
+  MarkInstall login:amd64 < 1:4.16.0-2+really2.41-4ubuntu4.1 -> 1:4.16.0-2+really2.41.2-4ubuntu2 @ii umU IPb > FU=0
+  new important dependency: util-linux-extra:amd64
+  Installing util-linux-extra:amd64 as Recommends of login:amd64
+    MarkInstall util-linux-extra:amd64 < none -> 2.41.2-4ubuntu2 @un uN > FU=0
+  MarkInstall tinysparql:amd64 < 3.8.2-7build1 -> 3.10.1-4 @ii umU IPb > FU=0
+  previously satisfied important dependency on localsearch:amd64
+  Installing localsearch:amd64 as Recommends of tinysparql:amd64
+    MarkInstall localsearch:amd64 < none -> 3.8.2-10 @un umN > FU=0
+  MarkInstall linux-image-generic:amd64 < 6.17.0-8.8 -> 6.18.0-8.8 @ii umU Ib > FU=0
+  Installing linux-image-6.18.0-8-generic:amd64 as Depends of linux-image-generic:amd64
+    MarkInstall linux-image-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN Ib > FU=0
+    Installing linux-modules-6.18.0-8-generic:amd64 as Depends of linux-image-6.18.0-8-generic:amd64
+      MarkInstall linux-modules-6.18.0-8-generic:amd64 < none -> 6.18.0-8.8 @un uN > FU=0
+  MarkInstall python3-jwt:amd64 < 2.10.1-2 -> 2.10.1-4 @ii umU IPb > FU=0
+  previously satisfied important dependency on python3-cryptography:amd64
+  Installing python3-cryptography:amd64 as Recommends of python3-jwt:amd64
+      MarkKeep python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mR > FU=0
+  MarkInstall libtool:amd64 < 2.5.4-4build1 -> 2.5.4-9 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libltdl-dev:amd64
+  MarkInstall libsdl2-2.0-0:amd64 < 2.32.4+dfsg-1 -> 2.32.10+dfsg-6 @ii umU Ib > FU=0
+  Installing libsdl2-classic:amd64 as Depends of libsdl2-2.0-0:amd64
+    MarkInstall libsdl2-classic:amd64 < none -> 2.32.10+dfsg-6 @un uN > FU=0
+  MarkInstall gnome-control-center:amd64 < 1:49.0-1ubuntu2 -> 1:49.2.2-1ubuntu1 @ii umU Ib > FU=0
+  Installing libmalcontent-0-0:amd64 as Depends of gnome-control-center:amd64
+    MarkInstall libmalcontent-0-0:amd64 < none -> 0.13.1-2ubuntu2 @un uN > FU=0
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.560 -> 1.563 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on dracut:amd64
+  new important dependency: resources:amd64
+  Installing resources:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall resources:amd64 < none -> 1.9.1-0ubuntu3 @un uN > FU=0
+  MarkInstall yelp:amd64 < 42.3-3ubuntu1 -> 49.0-5 @ii umU Ib > FU=0
+  Installing libyelp-1-0:amd64 as Depends of yelp:amd64
+    MarkInstall libyelp-1-0:amd64 < none -> 49.0-5 @un uN > FU=0
+  Installing user-session-migration:amd64 as Depends of yelp:amd64
+    MarkInstall user-session-migration:amd64 < none -> 0.5.1 @un uN > FU=0
+  MarkInstall cargo:amd64 < 1.85.1ubuntu1 -> 1.88.0ubuntu3 @ii umU Ib > FU=0
+  Installing cargo-1.88:amd64 as Depends of cargo:amd64
+    MarkInstall cargo-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+    Installing rustc-1.88:amd64 as Depends of cargo-1.88:amd64
+      MarkInstall rustc-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+      Installing libstd-rust-1.88-dev:amd64 as Depends of rustc-1.88:amd64
+        MarkInstall libstd-rust-1.88-dev:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN Ib > FU=0
+        Installing libstd-rust-1.88:amd64 as Depends of libstd-rust-1.88-dev:amd64
+          MarkInstall libstd-rust-1.88:amd64 < none -> 1.88.0+dfsg0ubuntu1-0ubuntu1 @un uN > FU=0
+  MarkInstall libavformat61:amd64 < 7:7.1.1-1ubuntu4.1 -> 7:7.1.3-1ubuntu1 @ii umU Ib > FU=0
+  Installing libbluray3:amd64 as Depends of libavformat61:amd64
+    MarkInstall libbluray3:amd64 < none -> 1:1.4.0-4 @un uN Ib > FU=0
+    Installing libudfread3:amd64 as Depends of libbluray3:amd64
+      MarkInstall libudfread3:amd64 < none -> 1.2.0-2 @un uN > FU=0
+  MarkInstall libfile-stripnondeterminism-perl:amd64 < 1.14.2-1 -> 1.15.0-1build1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libarchive-cpio-perl:amd64
+  MarkInstall libvirglrenderer1:amd64 < 1.1.0-2 -> 1.2.0-2 @ii umU IPb > FU=0
+  new important dependency: virgl-server:amd64
+  Installing virgl-server:amd64 as Recommends of libvirglrenderer1:amd64
+    MarkInstall virgl-server:amd64 < none -> 1.2.0-2 @un uN > FU=0
+  MarkInstall timg:amd64 < 1.6.0-1build2 -> 1.6.3-1build1 @ii umU Ib > FU=0
+  Installing libavcodec62:amd64 as Depends of timg:amd64
+    MarkInstall libavcodec62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+    Installing libavutil60:amd64 as Depends of libavcodec62:amd64
+      MarkInstall libavutil60:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+    Installing libswresample6:amd64 as Depends of libavcodec62:amd64
+      MarkInstall libswresample6:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+  Installing libavdevice62:amd64 as Depends of timg:amd64
+    MarkInstall libavdevice62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+    Installing libavfilter11:amd64 as Depends of libavdevice62:amd64
+      MarkInstall libavfilter11:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN Ib > FU=0
+      Installing libavformat62:amd64 as Depends of libavfilter11:amd64
+        MarkInstall libavformat62:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+      Installing libswscale9:amd64 as Depends of libavfilter11:amd64
+        MarkInstall libswscale9:amd64 < none -> 7:8.0.1-3ubuntu1 @un uN > FU=0
+  MarkInstall clang-tidy:amd64 < 1:20.0-63ubuntu1 -> 1:21.1.6-70 @ii umU Ib > FU=0
+  Installing clang-tidy-21:amd64 as Depends of clang-tidy:amd64
+    MarkInstall clang-tidy-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+    Installing clang-tools-21:amd64 as Depends of clang-tidy-21:amd64
+      MarkInstall clang-tools-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+      Installing clang-21:amd64 as Depends of clang-tools-21:amd64
+        MarkInstall clang-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+        Installing llvm-21-linker-tools:amd64 as Depends of clang-21:amd64
+          MarkInstall llvm-21-linker-tools:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+        Installing llvm-21-dev:amd64 as Recommends of clang-21:amd64
+          MarkInstall llvm-21-dev:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+          Installing llvm-21:amd64 as Depends of llvm-21-dev:amd64
+            MarkInstall llvm-21:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN Ib > FU=0
+            Installing llvm-21-runtime:amd64 as Depends of llvm-21:amd64
+              MarkInstall llvm-21-runtime:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+          Installing llvm-21-tools:amd64 as Depends of llvm-21-dev:amd64
+            MarkInstall llvm-21-tools:amd64 < none -> 1:21.1.8-1ubuntu1 @un uN > FU=0
+Starting pkgProblemResolver with broken count: 2
+Starting 2 pkgProblemResolver with broken count: 2
+Investigating (0) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 2
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+Investigating (0) libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib >
+Broken libmount-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libmount-dev:amd64 1
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib > FU=0
+  Removing libmount-dev:amd64 rather than change libselinux1-dev:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+Investigating (0) python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib >
+Broken python3-cryptography-vectors:amd64 Breaks on python3-cryptography:amd64 < 43.0.0-1ubuntu1 @ii mK > (< 46.0.1~)
+  Considering python3-cryptography:amd64 9 as a solution to python3-cryptography-vectors:amd64 0
+  MarkKeep python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+  Holding Back python3-cryptography-vectors:amd64 rather than change python3-cryptography:amd64
+Investigating (0) libfuse3-dev:amd64 < 3.17.4-1 -> 3.18.1-1 @ii umU Ib >
+Broken libfuse3-dev:amd64 Depends on libselinux-dev:amd64 < none | 3.9-4 @un umH >
+  Considering libselinux-dev:amd64 0 as a solution to libfuse3-dev:amd64 0
+  MarkKeep libfuse3-dev:amd64 < 3.17.4-1 -> 3.18.1-1 @ii umU Ib > FU=0
+  Removing libfuse3-dev:amd64 rather than change libselinux-dev:amd64
+  MarkDelete libfuse3-dev:amd64 < 3.17.4-1 | 3.18.1-1 @ii umH Ib > FU=0
+Investigating (1) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 1 as a solution to libgio-2.0-dev:amd64 9
+  Added libmount-dev:amd64 to the remove list
+Broken libgio-2.0-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libgio-2.0-dev:amd64 9
+  Added libselinux1-dev:amd64 to the remove list
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libmount-dev:amd64
+  MarkKeep libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libselinux1-dev:amd64
+Investigating (1) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 2
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+ Try to Re-Instate (1) libmount-dev:amd64
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU Ib > FU=0
+Investigating (1) libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib >
+Broken libmount-dev:amd64 Depends on libmount1:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU > (= 2.41-4ubuntu4.1)
+  Considering libmount1:amd64 576 as a solution to libmount-dev:amd64 1
+  Removing libmount-dev:amd64 rather than change libmount1:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+ Try to Re-Instate (1) python3-cryptography-vectors:amd64
+  MarkKeep python3-cryptography-vectors:amd64 < 43.0.0-1 -> 46.0.1-1 @ii umU Ib > FU=0
+Investigating (2) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 1 as a solution to libgio-2.0-dev:amd64 9
+  Added libmount-dev:amd64 to the remove list
+Broken libgio-2.0-dev:amd64 Depends on libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR >
+  Considering libselinux1-dev:amd64 2 as a solution to libgio-2.0-dev:amd64 9
+  Added libselinux1-dev:amd64 to the remove list
+  MarkKeep libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libmount-dev:amd64
+  MarkKeep libselinux1-dev:amd64 < 3.8.1-1build1 @ii mR > FU=0
+  Fixing libgio-2.0-dev:amd64 via keep of libselinux1-dev:amd64
+Investigating (2) libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib >
+Broken libselinux1-dev:amd64 Depends on libselinux1:amd64 < 3.8.1-1build1 -> 3.9-4 @ii umU > (= 3.8.1-1build1)
+  Considering libselinux1:amd64 1350 as a solution to libselinux1-dev:amd64 9
+  Removing libselinux1-dev:amd64 rather than change libselinux1:amd64
+  MarkDelete libselinux1-dev:amd64 < 3.8.1-1build1 @ii mK Ib > FU=0
+Investigating (2) libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib >
+Broken libmount-dev:amd64 Depends on libmount1:amd64 < 2.41-4ubuntu4.1 -> 2.41.2-4ubuntu2 @ii umU > (= 2.41-4ubuntu4.1)
+  Considering libmount1:amd64 576 as a solution to libmount-dev:amd64 9
+  Removing libmount-dev:amd64 rather than change libmount1:amd64
+  MarkDelete libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umH Ib > FU=0
+Investigating (3) libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libgio-2.0-dev:amd64 Depends on libmount-dev:amd64 < 2.41-4ubuntu4.1 | 2.41.2-4ubuntu2 @ii umR >
+  Considering libmount-dev:amd64 576 as a solution to libgio-2.0-dev:amd64 9
+  MarkKeep libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib > FU=0
+  Removing libgio-2.0-dev:amd64 rather than change libmount-dev:amd64
+  MarkDelete libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umH Ib > FU=0
+Investigating (4) libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib >
+Broken libglib2.0-dev:amd64 Depends on libgio-2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR > (= 2.86.3-4)
+  Considering libgio-2.0-dev:amd64 576 as a solution to libglib2.0-dev:amd64 20
+  MarkKeep libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 -> 2.86.3-4 @ii umU Ib > FU=0
+  Removing libglib2.0-dev:amd64 rather than change libgio-2.0-dev:amd64
+  MarkDelete libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umH Ib > FU=0
+Investigating (4) libcairo2-dev:amd64 < 1.18.4-1build1 -> 1.18.4-3 @ii umU Ib >
+Broken libcairo2-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libcairo2-dev:amd64 4
+  MarkKeep libcairo2-dev:amd64 < 1.18.4-1build1 -> 1.18.4-3 @ii umU Ib > FU=0
+  Removing libcairo2-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libcairo2-dev:amd64 < 1.18.4-1build1 | 1.18.4-3 @ii umH Ib > FU=0
+Investigating (4) libatk1.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatk1.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libatk1.0-dev:amd64 4
+  MarkKeep libatk1.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatk1.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libatk1.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libharfbuzz-dev:amd64 < 10.2.0-1 -> 12.3.0-4 @ii umU Ib >
+Broken libharfbuzz-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libharfbuzz-dev:amd64 3
+  MarkKeep libharfbuzz-dev:amd64 < 10.2.0-1 -> 12.3.0-4 @ii umU Ib > FU=0
+  Removing libharfbuzz-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libharfbuzz-dev:amd64 < 10.2.0-1 | 12.3.0-4 @ii umH Ib > FU=0
+Investigating (4) libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 -> 2.44.4+dfsg-1 @ii umU Ib >
+Broken libgdk-pixbuf-2.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libgdk-pixbuf-2.0-dev:amd64 2
+  MarkKeep libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 -> 2.44.4+dfsg-1 @ii umU Ib > FU=0
+  Removing libgdk-pixbuf-2.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libgdk-pixbuf-2.0-dev:amd64 < 2.42.12+dfsg-5 | 2.44.4+dfsg-1 @ii umH Ib > FU=0
+Investigating (4) libatspi2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatspi2.0-dev:amd64 Depends on libglib2.0-dev:amd64 < 2.86.0-2ubuntu0.1 | 2.86.3-4 @ii umR >
+  Considering libglib2.0-dev:amd64 576 as a solution to libatspi2.0-dev:amd64 2
+  MarkKeep libatspi2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatspi2.0-dev:amd64 rather than change libglib2.0-dev:amd64
+  MarkDelete libatspi2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libpango1.0-dev:amd64 < 1.56.3-1build1 -> 1.56.4-1 @ii umU Ib >
+Broken libpango1.0-dev:amd64 Depends on libcairo2-dev:amd64 < 1.18.4-1build1 | 1.18.4-3 @ii umR > (>= 1.18.0)
+  Considering libcairo2-dev:amd64 576 as a solution to libpango1.0-dev:amd64 2
+  MarkKeep libpango1.0-dev:amd64 < 1.56.3-1build1 -> 1.56.4-1 @ii umU Ib > FU=0
+  Removing libpango1.0-dev:amd64 rather than change libcairo2-dev:amd64
+  MarkDelete libpango1.0-dev:amd64 < 1.56.3-1build1 | 1.56.4-1 @ii umH Ib > FU=0
+Investigating (4) libatk-bridge2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib >
+Broken libatk-bridge2.0-dev:amd64 Depends on libatk1.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umR >
+  Considering libatk1.0-dev:amd64 576 as a solution to libatk-bridge2.0-dev:amd64 1
+  MarkKeep libatk-bridge2.0-dev:amd64 < 2.57.1-1 -> 2.59.0-1 @ii umU Ib > FU=0
+  Removing libatk-bridge2.0-dev:amd64 rather than change libatk1.0-dev:amd64
+  MarkDelete libatk-bridge2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umH Ib > FU=0
+Investigating (4) libgtk-3-dev:amd64 < 3.24.50-1ubuntu2 @ii mK Ib >
+Broken libgtk-3-dev:amd64 Depends on libatk-bridge2.0-dev:amd64 < 2.57.1-1 | 2.59.0-1 @ii umR > (>= 2.15.1)
+  Considering libatk-bridge2.0-dev:amd64 576 as a solution to libgtk-3-dev:amd64 0
+  Removing libgtk-3-dev:amd64 rather than change libatk-bridge2.0-dev:amd64
+  MarkDelete libgtk-3-dev:amd64 < 3.24.50-1ubuntu2 @ii mK Ib > FU=0
+Done
+Entering ResolveByKeep
+Log time: 2026-01-16 13:27:22.790483
+  MarkPurge libppsdocument-4.0-5:amd64 < 48.0-1ubuntu1.25.10.3 @ii gK > FU=1
+  MarkPurge gnome-system-monitor:amd64 < 49.1-2 @ii gK > FU=1
+  MarkPurge libpcre2-posix3:amd64 < 10.46-1 @ii gK > FU=1
+  MarkPurge linux-tools-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge libppsview-4.0-4:amd64 < 48.0-1ubuntu1.25.10.3 @ii gK Ib > FU=1
+  MarkPurge libdisplay-info2:amd64 < 0.2.0-2 @ii gK > FU=1
+  MarkPurge libpixman-1-dev:amd64 < 0.46.4-1 @ii gK > FU=1
+  MarkPurge libtheoraenc1:amd64 < 1.2.0~alpha1+dfsg-6 @ii gK > FU=1
+  MarkPurge libmarisa0:amd64 < 0.2.6-19 @ii mK > FU=1
+  MarkPurge libfontconfig-dev:amd64 < 2.15.0-2.4ubuntu1 @ii gK > FU=1
+  MarkPurge mousetweaks:amd64 < 3.32.0-6 @ii gK > FU=1
+  MarkPurge libxdamage-dev:amd64 < 1:1.1.6-1build2 @ii gK > FU=1
+  MarkPurge librav1e0.7:amd64 < 0.7.1-9 @ii gK > FU=1
+  MarkPurge libavfilter10:amd64 < 7:7.1.3-1ubuntu1 @ii gK > FU=1
+  MarkPurge libgdata-common:amd64 < 0.18.1-9build1 @ii gK > FU=1
+  MarkPurge clangd-20:amd64 < 1:20.1.8-2ubuntu5 @ii gK > FU=1
+  MarkPurge libpocketsphinx3:amd64 < 0.8.0+real5prealpha+1-15ubuntu6 @ii gK > FU=1
+  MarkPurge cargo-1.85:amd64 < 1.85.1+dfsg0ubuntu2-0ubuntu1 @ii gK > FU=1
+  MarkPurge libclang-20-dev:amd64 < 1:20.1.8-2ubuntu5 @ii gK > FU=1
+  MarkPurge libproxy1-plugin-gsettings:amd64 < 0.5.11-2 @ii gK > FU=1
+  MarkPurge libavutil59:amd64 < 7:7.1.3-1ubuntu1 @ii gK > FU=1
+  MarkPurge libwmf0.2-7-gtk:amd64 < 0.2.13-1.1build3 @ii gK > FU=1
+  MarkPurge libpangomm-2.48-1t64:amd64 < 2.56.1-1build1 @ii gK > FU=1
+  MarkPurge libxinerama-dev:amd64 < 2:1.1.4-3build2 @ii gK > FU=1
+  MarkPurge xtrans-dev:amd64 < 1.6.0-1 @ii gK > FU=1
+  MarkPurge libtiffxx6:amd64 < 4.7.0-3ubuntu3 @ii gK > FU=1
+  MarkPurge libstdc++-13-dev:amd64 < 13.4.0-4ubuntu1 @ii gK > FU=1
+  MarkPurge libxcomposite-dev:amd64 < 1:0.4.6-1build1 @ii gK > FU=1
+  MarkPurge libglibmm-2.68-1t64:amd64 < 2.86.0-6 @ii gK > FU=1
+  MarkPurge linux-headers-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge libsepol-dev:amd64 < 3.9-2 @ii gK > FU=1
+  MarkPurge linux-modules-extra-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge linux-tools-6.14.0-37:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge gnome-power-manager:amd64 < 43.0-5 @ii gK > FU=1
+  MarkPurge libswscale8:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge gcc-13-base:amd64 < 13.4.0-4ubuntu1 @ii gK > FU=1
+  MarkPurge libsigc++-3.0-0:amd64 < 3.6.0-2build1 @ii gK > FU=1
+  MarkPurge libxft-dev:amd64 < 2.3.6-1build2 @ii gK Ib > FU=1
+  MarkPurge gir1.2-freedesktop-dev:amd64 < 1.86.0-6 @ii gK > FU=1
+  MarkPurge gir1.2-girepository-2.0:amd64 < 1.86.0-6 @ii gK > FU=1
+  MarkPurge libsm-dev:amd64 < 2:1.2.6-1 @ii gK > FU=1
+  MarkPurge libglib2.0-dev-bin:amd64 < 2.86.3-4 @ii gK > FU=1
+  MarkPurge libcairomm-1.16-1:amd64 < 1.18.0-2build1 @ii gK Ib > FU=1
+  MarkPurge libsoup-2.4-1:amd64 < 2.74.3-10.1ubuntu4 @ii gK > FU=1
+  MarkPurge gir1.2-glib-2.0-dev:amd64 < 2.86.3-4 @ii gK > FU=1
+  MarkPurge libtheora0:amd64 < 1.2.0~alpha1+dfsg-6 @ii gK Ib > FU=1
+  MarkPurge libavcodec61:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libsphinxbase3t64:amd64 < 0.8+5prealpha+1-21ubuntu1 @ii gK > FU=1
+  MarkPurge libtheoradec1:amd64 < 1.2.0~alpha1+dfsg-6 @ii gK > FU=1
+  MarkPurge libthai-dev:amd64 < 0.1.30-1 @ii gK > FU=1
+  MarkPurge libxtst-dev:amd64 < 2:1.2.5-1build1 @ii gK > FU=1
+  MarkPurge x11proto-dev:amd64 < 2024.1-1build1 @ii gK > FU=1
+  MarkPurge libwebp-dev:amd64 < 1.5.0-0.1build1 @ii gK > FU=1
+  MarkPurge libxcursor-dev:amd64 < 1:1.2.3-1build1 @ii gK Ib > FU=1
+  MarkPurge libxfixes-dev:amd64 < 1:6.0.0-2build2 @ii gK Ib > FU=1
+  MarkPurge linux-modules-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge native-architecture:amd64 < 0.2.6build1 @ii gK > FU=1
+  MarkPurge libgles-dev:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libstd-rust-1.85:amd64 < 1.85.1+dfsg0ubuntu2-0ubuntu1 @ii gK > FU=1
+  MarkPurge libvpx9:amd64 < 1.15.0-2.1build1 @ii gK > FU=1
+  MarkPurge clang-tidy-20:amd64 < 1:20.1.8-2ubuntu5 @ii gK > FU=1
+  MarkPurge libsystemd-dev:amd64 < 259-1ubuntu2 @ii gK > FU=1
+  MarkPurge libudfread0:amd64 < 1.1.2-1build1 @ii gK > FU=1
+  MarkPurge libpostproc58:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge linux-headers-6.14.0-37:amd64 < 6.14.0-37.37 @ii gK > FU=1
+  MarkPurge icu-devtools:amd64 < 78.2-1ubuntu1 @ii gK > FU=1
+  MarkPurge libglvnd-dev:amd64 < 1.7.0-3 @ii gK Ib > FU=1
+  MarkPurge libxdmcp-dev:amd64 < 1:1.1.5-2 @ii gK Ib > FU=1
+  MarkPurge libpcre2-16-0:amd64 < 10.46-1 @ii gK > FU=1
+  MarkPurge mesa-vdpau-drivers:amd64 < 25.2.8-2ubuntu1 @ii gK > FU=1
+  MarkPurge vdpau-driver-all:amd64 < 1.5-3 @ii gK Ib > FU=1
+  MarkPurge clang-format-20:amd64 < 1:20.1.8-2ubuntu5 @ii gK > FU=1
+  MarkPurge libxcb-render0-dev:amd64 < 1.17.0-2build1 @ii gK > FU=1
+  MarkPurge libsoup2.4-common:amd64 < 2.74.3-10.1ubuntu4 @ii gK > FU=1
+  MarkPurge libglvnd-core-dev:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libpcre2-dev:amd64 < 10.46-1 @ii gK Ib > FU=1
+  MarkPurge libobjc-13-dev:amd64 < 13.4.0-4ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxext-dev:amd64 < 2:1.3.4-1build3 @ii gK Ib > FU=1
+  MarkPurge libplacebo349:amd64 < 7.349.0-3 @ii gK > FU=1
+  MarkPurge autopkgtest:amd64 < 5.53 @ii gK > FU=1
+  MarkPurge liblerc-dev:amd64 < 4.0.0+ds-5ubuntu2 @ii gK > FU=1
+  MarkPurge libgl-dev:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libjpeg8-dev:amd64 < 8c-2ubuntu11 @ii gK > FU=1
+  MarkPurge libbluray2:amd64 < 1:1.3.4-1build2 @ii gK Ib > FU=1
+  MarkPurge libdbus-1-dev:amd64 < 1.16.2-2ubuntu2 @ii gK Ib > FU=1
+  MarkPurge libxcb-shm0-dev:amd64 < 1.17.0-2build1 @ii gK > FU=1
+  MarkPurge girepository-tools:amd64 < 2.86.3-4 @ii gK Ib > FU=1
+  MarkPurge wayland-protocols:amd64 < 1.47-1 @ii gK > FU=1
+  MarkPurge libgtkmm-4.0-0:amd64 < 4.20.0-1 @ii gK Ib > FU=1
+  MarkPurge rustc-1.85:amd64 < 1.85.1+dfsg0ubuntu2-0ubuntu1 @ii gK > FU=1
+  MarkPurge libdeflate-dev:amd64 < 1.23-2 @ii gK > FU=1
+  MarkPurge libxrandr-dev:amd64 < 2:1.5.4-1build1 @ii gK Ib > FU=1
+  MarkPurge pocketsphinx-en-us:amd64 < 0.8.0+real5prealpha+1-15ubuntu6 @ii gK > FU=1
+  MarkPurge libgcc-13-dev:amd64 < 13.4.0-4ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxrender-dev:amd64 < 1:0.9.12-1 @ii gK Ib > FU=1
+  MarkPurge libopengl0:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libice-dev:amd64 < 2:1.1.1-1build1 @ii gK Ib > FU=1
+  MarkPurge libgraphite2-dev:amd64 < 1.3.14-11ubuntu1 @ii gK > FU=1
+  MarkPurge libicu-dev:amd64 < 78.2-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libsysprof-capture-4-dev:amd64 < 49.0-5 @ii gK > FU=1
+  MarkPurge libwayland-dev:amd64 < 1.24.0-2 @ii gK > FU=1
+  MarkPurge libgles1:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libsharpyuv-dev:amd64 < 1.5.0-0.1build1 @ii gK > FU=1
+  MarkPurge golang-1.24-go:amd64 < 1.24.9-1 @ii gK > FU=1
+  MarkPurge libfribidi-dev:amd64 < 1.0.16-5 @ii gK > FU=1
+  MarkPurge libjs-underscore:amd64 < 1.13.4~dfsg+~1.11.4-3build1 @ii gK > FU=1
+  MarkPurge retry:amd64 < 1.0.6-1 @ii gK > FU=1
+  MarkPurge libyelp0:amd64 < 42.3-3ubuntu1 @ii gK > FU=1
+  MarkPurge libharfbuzz-cairo0:amd64 < 12.3.0-4 @ii gK > FU=1
+  MarkPurge libegl1-mesa-dev:amd64 < 25.2.8-2ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxcb1-dev:amd64 < 1.17.0-2build1 @ii gK Ib > FU=1
+  MarkPurge libllvm19:amd64 < 1:19.1.7-20ubuntu1 @ii gK > FU=1
+  MarkPurge tracker-extract:amd64 < 3.8.2-10 @ii gK > FU=1
+  MarkPurge libxkbcommon-dev:amd64 < 1.12.3-1 @ii gK > FU=1
+  MarkPurge libjbig-dev:amd64 < 2.1-6.1ubuntu3 @ii gK > FU=1
+  MarkPurge libgdata22:amd64 < 0.18.1-9build1 @ii gK Ib > FU=1
+  MarkPurge libavdevice61:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libjpeg-turbo8-dev:amd64 < 2.1.5-4ubuntu2 @ii gK > FU=1
+  MarkPurge libx264-164:amd64 < 2:0.164.3108+git31e19f9-2build2 @ii gK > FU=1
+  MarkPurge libdatrie-dev:amd64 < 0.2.14-1 @ii gK > FU=1
+  MarkPurge networkd-dispatcher:amd64 < 2.2.4-1.1build1 @ii gK > FU=1
+  MarkPurge libepoxy-dev:amd64 < 1.5.10-2build1 @ii gK Ib > FU=1
+  MarkPurge python3-roman:amd64 < 5.2-1 @ii gK > FU=1
+  MarkPurge golang-1.24-src:amd64 < 1.24.9-1 @ii gK > FU=1
+  MarkPurge libgio-2.0-dev-bin:amd64 < 2.86.3-4 @ii gK > FU=1
+  MarkPurge libavformat61:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libproxy1-plugin-networkmanager:amd64 < 0.5.11-2 @ii gK > FU=1
+  MarkPurge libwayland-bin:amd64 < 1.24.0-2 @ii gK > FU=1
+  MarkPurge libglx-dev:amd64 < 1.7.0-3 @ii gK > FU=1
+  MarkPurge libegl-dev:amd64 < 1.7.0-3 @ii gK Ib > FU=1
+  MarkPurge pango1.0-tools:amd64 < 1.56.4-1 @ii gK > FU=1
+  MarkPurge libjpeg-dev:amd64 < 8c-2ubuntu11 @ii gK Ib > FU=1
+  MarkPurge autodep8:amd64 < 0.30build1 @ii gK > FU=1
+  MarkPurge libx11-dev:amd64 < 2:1.8.12-1build1 @ii gK Ib > FU=1
+  MarkPurge xorg-sgml-doctools:amd64 < 1:1.11-1.1build1 @ii gK > FU=1
+  MarkPurge libzstd-dev:amd64 < 1.5.7+dfsg-2 @ii gK > FU=1
+  MarkPurge linux-image-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii gK Ib > FU=1
+  MarkPurge libstd-rust-1.85-dev:amd64 < 1.85.1+dfsg0ubuntu2-0ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxau-dev:amd64 < 1:1.0.11-1build1 @ii gK Ib > FU=1
+  MarkPurge libxi-dev:amd64 < 2:1.8.2-2 @ii gK Ib > FU=1
+  MarkPurge libtiff-dev:amd64 < 4.7.0-3ubuntu3 @ii gK Ib > FU=1
+  MarkPurge libopengl-dev:amd64 < 1.7.0-3 @ii gK Ib > FU=1
+  MarkPurge libswresample5:amd64 < 7:7.1.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libwebpdecoder3:amd64 < 1.5.0-0.1build1 @ii gK > FU=1
+Entering ResolveByKeep

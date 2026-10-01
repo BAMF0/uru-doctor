@@ -1,0 +1,978 @@
+Log time: 2026-09-30 14:59:55.966964
+Log time: 2026-09-30 14:59:57.695508
+Log time: 2026-09-30 15:00:11.868746
+  MarkInstall ubuntu-minimal:amd64 < 1.539.2 -> 1.570.4 @ii umU Ib > FU=1
+  Upgrading ubuntu-standard:amd64 < 1.539.2 | 1.570.4 @ii umH > due to ubuntu-minimal:amd64
+  Upgrading ubuntu-kernel-accessories:amd64 < 1.539.2 | 1.570.4 @ii umH > due to ubuntu-minimal:amd64
+  Installing sudo-rs:amd64 as Depends of ubuntu-minimal:amd64
+    MarkInstall sudo-rs:amd64 < none -> 0.2.13-0ubuntu1.2 @un uN Ib > FU=0
+    Installing sudo-common:amd64 as Depends of sudo-rs:amd64
+      MarkInstall sudo-common:amd64 < none -> 1.2ubuntu @un uN Ib > FU=0
+        MarkInstall sudo:amd64 < 1.9.15p5-3ubuntu5.24.04.3 -> 1.9.17p2-1ubuntu3.1 @ii umU Ib > FU=0
+        Installing libc6:amd64 as Depends of sudo:amd64
+           Upgrading: libc6-dev:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc6-dev:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > (= 2.39-0ubuntu8.9)
+           Upgrading: libc6-dbg:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc6-dbg:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > (= 2.39-0ubuntu8.9)
+           Upgrading: libc-dev-bin:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc-dev-bin:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > (< 2.40)
+           Upgrading: libc-bin:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc-bin:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > (< 2.40)
+          MarkInstall libc6:amd64 < 2.39-0ubuntu8.9 -> 2.43-2ubuntu2.4 @ii umU Ib > FU=0
+          Upgrading libc-devtools:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc6:amd64
+          Upgrading libc6:i386 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH Ib > due to libc6:amd64
+          Upgrading locales:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH > due to libc6:amd64
+          Upgrading libc6-dev:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH Ib > due to libc6:amd64
+          Upgrading libc6-dbg:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH Ib > due to libc6:amd64
+          Upgrading libc-dev-bin:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH Ib > due to libc6:amd64
+          Upgrading libc-bin:amd64 < 2.39-0ubuntu8.9 | 2.43-2ubuntu2.4 @ii umH Ib > due to libc6:amd64
+            MarkInstall libc6-dev:amd64 < 2.39-0ubuntu8.9 -> 2.43-2ubuntu2.4 @ii umU Ib > FU=0
+               Upgrading: dpkg-dev:amd64 < 1.22.6ubuntu6.6 | 1.23.7ubuntu1 @ii umH > due to dpkg-dev:amd64 Depends on libdpkg-perl:amd64 < 1.22.6ubuntu6.6 | 1.23.7ubuntu1 @ii umH > (= 1.22.6ubuntu6.6)
+              MarkInstall libdpkg-perl:amd64 < 1.22.6ubuntu6.6 -> 1.23.7ubuntu1 @ii umU > FU=0
+              Upgrading dpkg-dev:amd64 < 1.22.6ubuntu6.6 | 1.23.7ubuntu1 @ii umH Ib > due to libdpkg-perl:amd64
+              Upgrading dpkg:amd64 < 1.22.6ubuntu6.6 | 1.23.7ubuntu1 @ii umH > due to libdpkg-perl:amd64
+                MarkInstall dpkg-dev:amd64 < 1.22.6ubuntu6.6 -> 1.23.7ubuntu1 @ii umU Ib > FU=0
+                Installing make:amd64 as Depends of dpkg-dev:amd64
+                  MarkInstall make:amd64 < 4.3-4.1build2 -> 4.4.1-3 @ii umU > FU=0
+            MarkInstall libc6:i386 < 2.39-0ubuntu8.9 -> 2.43-2ubuntu2.4 @ii umU Ib > FU=0
+              MarkInstall base-files:amd64 < 13ubuntu10.5 -> 14ubuntu6.2 @ii umU > FU=0
+              MarkInstall libqt6webenginecore6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+              Upgrading libqt6webenginewidgets6:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+              Upgrading libqt6webenginequick6:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+              Upgrading libqt6webenginecore6-bin:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+              Upgrading libqt6webengine6-data:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+                MarkInstall libqt6webenginecore6-bin:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                Installing libicu78:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                  MarkInstall libicu78:amd64 < none -> 78.2-2ubuntu1 @un uN > FU=0
+                Installing libpng16-16t64:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                  MarkInstall libpng16-16t64:amd64 < 1.6.43-5ubuntu0.6 -> 1.6.57-1 @ii umU Ib > FU=0
+                  Upgrading libpng16-16t64:i386 < 1.6.43-5ubuntu0.6 | 1.6.57-1 @ii ugH Ib > due to libpng16-16t64:amd64
+                Installing libqt6core6t64:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                  MarkInstall libqt6core6t64:amd64 < 6.4.2+dfsg-21.1build5 -> 6.10.2+dfsg-7 @ii umU > FU=0
+                  Upgrading qt6-qpa-plugins:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                  Upgrading qt6-gtk-platformtheme:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                  Upgrading libqt6wlshellintegration6:amd64 < 6.4.2-5build3 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                  Upgrading libqt6waylandclient6:amd64 < 6.4.2-5build3 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                  Upgrading libqt6sql6-sqlite:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                    MarkInstall libqt6sql6-sqlite:amd64 < 6.4.2+dfsg-21.1build5 -> 6.10.2+dfsg-7 @ii umU Ib > FU=0
+                    Installing libqt6sql6:amd64 as Depends of libqt6sql6-sqlite:amd64
+                       Delayed Removing: libqt6sql6t64:amd64 as upgrade is not an option for libqt6sql6:amd64 (6.10.2+dfsg-7)
+                      MarkInstall libqt6sql6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                      MarkDelete libqt6sql6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                    MarkInstall libqt6wlshellintegration6:amd64 < 6.4.2-5build3 -> 6.10.2+dfsg-7 @ii umU Ib > FU=0
+                       Delayed Removing: libqt6waylandeglclienthwintegration6:amd64 as upgrade is not an option for qt6-wayland:amd64 (6.10.2-4)
+                       Delayed Removing: libqt6waylandeglcompositorhwintegration6:amd64 as upgrade is not an option for qt6-wayland:amd64 (6.10.2-4)
+                      MarkInstall qt6-wayland:amd64 < 6.4.2-5build3 -> 6.10.2-4 @ii umU Ib > FU=0
+                      Upgrading libqt6waylandcompositor6:amd64 < 6.4.2-5build3 | 6.10.2-4 @ii umH Ib > due to qt6-wayland:amd64
+                        MarkInstall libqt6waylandcompositor6:amd64 < 6.4.2-5build3 -> 6.10.2-4 @ii umU Ib > FU=0
+                        Installing libqt6gui6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                           Delayed Removing: libqt6gui6t64:amd64 as upgrade is not an option for libqt6gui6:amd64 (6.10.2+dfsg-7)
+                          MarkInstall libqt6gui6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                          Installing libqt6dbus6:amd64 as Depends of libqt6gui6:amd64
+                             Delayed Removing: libqt6dbus6t64:amd64 as upgrade is not an option for libqt6dbus6:amd64 (6.10.2+dfsg-7)
+                            MarkInstall libqt6dbus6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                            MarkDelete libqt6dbus6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                          Installing libsm6:amd64 as Depends of libqt6gui6:amd64
+                            MarkInstall libsm6:amd64 < 2:1.2.3-1build3 -> 2:1.2.6-1build1 @ii umU > FU=0
+                          Installing libxcb-icccm4:amd64 as Depends of libqt6gui6:amd64
+                            MarkInstall libxcb-icccm4:amd64 < 0.4.1-1.1build3 -> 0.4.2-1build1 @ii umU > FU=0
+                          Installing libxcb-keysyms1:amd64 as Depends of libqt6gui6:amd64
+                            MarkInstall libxcb-keysyms1:amd64 < 0.4.0-1build4 -> 0.4.1-1build1 @ii umU > FU=0
+                          Installing libxcb-xinput0:amd64 as Depends of libqt6gui6:amd64
+                            MarkInstall libxcb-xinput0:amd64 < 1.15-1ubuntu2 -> 1.17.0-2ubuntu1 @ii umU > FU=0
+                            Upgrading libxcb1:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-xfixes0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-sync1:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-shm0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-render0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-randr0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-present0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-glx0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-dri3-0:i386 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii ugH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-xv0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-xkb1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-xinerama0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-xfixes0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-sync1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-shm0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-shape0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-res0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-render0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-record0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-randr0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-present0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-glx0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-dri3-0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-dri2-0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-dpms0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-damage0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                            Upgrading libxcb-composite0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                              MarkInstall libxcb1:amd64 < 1.15-1ubuntu2 -> 1.17.0-2ubuntu1 @ii umU Ib > FU=0
+                              Installing libxau6:amd64 as Depends of libxcb1:amd64
+                                MarkInstall libxau6:amd64 < 1:1.0.9-1build6 -> 1:1.0.11-1build2 @ii umU Ib > FU=0
+                                Upgrading libxau6:i386 < 1:1.0.9-1build6 | 1:1.0.11-1build2 @ii ugH Ib > due to libxau6:amd64
+                              Installing libxdmcp6:amd64 as Depends of libxcb1:amd64
+                                MarkInstall libxdmcp6:amd64 < 1:1.1.3-0ubuntu6 -> 1:1.1.5-2 @ii umU Ib > FU=0
+                                Upgrading libxdmcp6:i386 < 1:1.1.3-0ubuntu6 | 1:1.1.5-2 @ii ugH Ib > due to libxdmcp6:amd64
+                          Installing qt6-svg-plugins:amd64 as Recommends of libqt6gui6:amd64
+                            MarkInstall qt6-svg-plugins:amd64 < none -> 6.10.2-2 @un uN Ib > FU=0
+                            Upgrading libqt6svgwidgets6:amd64 < 6.4.2-4ubuntu3 | 6.10.2-2 @ii umH Ib > due to qt6-svg-plugins:amd64
+                            Upgrading libqt6svg6:amd64 < 6.4.2-4ubuntu3 | 6.10.2-2 @ii umH Ib > due to qt6-svg-plugins:amd64
+                              MarkInstall libqt6svgwidgets6:amd64 < 6.4.2-4ubuntu3 -> 6.10.2-2 @ii umU Ib > FU=0
+                              Installing libqt6widgets6:amd64 as Depends of libqt6svgwidgets6:amd64
+                                 Delayed Removing: libqt6widgets6t64:amd64 as upgrade is not an option for libqt6widgets6:amd64 (6.10.2+dfsg-7)
+                                MarkInstall libqt6widgets6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                                MarkDelete libqt6widgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                          MarkDelete libqt6gui6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                        Installing libqt6opengl6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                           Delayed Removing: libqt6opengl6t64:amd64 as upgrade is not an option for libqt6opengl6:amd64 (6.10.2+dfsg-7)
+                          MarkInstall libqt6opengl6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                          MarkDelete libqt6opengl6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                        Installing libqt6qml6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                          MarkInstall libqt6qml6:amd64 < 6.4.2+dfsg-4build3 -> 6.10.2+dfsg-3 @ii umU Ib > FU=0
+                          Upgrading libqt6quickwidgets6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                          Upgrading libqt6quick6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                          Upgrading libqt6qmlmodels6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                            MarkInstall libqt6quick6:amd64 < 6.4.2+dfsg-4build3 -> 6.10.2+dfsg-3 @ii umU Ib > FU=0
+                            Installing libqt6network6:amd64 as Depends of libqt6quick6:amd64
+                               Delayed Removing: libqt6network6t64:amd64 as upgrade is not an option for libqt6network6:amd64 (6.10.2+dfsg-7)
+                              MarkInstall libqt6network6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                              MarkDelete libqt6network6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                            Installing libqt6qmlmeta6:amd64 as Depends of libqt6quick6:amd64
+                              MarkInstall libqt6qmlmeta6:amd64 < none -> 6.10.2+dfsg-3 @un uN Ib > FU=0
+                              Installing libqt6qmlworkerscript6:amd64 as Depends of libqt6qmlmeta6:amd64
+                                MarkInstall libqt6qmlworkerscript6:amd64 < none -> 6.10.2+dfsg-3 @un uN > FU=0
+                      MarkDelete libqt6waylandeglclienthwintegration6:amd64 < 6.4.2-5build3 @ii mK Ib > FU=0
+                      MarkDelete libqt6waylandeglcompositorhwintegration6:amd64 < 6.4.2-5build3 @ii mK Ib > FU=0
+                    MarkInstall qt6-gtk-platformtheme:amd64 < 6.4.2+dfsg-21.1build5 -> 6.10.2+dfsg-7 @ii umU Ib > FU=0
+                    Installing gnome-themes-extra-data:amd64 as Depends of qt6-gtk-platformtheme:amd64
+                      MarkInstall gnome-themes-extra-data:amd64 < none -> 3.28-5 @un uN > FU=0
+                Installing libwebp7:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                  MarkInstall libwebp7:amd64 < 1.3.2-0.4build3 -> 1.5.0-0.1build1 @ii umU Ib > FU=0
+                  Upgrading webp:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                  Upgrading libwebpmux3:i386 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii ugH > due to libwebp7:amd64
+                  Upgrading libwebp7:i386 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii ugH Ib > due to libwebp7:amd64
+                  Upgrading libsharpyuv0:i386 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii ugH > due to libwebp7:amd64
+                  Upgrading libwebpmux3:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                  Upgrading libwebpdemux2:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                  Upgrading libsharpyuv0:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                MarkInstall libqt6webenginewidgets6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                Installing libqt6printsupport6:amd64 as Depends of libqt6webenginewidgets6:amd64
+                   Delayed Removing: libqt6printsupport6t64:amd64 as upgrade is not an option for libqt6printsupport6:amd64 (6.10.2+dfsg-7)
+                  MarkInstall libqt6printsupport6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                  MarkDelete libqt6printsupport6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                MarkInstall libqt6webenginequick6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                Installing libqt6webchannelquick6:amd64 as Depends of libqt6webenginequick6:amd64
+                  MarkInstall libqt6webchannelquick6:amd64 < none -> 6.10.2-1 @un uN Ib > FU=0
+                  Upgrading libqt6webchannel6:amd64 < 6.4.2-3build2 | 6.10.2-1 @ii umH Ib > due to libqt6webchannelquick6:amd64
+              Installing libqt6positioning6:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libqt6positioning6:amd64 < 6.4.2-3build3 -> 6.10.2-1 @ii umU > FU=0
+              Installing libsnappy1v5:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libsnappy1v5:amd64 < 1.1.10-1build1 -> 1.2.2-2 @ii umU Ib > FU=0
+                Upgrading libsnappy1v5:i386 < 1.1.10-1build1 | 1.2.2-2 @ii ugH Ib > due to libsnappy1v5:amd64
+              Installing libtiff6:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libtiff6:amd64 < 4.5.1+git230720-4ubuntu2.5 -> 4.7.0-3ubuntu5 @ii umU Ib > FU=0
+                Upgrading libtiff6:i386 < 4.5.1+git230720-4ubuntu2.5 | 4.7.0-3ubuntu5 @ii ugH Ib > due to libtiff6:amd64
+              Installing libxcomposite1:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libxcomposite1:amd64 < 1:0.4.5-1build3 -> 1:0.4.6-1build1 @ii umU Ib > FU=0
+                Upgrading libxcomposite1:i386 < 1:0.4.5-1build3 | 1:0.4.6-1build1 @ii ugH Ib > due to libxcomposite1:amd64
+              Installing libxml2-16:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libxml2-16:amd64 < none -> 2.15.2+dfsg-0.1ubuntu0.2 @un uN > FU=0
+                Upgrading libxml2-utils:amd64 < 2.9.14+dfsg-1.3ubuntu3.9 | 2.15.2+dfsg-0.1ubuntu0.2 @ii umH > due to libxml2-16:amd64
+              Installing libxtst6:amd64 as Depends of libqt6webenginecore6:amd64
+                MarkInstall libxtst6:amd64 < 2:1.2.3-1.1build1 -> 2:1.2.5-1build1 @ii umU Ib > FU=0
+                Upgrading libxtst6:i386 < 2:1.2.3-1.1build1 | 2:1.2.5-1build1 @ii ugH Ib > due to libxtst6:amd64
+            Installing libc-gconv-modules-extra:i386 as Depends of libc6:i386
+              MarkInstall libc-gconv-modules-extra:i386 < none -> 2.43-2ubuntu2.4 @un uN > FU=0
+          Installing libc-gconv-modules-extra:amd64 as Depends of libc6:amd64
+            MarkInstall libc-gconv-modules-extra:amd64 < none -> 2.43-2ubuntu2.4 @un uN > FU=0
+Starting pkgProblemResolver with broken count: 7
+Starting 2 pkgProblemResolver with broken count: 7
+Investigating (0) python3-pyqt6:amd64 < 6.6.1-2build4 -> 6.10.2-2build5 @ii umU Ib >
+Broken python3-pyqt6:amd64 Depends on python3-pyqt6.sip:amd64 < 13.6.0-1build2 | 13.11.0-1build1 @ii umH > (>= 13.8)
+  Considering python3-pyqt6.sip:amd64 19 as a solution to python3-pyqt6:amd64 13
+  MarkKeep python3-pyqt6:amd64 < 6.6.1-2build4 -> 6.10.2-2build5 @ii umU Ib > FU=0
+  Re-Instated libssl3t64:i386
+  Re-Instated openssl-provider-legacy:amd64
+  Re-Instated libssl3t64:amd64
+  Re-Instated libpython3.14-minimal:amd64
+  Re-Instated libexpat1:i386
+  Re-Instated libexpat1:amd64
+  Re-Instated python3.14-minimal:amd64
+  Re-Instated python3-minimal:amd64
+  Re-Instated libpython3.14-stdlib:amd64
+  Re-Instated python3.14:amd64
+  Re-Instated libpython3-stdlib:amd64
+  Re-Instated python3:amd64
+  Re-Instated python3-pyqt6.sip:amd64
+  Re-Instated libqt6openglwidgets6:amd64
+  Re-Instated libqt6test6:amd64
+  Re-Instated libqt6xml6:amd64
+  Re-Instated python3-pyqt6:amd64
+Investigating (0) python3-yaml:amd64 < 6.0.1-2build2 | 6.0.3-1build1 @ii umH Ib >
+Broken python3-yaml:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-yaml:amd64 9
+  Re-Instated python3-yaml:amd64
+Investigating (0) python3-pyqt5.sip:amd64 < 12.13.0-1build3 | 12.17.2-1build1 @ii umH Ib >
+Broken python3-pyqt5.sip:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-pyqt5.sip:amd64 9
+  Re-Instated python3-pyqt5.sip:amd64
+Investigating (0) python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib >
+Broken python3-uno:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-uno:amd64 8
+  Re-Instated libreoffice-uiconfig-common:amd64
+  Re-Instated libuno-sal3t64:amd64
+  Re-Instated libreoffice-base-core:amd64
+  Re-Instated libreoffice-uiconfig-calc:amd64
+  Re-Instated libboost-iostreams1.90.0:amd64
+  Re-Instated liborcus-parser-0.21-0:amd64
+  Re-Instated liborcus-0.21-0:amd64
+  Re-Instated libreoffice-calc:amd64
+  Re-Instated libreoffice-uiconfig-draw:amd64
+  Re-Instated libreoffice-uiconfig-impress:amd64
+  Re-Instated libreoffice-draw:amd64
+  Re-Instated libreoffice-impress:amd64
+  Re-Instated libreoffice-uiconfig-math:amd64
+  Re-Instated libreoffice-math:amd64
+  Re-Instated libreoffice-uiconfig-writer:amd64
+  Re-Instated libreoffice-writer:amd64
+  Re-Instated libreoffice-common:amd64
+  Re-Instated libabsl20260107:amd64
+  Re-Instated libboost-thread1.90.0:amd64
+  Re-Instated libboost-locale1.90.0:amd64
+  Re-Instated libassuan9:amd64
+  Re-Instated libgpg-error0:i386
+  Re-Instated libgpg-error0:amd64
+  Re-Instated libgpgme45:amd64
+  Re-Instated libgpgmepp7:amd64
+  Re-Instated libpoppler156:amd64
+  Re-Instated libuno-salhelpergcc3-3t64:amd64
+  Re-Instated libxmlsec1-1:amd64
+  Re-Instated libxmlsec1-nss1:amd64
+  Re-Instated libxrender1:i386
+  Re-Instated libxrender1:amd64
+  Re-Instated libreoffice-core:amd64
+  Re-Instated libpython3.14:amd64
+  Re-Instated python3-uno:amd64
+Investigating (0) python3-cups:amd64 < 2.0.1-5build6 | 2.0.4-3build1 @ii umH Ib >
+Broken python3-cups:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-cups:amd64 8
+  Re-Instated python3-cups:amd64
+Investigating (0) python3-numpy:amd64 < 1:1.26.4+ds-6ubuntu1 | 1:2.3.5+ds-3ubuntu1 @ii umH Ib >
+Broken python3-numpy:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-numpy:amd64 6
+  Re-Instated python3-numpy-dev:amd64
+  Re-Instated python3-numpy:amd64
+Investigating (0) python3-lxml:amd64 < 5.2.1-1 | 6.0.2-1build1 @ii umH Ib >
+Broken python3-lxml:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-lxml:amd64 6
+  Re-Instated python3-lxml:amd64
+Investigating (0) python3-pil:amd64 < 10.2.0-1ubuntu1.3 | 12.1.1-2ubuntu1.3 @ii umH Ib >
+Broken python3-pil:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-pil:amd64 6
+  Re-Instated python3-pil:amd64
+Investigating (0) python3-pil.imagetk:amd64 < 10.2.0-1ubuntu1.3 | 12.1.1-2ubuntu1.3 @ii umH Ib >
+Broken python3-pil.imagetk:amd64 Depends on python3-pil:amd64 < 10.2.0-1ubuntu1.3 -> 12.1.1-2ubuntu1.3 @ii umU > (= 10.2.0-1ubuntu1.3)
+  Considering python3-pil:amd64 6 as a solution to python3-pil.imagetk:amd64 5
+  Re-Instated python3-pil.imagetk:amd64
+Investigating (0) python3-brotli:amd64 < 1.1.0-2build2 | 1.2.0-3build1 @ii umH Ib >
+Broken python3-brotli:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-brotli:amd64 3
+  Re-Instated python3-brotli:amd64
+Investigating (0) python3-systemd:amd64 < 235-1build4 | 235-1build9 @ii umH Ib >
+Broken python3-systemd:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-systemd:amd64 3
+  Re-Instated python3-systemd:amd64
+Investigating (0) python3-cairo:amd64 < 1.25.1-2build2 | 1.27.0-2build2 @ii umH Ib >
+Broken python3-cairo:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-cairo:amd64 3
+  Re-Instated libcairo2:i386
+  Re-Instated libcairo2:amd64
+  Re-Instated python3-cairo:amd64
+Investigating (0) python3-all:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH Ib >
+Broken python3-all:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (= 3.12.3-0ubuntu2.1)
+  Considering python3:amd64 448 as a solution to python3-all:amd64 2
+  Re-Instated python3-all:amd64
+Investigating (0) python3-fonttools:amd64 < 4.46.0-1build2 | 4.61.1-3build1 @ii umH Ib >
+Broken python3-fonttools:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-fonttools:amd64 2
+  Re-Instated python3-ufolib2:amd64
+  Re-Instated libzopfli1:amd64
+  Re-Instated python3-zopfli:amd64
+  Re-Instated unicode-data:amd64
+  Re-Instated python3-fonttools:amd64
+Investigating (0) python3-lz4:amd64 < 4.0.2+dfsg-1build4 | 4.4.5+dfsg-1build1 @ii umH Ib >
+Broken python3-lz4:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-lz4:amd64 2
+  Re-Instated python3-lz4:amd64
+Investigating (0) python3-scipy:amd64 < 1.11.4-6build1 | 1.16.3-4build1 @ii umH Ib >
+Broken python3-scipy:amd64 Depends on python3-numpy-abi9:amd64 < none @un mH >
+  Considering python3-numpy:amd64 6 as a solution to python3-scipy:amd64 2
+  Re-Instated python3-scipy:amd64
+Investigating (0) python3-tk:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH Ib >
+Broken python3-tk:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-tk:amd64 2
+  Re-Instated python3.14-tk:amd64
+  Re-Instated python3-tk:amd64
+Investigating (0) python3-netifaces:amd64 < 0.11.0-2build3 | 0.11.0-2build7 @ii umH Ib >
+Broken python3-netifaces:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-netifaces:amd64 1
+  Re-Instated python3-netifaces:amd64
+Investigating (0) python3-samba:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 | 2:4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken python3-samba:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-samba:amd64 1
+  Re-Instated libldb2:amd64
+  Re-Instated python3-ldb:amd64
+  Re-Instated libtevent0t64:amd64
+  Re-Instated samba-libs:amd64
+  Re-Instated samba-common-bin:amd64
+  Re-Instated python3-samba:amd64
+Investigating (0) samba-dsdb-modules:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 | 2:4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken samba-dsdb-modules:amd64 Depends on samba-libs:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 -> 2:4.23.6+dfsg-1ubuntu2.2 @ii umU > (= 2:4.19.5+dfsg-4ubuntu9.7)
+  Considering samba-libs:amd64 7 as a solution to samba-dsdb-modules:amd64 1
+  Re-Instated samba-dsdb-modules:amd64
+Investigating (0) python3-gpg:amd64 < 1.18.0-4.1ubuntu4 | 2.0.0-2build1 @ii umH Ib >
+Broken python3-gpg:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-gpg:amd64 1
+  Re-Instated python3-gpg:amd64
+Investigating (0) python3-cffi-backend:amd64 < 1.16.0-2build1 | 2.0.0-3build1 @ii umH Ib >
+Broken python3-cffi-backend:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-cffi-backend:amd64 1
+  Re-Instated python3-cffi-backend:amd64
+Investigating (0) libssl-dev:amd64 < 3.0.13-0ubuntu3.16 | 3.5.5-1ubuntu3.6 @ii umH Ib >
+Broken libssl-dev:amd64 Depends on libssl3t64:amd64 < 3.0.13-0ubuntu3.16 -> 3.5.5-1ubuntu3.6 @ii umU > (= 3.0.13-0ubuntu3.16)
+  Considering libssl3t64:amd64 257 as a solution to libssl-dev:amd64 0
+  Re-Instated libssl-dev:amd64
+Investigating (0) libxmlsec1-nss1:amd64 < none -> 1.3.9-1 @un uN Ib >
+Broken libxmlsec1-nss1:amd64 Conflicts on libxmlsec1-nss:amd64 < none @un H >
+  Considering libxmlsec1t64-nss:amd64 8 as a solution to libxmlsec1-nss1:amd64 0
+  MarkKeep libxmlsec1-nss1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+  Holding Back libxmlsec1-nss1:amd64 rather than change libxmlsec1-nss:amd64
+Investigating (0) python3-tdb:amd64 < 1.4.10-1build1 | 2:1.4.14+samba4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken python3-tdb:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-tdb:amd64 0
+  Re-Instated python3-tdb:amd64
+Investigating (0) python3-kiwisolver:amd64 < 1.4.4-2build1 | 1.4.10~rc0-1build1 @ii umH Ib >
+Broken python3-kiwisolver:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-kiwisolver:amd64 0
+  Re-Instated python3-kiwisolver:amd64
+Investigating (0) python3-regex:amd64 < 0.1.20221031-2build1 | 0.1.20250918-1build1 @ii umH Ib >
+Broken python3-regex:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-regex:amd64 0
+  Re-Instated python3-regex:amd64
+Investigating (0) smbclient:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 | 2:4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken smbclient:amd64 Depends on samba-libs:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 -> 2:4.23.6+dfsg-1ubuntu2.2 @ii umU > (= 2:4.19.5+dfsg-4ubuntu9.7)
+  Considering samba-libs:amd64 7 as a solution to smbclient:amd64 0
+  Re-Instated smbclient:amd64
+Investigating (0) python3-xxhash:amd64 < 3.2.0-1build3 | 3.2.0-1build7 @ii umH Ib >
+Broken python3-xxhash:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-xxhash:amd64 0
+  Re-Instated python3-xxhash:amd64
+Investigating (0) python3-chm:amd64 < 0.8.6-4build1 | 0.8.6+ds-7build1 @ii umH Ib >
+Broken python3-chm:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-chm:amd64 0
+  Re-Instated python3-chm:amd64
+Investigating (0) libqt6xml6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6xml6:amd64 Breaks on libqt6xml6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6xml6t64:amd64 -2 as a solution to libqt6xml6:amd64 0
+  Added libqt6xml6t64:amd64 to the remove list
+  MarkDelete libqt6xml6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6xml6:amd64 via remove of libqt6xml6t64:amd64
+Investigating (0) libxmlsec1-1:amd64 < none -> 1.3.9-1 @un uN Ib >
+Broken libxmlsec1-1:amd64 Conflicts on libxmlsec1:amd64 < none @un H >
+  Considering libxmlsec1t64:amd64 11 as a solution to libxmlsec1-1:amd64 0
+  MarkKeep libxmlsec1-1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+  Holding Back libxmlsec1-1:amd64 rather than change libxmlsec1:amd64
+Investigating (0) libqt6openglwidgets6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6openglwidgets6:amd64 Breaks on libqt6openglwidgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6openglwidgets6t64:amd64 -2 as a solution to libqt6openglwidgets6:amd64 0
+  Added libqt6openglwidgets6t64:amd64 to the remove list
+  MarkDelete libqt6openglwidgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6openglwidgets6:amd64 via remove of libqt6openglwidgets6t64:amd64
+Investigating (0) qbittorrent:amd64 < 4.6.3-1build2 -> 5.1.4-dmo1 @ii umU Ib >
+Broken qbittorrent:amd64 Depends on libtorrent-rasterbar2.0t64:amd64 < 2.0.10-1.1build2 | 2.0.12-1 @ii umH > (>= 2.0.11)
+  Considering libtorrent-rasterbar2.0t64:amd64 -1 as a solution to qbittorrent:amd64 0
+  MarkKeep qbittorrent:amd64 < 4.6.3-1build2 -> 5.1.4-dmo1 @ii umU Ib > FU=0
+  Re-Instated libtorrent-rasterbar2.0t64:amd64
+  Re-Instated qbittorrent:amd64
+Investigating (0) python3-msgpack:amd64 < 1.0.3-3build2 | 1.1.2-2build1 @ii umH Ib >
+Broken python3-msgpack:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-msgpack:amd64 0
+  Re-Instated python3-msgpack:amd64
+Investigating (0) python3-matplotlib:amd64 < 3.6.3-1ubuntu5 | 3.10.7+dfsg1-2build1 @ii umH Ib >
+Broken python3-matplotlib:amd64 Depends on python3-numpy-abi9:amd64 < none @un mH >
+  Considering python3-numpy:amd64 6 as a solution to python3-matplotlib:amd64 0
+  Re-Instated python-matplotlib-data:amd64
+  Re-Instated python3-matplotlib:amd64
+Investigating (0) python3-pyxattr:amd64 < 0.8.1-1build2 | 0.8.1-1build6 @ii umH Ib >
+Broken python3-pyxattr:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-pyxattr:amd64 0
+  Re-Instated python3-pyxattr:amd64
+Investigating (0) bup:amd64 < 0.33.3-1build2 | 0.33.9-1.2build1 @ii umH Ib >
+Broken bup:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to bup:amd64 0
+  Re-Instated bup:amd64
+Investigating (0) calibre-bin:amd64 < 7.6.0+ds-1build1 -> 9.2.1+ds+~0.10.5-2build1 @ii umU Ib >
+Broken calibre-bin:amd64 Depends on libavcodec62:amd64 < none | 7:8.0.1-3ubuntu2 @un uH > (>= 7:8.0.1)
+  Considering libavcodec62:amd64 0 as a solution to calibre-bin:amd64 0
+  MarkKeep calibre-bin:amd64 < 7.6.0+ds-1build1 -> 9.2.1+ds+~0.10.5-2build1 @ii umU Ib > FU=0
+  Re-Instated libva2:i386
+  Re-Instated libva2:amd64
+  Re-Instated libvpl2:amd64
+  Re-Instated libavutil60:amd64
+  Re-Instated libjxl0.11:amd64
+  Re-Instated librav1e0.8:amd64
+  Re-Instated libsvtav1enc2:amd64
+  Re-Instated libswresample6:amd64
+  Re-Instated libtheoradec2:amd64
+  Re-Instated libtheoraenc2:amd64
+  Re-Instated libvpx12:amd64
+  Re-Instated libx264-165:amd64
+  Re-Instated libx265-215:amd64
+  Re-Instated libavcodec62:amd64
+  Re-Instated libudfread3:amd64
+  Re-Instated libbluray3:amd64
+  Re-Instated libsrt1.5-gnutls:amd64
+  Re-Instated libavformat62:amd64
+  Re-Instated libpcaudio0:amd64
+  Re-Instated espeak-ng-data:amd64
+  Re-Instated libespeak-ng1:amd64
+  Re-Instated libcpuinfo0:amd64
+  Re-Instated libprotobuf32t64:amd64
+  Re-Instated libonnx1t64:amd64
+  Re-Instated libpthreadpool0:amd64
+  Re-Instated libre2-11:amd64
+  Re-Instated libxnnpack0.20241108:amd64
+  Re-Instated libdnnl3.6:amd64
+  Re-Instated libonnxruntime-providers:amd64
+  Re-Instated libonnxruntime1.23:amd64
+  Re-Instated calibre-bin:amd64
+Investigating (0) python3-brlapi:amd64 < 6.6-4ubuntu5 | 6.7-1ubuntu6 @ii umH Ib >
+Broken python3-brlapi:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-brlapi:amd64 0
+  Re-Instated libbrlapi0.8:amd64
+  Re-Instated python3-brlapi:amd64
+Investigating (0) python3-apsw:amd64 < 3.43.0.0-1build2 | 3.46.0.1-1build4 @ii umH Ib >
+Broken python3-apsw:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-apsw:amd64 0
+  Re-Instated python3-apsw:amd64
+Investigating (0) python3-html5-parser:amd64 < 0.4.12+ds-1build1 | 0.4.12+ds-8build1 @ii umH Ib >
+Broken python3-html5-parser:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-html5-parser:amd64 0
+  Re-Instated python3-html5-parser:amd64
+Investigating (0) python3-talloc:amd64 < 2.4.2-1build2 | 2:2.4.3+samba4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken python3-talloc:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-talloc:amd64 0
+  Re-Instated python3-talloc:amd64
+Investigating (0) libqt6test6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6test6:amd64 Breaks on libqt6test6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6test6t64:amd64 -2 as a solution to libqt6test6:amd64 0
+  Added libqt6test6t64:amd64 to the remove list
+  MarkDelete libqt6test6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6test6:amd64 via remove of libqt6test6t64:amd64
+Investigating (0) python3-gdbm:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH Ib >
+Broken python3-gdbm:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-gdbm:amd64 0
+  Re-Instated python3.14-gdbm:amd64
+  Re-Instated python3-gdbm:amd64
+Investigating (0) python3-contourpy:amd64 < 1.0.7-2build1 | 1.3.3-1build1 @ii umH Ib >
+Broken python3-contourpy:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-contourpy:amd64 0
+  Re-Instated python3-contourpy:amd64
+Investigating (0) python3-pylibacl:amd64 < 0.7.0-2build2 | 0.7.2-1build2 @ii umH Ib >
+Broken python3-pylibacl:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-pylibacl:amd64 0
+  Re-Instated python3-pylibacl:amd64
+Investigating (0) libreoffice-kf5:amd64 < 4:24.2.7-0ubuntu0.24.04.6 @ii mK Ib >
+Broken libreoffice-kf5:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > (= 4:24.2.7-0ubuntu0.24.04.6)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-kf5:amd64 -1
+  Removing libreoffice-kf5:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-kf5:amd64 < 4:24.2.7-0ubuntu0.24.04.6 @ii mK Ib > FU=0
+Investigating (0) libreoffice-plasma:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib >
+Broken libreoffice-plasma:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > (= 4:24.2.7-0ubuntu0.24.04.6)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-plasma:amd64 -1
+  Re-Instated libreoffice-plasma:amd64
+Investigating (0) python3-fuse:amd64 < 2:1.0.7-1build2 @ii mK Ib >
+Broken python3-fuse:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-fuse:amd64 -1
+  Removing python3-fuse:amd64 rather than change python3:amd64
+  MarkDelete python3-fuse:amd64 < 2:1.0.7-1build2 @ii mK Ib > FU=0
+Investigating (0) libreoffice-qt5:amd64 < 4:24.2.7-0ubuntu0.24.04.6 @ii mK Ib >
+Broken libreoffice-qt5:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > (= 4:24.2.7-0ubuntu0.24.04.6)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-qt5:amd64 -1
+  Removing libreoffice-qt5:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-qt5:amd64 < 4:24.2.7-0ubuntu0.24.04.6 @ii mK Ib > FU=0
+Investigating (0) python3-gi-cairo:amd64 < 3.48.2-1 | 3.56.2-1 @ii ugH Ib >
+Broken python3-gi-cairo:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-gi-cairo:amd64 -1
+  Re-Instated libblkid1:i386
+  Re-Instated libblkid1:amd64
+  Re-Instated libmount1:i386
+  Re-Instated libmount1:amd64
+  Re-Instated libglib2.0-0t64:i386
+  Re-Instated libglib2.0-0t64:amd64
+  Re-Instated gir1.2-glib-2.0:amd64
+  Re-Instated libgirepository-2.0-0:amd64
+  Re-Instated gir1.2-girepository-3.0:amd64
+  Re-Instated libpeas-1.0-1:amd64
+  Re-Instated gir1.2-peas-1.0:amd64
+  Re-Instated libjxl-gdk-pixbuf:amd64
+  Re-Instated eog:amd64
+  Re-Instated python3-gi:amd64
+  Re-Instated python3-gi-cairo:amd64
+Investigating (1) libcairo-gobject2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH Ib >
+Broken libcairo-gobject2:amd64 Depends on libcairo2:amd64 < 1.18.0-3build1 -> 1.18.4-3 @ii umU > (= 1.18.0-3build1)
+  Considering libcairo2:amd64 147 as a solution to libcairo-gobject2:amd64 56
+  Re-Instated libcairo-gobject2:i386
+  Re-Instated libcairo-gobject2:amd64
+Investigating (1) python3-apt:amd64 < 2.7.7ubuntu5.3 | 3.1.0ubuntu1.1 @ii umH Ib >
+Broken python3-apt:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-apt:amd64 26
+  Re-Instated libapt-pkg7.0:amd64
+  Re-Instated python3-apt:amd64
+Investigating (1) libva-drm2:amd64 < 2.20.0-2ubuntu0.2 | 2.23.0-1ubuntu1 @ii umH Ib >
+Broken libva-drm2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.2 -> 2.23.0-1ubuntu1 @ii umU > (< 2.20.0.1)
+  Considering libva2:amd64 57 as a solution to libva-drm2:amd64 19
+  Re-Instated libva-drm2:i386
+  Re-Instated libva-drm2:amd64
+Investigating (1) libva-x11-2:amd64 < 2.20.0-2ubuntu0.2 | 2.23.0-1ubuntu1 @ii umH Ib >
+Broken libva-x11-2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.2 -> 2.23.0-1ubuntu1 @ii umU > (< 2.20.0.1)
+  Considering libva2:amd64 57 as a solution to libva-x11-2:amd64 18
+  Re-Instated libva-x11-2:i386
+  Re-Instated libva-x11-2:amd64
+Investigating (1) python3-dbus:amd64 < 1.3.2-5build3 | 1.4.0-1build2 @ii umH Ib >
+Broken python3-dbus:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU > (< 3.13)
+  Considering python3:amd64 448 as a solution to python3-dbus:amd64 18
+  Re-Instated python3-dbus:amd64
+Investigating (1) libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-core:amd64 Depends on libxmlsec1-1:amd64 < none | 1.3.9-1 @un uH > (>= 1.2.35)
+  Considering libxmlsec1-1:amd64 0 as a solution to libreoffice-core:amd64 10
+  MarkKeep libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Holding Back libreoffice-core:amd64 rather than change libxmlsec1-1:amd64
+Investigating (1) python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken python3-uno:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core:amd64 10 as a solution to python3-uno:amd64 8
+  MarkKeep python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+Broken python3-uno:amd64 Depends on libreoffice-core-nogui:amd64 < none | 4:26.2.5.2-0ubuntu0.26.04.1 @un umH > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core-nogui:amd64 -1 as a solution to python3-uno:amd64 8
+  Try Installing libreoffice-core-nogui:amd64 < none | 4:26.2.5.2-0ubuntu0.26.04.1 @un umH > before changing python3-uno:amd64
+     Delayed Removing: libreoffice-core:amd64 as upgrade is not an option for libreoffice-core-nogui:amd64 (4:26.2.5.2-0ubuntu0.26.04.1)
+    MarkKeep libreoffice-calc:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+     Delayed Removing: libreoffice-calc:amd64 as upgrade is not an option for libreoffice-core-nogui:amd64 (4:26.2.5.2-0ubuntu0.26.04.1)
+    MarkInstall libreoffice-core-nogui:amd64 < none -> 4:26.2.5.2-0ubuntu0.26.04.1 @un umN Ib > FU=0
+    Upgrading libreoffice-style-breeze:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading ure:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading uno-libs-private:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > due to libreoffice-core-nogui:amd64
+    Upgrading libuno-purpenvhelpergcc3-3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading libuno-cppuhelpergcc3-3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading libuno-cppu3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading libreoffice-style-colibre:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+    Upgrading libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > due to libreoffice-core-nogui:amd64
+    Upgrading libreoffice-calc:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > due to libreoffice-core-nogui:amd64
+    Upgrading fonts-opensymbol:amd64 < 4:102.12+LibO24.2.7-0ubuntu0.24.04.6 | 4:102.12+LibO26.2.5.2-0ubuntu0.26.04.1 @ii umH > due to libreoffice-core-nogui:amd64
+      Ignore MarkKeep of libreoffice-core-nogui:amd64 < none -> 4:26.2.5.2-0ubuntu0.26.04.1 @un pumN Ib > as its mode (Install) is protected
+    Installing libxmlsec1-1:amd64 as Depends of libreoffice-core-nogui:amd64
+       Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+      MarkInstall libxmlsec1-1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+      MarkDelete libxmlsec1t64:amd64 < 1.2.39-5build2 @ii mK > FU=0
+    Installing libxmlsec1-nss1:amd64 as Depends of libreoffice-core-nogui:amd64
+       Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+       Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+      MarkInstall libxmlsec1-nss1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+      MarkDelete libxmlsec1t64-nss:amd64 < 1.2.39-5build2 @ii mK Ib > FU=0
+    MarkDelete libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+    MarkDelete libreoffice-calc:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Or group keep for python3-uno:amd64
+  MarkKeep python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU > FU=0
+Investigating (1) libsmbclient0:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 | 2:4.23.6+dfsg-1ubuntu2.2 @ii umH Ib >
+Broken libsmbclient0:amd64 Depends on samba-libs:amd64 < 2:4.19.5+dfsg-4ubuntu9.7 -> 2:4.23.6+dfsg-1ubuntu2.2 @ii umU > (= 2:4.19.5+dfsg-4ubuntu9.7)
+  Considering samba-libs:amd64 7 as a solution to libsmbclient0:amd64 5
+  Re-Instated libsmbclient0:amd64
+Investigating (1) libglib2.0-bin:amd64 < 2.80.0-6ubuntu3.9 | 2.88.0-1ubuntu0.1 @ii umH Ib >
+Broken libglib2.0-bin:amd64 Depends on libglib2.0-0t64:amd64 < 2.80.0-6ubuntu3.9 -> 2.88.0-1ubuntu0.1 @ii umU > (= 2.80.0-6ubuntu3.9)
+  Considering libglib2.0-0t64:amd64 1359 as a solution to libglib2.0-bin:amd64 3
+  Re-Instated libglib2.0-bin:amd64
+Investigating (1) libva-wayland2:amd64 < 2.20.0-2ubuntu0.2 | 2.23.0-1ubuntu1 @ii umH Ib >
+Broken libva-wayland2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.2 -> 2.23.0-1ubuntu1 @ii umU > (< 2.20.0.1)
+  Considering libva2:amd64 57 as a solution to libva-wayland2:amd64 2
+  Re-Instated libva-wayland2:amd64
+Investigating (1) libpskc0t64:amd64 < 2.6.11-2.1ubuntu0.1 | 2.6.14-1 @ii umH Ib >
+Broken libpskc0t64:amd64 Depends on libxmlsec1t64:amd64 < 1.2.39-5build2 @ii mR > (>= 1.2.31)
+  Considering libxmlsec1t64:amd64 11 as a solution to libpskc0t64:amd64 2
+  Re-Instated libxmlsec1-openssl1:amd64
+  Re-Instated libpskc0t64:amd64
+Investigating (1) intel-media-va-driver:i386 < 24.1.0+dfsg1-1ubuntu0.2 | 26.1.2+dfsg1-1 @ii ugH Ib >
+Broken intel-media-va-driver:i386 Depends on libva-driver-abi-1.20:i386 < none @un H >
+  Considering libva2:i386 8 as a solution to intel-media-va-driver:i386 1
+  Re-Instated libigdgmm12:amd64
+  Re-Instated libigdgmm12:i386
+  Re-Instated intel-media-va-driver:amd64
+  Re-Instated intel-media-va-driver:i386
+Investigating (1) i965-va-driver:i386 < 2.4.1+dfsg1-1ubuntu0.2 | 2.4.1+dfsg1-2build1 @ii ugH Ib >
+Broken i965-va-driver:i386 Depends on libva-driver-abi-1.20:i386 < none @un H >
+  Considering libva2:i386 8 as a solution to i965-va-driver:i386 1
+  Re-Instated i965-va-driver:amd64
+  Re-Instated i965-va-driver:i386
+Investigating (1) libreoffice-math:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-math:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umR > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-math:amd64 0
+  MarkKeep libreoffice-math:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Removing libreoffice-math:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-math:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > FU=0
+Investigating (1) libpeas-1.0-1:amd64 < none -> 1.38.1-4ubuntu1 @un uN Ib >
+Broken libpeas-1.0-1:amd64 Breaks on libpeas-1.0-0:amd64 < 1.36.0-3build4 @ii mK > (< 1.38.1-4~)
+  Considering libpeas-1.0-0:amd64 0 as a solution to libpeas-1.0-1:amd64 0
+  MarkKeep libpeas-1.0-1:amd64 < none -> 1.38.1-4ubuntu1 @un uN Ib > FU=0
+  Holding Back libpeas-1.0-1:amd64 rather than change libpeas-1.0-0:amd64
+Investigating (1) libxmlsec1-openssl1:amd64 < none -> 1.3.9-1 @un uN Ib >
+Broken libxmlsec1-openssl1:amd64 Conflicts on libxmlsec1-openssl:amd64 < none @un H >
+  Considering libxmlsec1t64-openssl:amd64 -1 as a solution to libxmlsec1-openssl1:amd64 0
+  Added libxmlsec1t64-openssl:amd64 to the remove list
+Broken libxmlsec1-openssl1:amd64 Conflicts on libxmlsec1t64-openssl:amd64 < 1.2.39-5build2 @ii mK Ib >
+  Considering libxmlsec1t64-openssl:amd64 -1 as a solution to libxmlsec1-openssl1:amd64 0
+  Added libxmlsec1t64-openssl:amd64 to the remove list
+Broken libxmlsec1-openssl1:amd64 Breaks on libxmlsec1-openssl:amd64 < none @un H > (< 1.3.9-1)
+  Considering libxmlsec1t64-openssl:amd64 -1 as a solution to libxmlsec1-openssl1:amd64 0
+  Added libxmlsec1t64-openssl:amd64 to the remove list
+Broken libxmlsec1-openssl1:amd64 Breaks on libxmlsec1t64-openssl:amd64 < 1.2.39-5build2 @ii mK Ib > (< 1.3.9-1)
+  Considering libxmlsec1t64-openssl:amd64 -1 as a solution to libxmlsec1-openssl1:amd64 0
+  Added libxmlsec1t64-openssl:amd64 to the remove list
+  MarkDelete libxmlsec1t64-openssl:amd64 < 1.2.39-5build2 @ii mK Ib > FU=0
+  Fixing libxmlsec1-openssl1:amd64 via remove of libxmlsec1t64-openssl:amd64
+  Fixing libxmlsec1-openssl1:amd64 via remove of libxmlsec1t64-openssl:amd64
+  Fixing libxmlsec1-openssl1:amd64 via remove of libxmlsec1t64-openssl:amd64
+  Fixing libxmlsec1-openssl1:amd64 via remove of libxmlsec1t64-openssl:amd64
+Investigating (1) libreoffice-draw:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-draw:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umR > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-draw:amd64 0
+  MarkKeep libreoffice-draw:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Removing libreoffice-draw:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-draw:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > FU=0
+Investigating (1) libreoffice-impress:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-impress:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umR > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-impress:amd64 -1
+  MarkKeep libreoffice-impress:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Removing libreoffice-impress:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-impress:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > FU=0
+Investigating (1) libreoffice-writer:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-writer:amd64 Depends on libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umR > (= 4:26.2.5.2-0ubuntu0.26.04.1)
+  Considering libreoffice-core:amd64 10 as a solution to libreoffice-writer:amd64 -1
+  MarkKeep libreoffice-writer:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib > FU=0
+  Removing libreoffice-writer:amd64 rather than change libreoffice-core:amd64
+  MarkDelete libreoffice-writer:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > FU=0
+Investigating (1) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.36.0-6~)
+  Considering libpeas-1.0-1:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (2) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Investigating (2) libreoffice-common:amd64 < 4:24.2.7-0ubuntu0.24.04.6 -> 4:26.2.5.2-0ubuntu0.26.04.1 @ii umU Ib >
+Broken libreoffice-common:amd64 Breaks on python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.6 | 4:26.2.5.2-0ubuntu0.26.04.1 @ii umH Ib > (< 4:25.2.1~rc1-3~)
+  Considering python3-uno:amd64 8 as a solution to libreoffice-common:amd64 18
+  Upgrading python3-uno:amd64 due to Breaks field in libreoffice-common:amd64
+Investigating (2) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (2) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (3) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (3) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (3) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (4) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (4) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (4) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (5) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (5) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (5) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (6) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (6) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (6) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (7) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (7) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (7) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (8) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (8) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (8) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (9) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (9) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (9) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (10) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (10) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (10) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (11) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (11) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (11) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (12) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (12) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (12) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (13) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (13) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (13) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (14) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (14) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (14) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (15) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (15) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (15) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (16) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (16) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (16) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (17) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (17) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (17) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (18) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (18) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (18) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Investigating (19) python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib >
+Broken python3-gi:amd64 Breaks on eog:amd64 < 45.3-1ubuntu2 | 49.1-1build1 @ii umH > (< 47.0-4~)
+  Considering eog:amd64 -1 as a solution to python3-gi:amd64 26
+  Upgrading eog:amd64 due to Breaks field in python3-gi:amd64
+Broken python3-gi:amd64 Breaks on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (< 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to python3-gi:amd64 26
+  Upgrading gir1.2-peas-1.0:amd64 due to Breaks field in python3-gi:amd64
+Investigating (19) gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib >
+Broken gir1.2-peas-1.0:amd64 Depends on libpeas-1.0-1:amd64 < none | 1.38.1-4ubuntu1 @un uH > (>= 1.26.0)
+  Considering libpeas-1.0-1:amd64 0 as a solution to gir1.2-peas-1.0:amd64 0
+  MarkKeep gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+  Holding Back gir1.2-peas-1.0:amd64 rather than change libpeas-1.0-1:amd64
+Investigating (19) eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib >
+Broken eog:amd64 Depends on gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > (>= 1.36.0-6~)
+  Considering gir1.2-peas-1.0:amd64 0 as a solution to eog:amd64 -1
+  MarkKeep eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU Ib > FU=0
+  Holding Back eog:amd64 rather than change gir1.2-peas-1.0:amd64
+Done

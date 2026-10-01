@@ -1,0 +1,530 @@
+Log time: 2025-12-18 09:08:08.928212
+Log time: 2025-12-18 09:08:10.708387
+Log time: 2025-12-18 09:08:25.832415
+  MarkInstall libm17n-0:amd64 < 1.8.4-2 -> 1.8.5-1build1 @ii umU Ib > FU=0
+  Installing libxml2-16:amd64 as Depends of libm17n-0:amd64
+    MarkInstall libxml2-16:amd64 < none -> 2.14.5+dfsg-0.2 @un uN > FU=0
+  MarkInstall linux-headers-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU Ib > FU=0
+  Installing linux-headers-6.17.0-8-generic:amd64 as Depends of linux-headers-generic-hwe-24.04:amd64
+    MarkInstall linux-headers-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-headers-6.17.0-8:amd64 as Depends of linux-headers-6.17.0-8-generic:amd64
+      MarkInstall linux-headers-6.17.0-8:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  MarkInstall linux-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU IPb > FU=0
+  new important dependency: linux-tools-6.17.0-8-generic:amd64
+  Installing linux-tools-6.17.0-8-generic:amd64 as Recommends of linux-generic-hwe-24.04:amd64
+    MarkInstall linux-tools-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-tools-6.17.0-8:amd64 as Depends of linux-tools-6.17.0-8-generic:amd64
+      MarkInstall linux-tools-6.17.0-8:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  MarkInstall libbpfcc:amd64 < 0.30.0+ds-1ubuntu5 -> 0.31.0+ds-7ubuntu2 @ii umU Ib > FU=0
+  Installing libclang-cpp20:amd64 as Depends of libbpfcc:amd64
+    MarkInstall libclang-cpp20:amd64 < none -> 1:20.1.8-0ubuntu4 @un uN > FU=0
+  MarkInstall orca:amd64 < 48.0-1ubuntu1 -> 49.1-1ubuntu1 @ii umU Ib > FU=0
+  Installing python3-dasbus:amd64 as Depends of orca:amd64
+    MarkInstall python3-dasbus:amd64 < none -> 1.7-2 @un uN > FU=0
+  Installing python3-setproctitle:amd64 as Depends of orca:amd64
+    MarkInstall python3-setproctitle:amd64 < none -> 1.3.6-2 @un uN > FU=0
+  Installing python3-psutil:amd64 as Depends of orca:amd64
+    MarkInstall python3-psutil:amd64 < none -> 7.0.0-2ubuntu1 @un uN > FU=0
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu3.25.04.1 -> 2.0.1-0ubuntu3.25.10.1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall coreutils:amd64 < 9.5-1ubuntu1.25.04.2 -> 9.5-1ubuntu2+0.0.0~ubuntu24 @ii umU Ib > FU=0
+  Installing coreutils-from-uutils:amd64 as PreDepends of coreutils:amd64
+    MarkInstall coreutils-from-uutils:amd64 < none -> 0.0.0~ubuntu24 @un uN Ib > FU=0
+    Installing rust-coreutils:amd64 as PreDepends of coreutils-from-uutils:amd64
+      MarkInstall rust-coreutils:amd64 < none -> 0.2.2-0ubuntu2.1 @un uN > FU=0
+    Installing gnu-coreutils:amd64 as PreDepends of coreutils-from-uutils:amd64
+      MarkInstall gnu-coreutils:amd64 < none -> 9.5-1ubuntu4 @un uN > FU=0
+  MarkInstall nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+    nautilus-extension-gnome-terminal:amd64 Depends on gnome-terminal:amd64 < 3.56.0-1ubuntu1 -> 3.56.2-4ubuntu1 @ii umU > (= 3.56.0-1ubuntu1) can't be satisfied! (dep)
+  MarkInstall cpp:amd64 < 4:14.2.0-1ubuntu1 -> 4:15.2.0-4ubuntu1 @ii umU Ib > FU=0
+  Installing cpp-15:amd64 as Depends of cpp:amd64
+    MarkInstall cpp-15:amd64 < none -> 15.2.0-4ubuntu4 @un uN Ib > FU=0
+    Installing cpp-15-x86-64-linux-gnu:amd64 as Depends of cpp-15:amd64
+      MarkInstall cpp-15-x86-64-linux-gnu:amd64 < none -> 15.2.0-4ubuntu4 @un uN > FU=0
+  MarkInstall gnome-initial-setup:amd64 < 48.0-1ubuntu4.2 -> 49.0-1ubuntu4 @ii umU Ib > FU=0
+  Installing libinsights0:amd64 as Depends of gnome-initial-setup:amd64
+    MarkInstall libinsights0:amd64 < none -> 0.6.2 @un uN > FU=0
+  MarkInstall gjs:amd64 < 1.82.1-1 -> 1.86.0-1 @ii umU Ib > FU=0
+  Installing libgjs0:amd64 as Depends of gjs:amd64
+     Delayed Removing: libgjs0g:amd64 as upgrade is not an option for libgjs0:amd64 (1.86.0-1)
+    MarkInstall libgjs0:amd64 < none -> 1.86.0-1 @un uN Ib > FU=0
+    Installing gir1.2-girepository-3.0:amd64 as Depends of libgjs0:amd64
+      MarkInstall gir1.2-girepository-3.0:amd64 < none -> 2.86.0-2 @un uN Ib > FU=0
+      Installing libgirepository-2.0-0:amd64 as Depends of gir1.2-girepository-3.0:amd64
+        MarkInstall libgirepository-2.0-0:amd64 < none -> 2.86.0-2 @un uN > FU=0
+    Installing libmozjs-140-0:amd64 as Depends of libgjs0:amd64
+      MarkInstall libmozjs-140-0:amd64 < none -> 140.3.0-1 @un uN > FU=0
+    MarkDelete libgjs0g:amd64 < 1.82.1-1 @ii mK > FU=0
+   Delayed Removing: keyboxd:amd64 as upgrade is not an option for gpg:amd64 (2.4.8-2ubuntu2)
+  MarkInstall gpg:amd64 < 2.4.4-2ubuntu23.1 -> 2.4.8-2ubuntu2 @ii umU Ib > FU=0
+  MarkDelete keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > FU=0
+  MarkInstall ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+    ubuntu-session-xsession:amd64 Depends on ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > (= 47.0.1-2ubuntu3) can't be satisfied! (dep)
+    MarkKeep libgjs0g:amd64 < 1.82.1-1 @ii mR > FU=0
+  MarkInstall libbinutils:amd64 < 2.44-3ubuntu1.3 -> 2.45-7ubuntu1.2 @ii umU Ib > FU=0
+  Installing libsframe2:amd64 as Depends of libbinutils:amd64
+    MarkInstall libsframe2:amd64 < none -> 2.45-7ubuntu1.2 @un uN > FU=0
+   Delayed Removing: gnome-startup-applications:amd64 as upgrade is not an option for gnome-session-bin:amd64 (49.0-1ubuntu2)
+  MarkInstall gnome-session-bin:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > FU=0
+  MarkInstall libmanette-0.2-0:amd64 < 0.2.9-2 -> 0.2.12-2 @ii umU Ib > FU=0
+  Installing libhidapi-hidraw0:amd64 as Depends of libmanette-0.2-0:amd64
+    MarkInstall libhidapi-hidraw0:amd64 < none -> 0.14.0-1build1 @un uN > FU=0
+  MarkInstall libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+    libmutter-16-0:amd64 Depends on mutter-common-bin:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU > (= 48.1-1ubuntu3.1) can't be satisfied! (dep)
+  MarkInstall gnome-remote-desktop:amd64 < 48.0-1ubuntu0.1 -> 49.0-0ubuntu1.1 @ii umU Ib > FU=0
+  Installing libmutter-17-0:amd64 as Depends of gnome-remote-desktop:amd64
+    MarkInstall libmutter-17-0:amd64 < none -> 49.0-2ubuntu5.3 @un uN Ib > FU=0
+    Installing libglycin-2-0:amd64 as Depends of libmutter-17-0:amd64
+      MarkInstall libglycin-2-0:amd64 < none -> 2.0.0+ds-1ubuntu2 @un uN Ib > FU=0
+      Installing glycin-loaders:amd64 as Depends of libglycin-2-0:amd64
+        MarkInstall glycin-loaders:amd64 < none -> 2.0.0+ds-1ubuntu2 @un uN > FU=0
+  Installing libfuse3-4:amd64 as Depends of gnome-remote-desktop:amd64
+    MarkInstall libfuse3-4:amd64 < none -> 3.17.4-1 @un uN > FU=0
+    MarkKeep keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mR > FU=0
+   Delayed Removing: libmutter-16-0:amd64 as upgrade is not an option for mutter-common:amd64 (49.0-2ubuntu5.3)
+  MarkInstall mutter-common:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU Ib > FU=0
+  MarkDelete libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  MarkInstall util-linux:amd64 < 2.40.2-14ubuntu1.2 -> 2.41-4ubuntu4.1 @ii umU Ib > FU=0
+  Installing liblastlog2-2:amd64 as PreDepends of util-linux:amd64
+    MarkInstall liblastlog2-2:amd64 < none -> 2.41-4ubuntu4.1 @un uN > FU=0
+  MarkInstall gnome-shell:amd64 < 48.0-1ubuntu1.3 -> 49.0-1ubuntu1.2 @ii umU Ib > FU=0
+  Installing gir1.2-mutter-17:amd64 as Depends of gnome-shell:amd64
+    MarkInstall gir1.2-mutter-17:amd64 < none -> 49.0-2ubuntu5.3 @un uN > FU=0
+  MarkInstall ubuntu-wallpapers:amd64 < 25.04.2 -> 25.10.2 @ii umU Ib > FU=0
+  Installing ubuntu-wallpapers-questing:amd64 as Depends of ubuntu-wallpapers:amd64
+    MarkInstall ubuntu-wallpapers-questing:amd64 < none -> 25.10.2 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall libphonenumber8:amd64 < 8.13.51+ds-4.2 -> 8.13.51+ds-4.2ubuntu1 @ii umU Ib > FU=0
+  Installing libabsl20240722:amd64 as Depends of libphonenumber8:amd64
+    MarkInstall libabsl20240722:amd64 < none -> 20240722.0-4ubuntu1 @un uN > FU=0
+  MarkInstall gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  Installing libmutter-16-0:amd64 as Depends of gir1.2-mutter-16:amd64
+      MarkKeep libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mR > FU=0
+  MarkInstall bpftrace:amd64 < 0.21.2-2ubuntu3 -> 0.23.5-1ubuntu1 @ii umU Ib > FU=0
+  Installing libclang1-20:amd64 as Depends of bpftrace:amd64
+    MarkInstall libclang1-20:amd64 < none -> 1:20.1.8-0ubuntu4 @un uN > FU=0
+  MarkInstall python3-markdown-it:amd64 < 3.0.0-2 -> 3.0.0-3 @ii umU Ib > FU=0
+  Installing python3-linkify-it:amd64 as Depends of python3-markdown-it:amd64
+    MarkInstall python3-linkify-it:amd64 < none -> 2.0.3-1ubuntu2 @un uN Ib > FU=0
+    Installing python3-uc-micro:amd64 as Depends of python3-linkify-it:amd64
+      MarkInstall python3-uc-micro:amd64 < none -> 1.0.3-1 @un uN > FU=0
+  MarkInstall linux-image-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU Ib > FU=0
+  Installing linux-image-6.17.0-8-generic:amd64 as Depends of linux-image-generic-hwe-24.04:amd64
+    MarkInstall linux-image-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-modules-6.17.0-8-generic:amd64 as Depends of linux-image-6.17.0-8-generic:amd64
+      MarkInstall linux-modules-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+   Delayed Removing: ubuntu-session-xsession:amd64 as upgrade is not an option for ubuntu-session:amd64 (49.0-1ubuntu2)
+  MarkInstall ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+  MarkInstall gnome-shell-extension-ubuntu-dock:amd64 < 100ubuntu2 -> 102ubuntu1 @ii umU IPb > FU=0
+  new important dependency: gir1.2-dbusmenu-glib-0.4:amd64
+  Installing gir1.2-dbusmenu-glib-0.4:amd64 as Recommends of gnome-shell-extension-ubuntu-dock:amd64
+    MarkInstall gir1.2-dbusmenu-glib-0.4:amd64 < none -> 18.10.20180917~bzr492+repack1-4 @un uN > FU=0
+   Delayed Removing: libgtk-4-media-gstreamer:amd64 as upgrade is not an option for libgtk-4-1:amd64 (4.20.1+ds-2)
+  MarkInstall libgtk-4-1:amd64 < 4.18.5+ds-0ubuntu0.1 -> 4.20.1+ds-2 @ii umU Ib > FU=0
+  MarkDelete libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > FU=0
+  MarkInstall sudo:amd64 < 1.9.16p2-1ubuntu1.1 -> 1.9.17p2-1ubuntu1 @ii umU IPb > FU=0
+  new important dependency: sudo-rs:amd64
+  Installing sudo-rs:amd64 as Recommends of sudo:amd64
+    MarkInstall sudo-rs:amd64 < none -> 0.2.8-1ubuntu5.2 @un uN > FU=0
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.549 -> 1.560 @ii umU IPb > FU=0
+  previously satisfied important dependency on dracut:amd64
+  Installing dracut:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkKeep initramfs-tools:amd64 < 0.147ubuntu1.1 -> 0.150ubuntu3.1 @ii umU > FU=0
+     Delayed Removing: initramfs-tools:amd64 as upgrade is not an option for dracut:amd64 (108-3ubuntu3)
+    MarkInstall dracut:amd64 < none -> 108-3ubuntu3 @un umN Ib > FU=0
+    Installing dracut-core:amd64 as Depends of dracut:amd64
+      MarkInstall dracut-core:amd64 < none -> 108-3ubuntu3 @un uN > FU=0
+    MarkDelete initramfs-tools:amd64 < 0.147ubuntu1.1 | 0.150ubuntu3.1 @ii umH Ib > FU=0
+  new important dependency: hwctl:amd64
+  Installing hwctl:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall hwctl:amd64 < none -> 0.9.3+us-0ubuntu1 @un uN > FU=0
+  new important dependency: loupe:amd64
+  Installing loupe:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall loupe:amd64 < none -> 49.0-1ubuntu1 @un uN > FU=0
+  new important dependency: ptyxis:amd64
+  Installing ptyxis:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall ptyxis:amd64 < none -> 49.1-1 @un umN Ib > FU=0
+    Installing libvte-2.91-gtk4-0:amd64 as Depends of ptyxis:amd64
+      MarkInstall libvte-2.91-gtk4-0:amd64 < none -> 0.80.3-3 @un uN > FU=0
+  new important dependency: ubuntu-insights:amd64
+  Installing ubuntu-insights:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall ubuntu-insights:amd64 < none -> 0.6.2 @un uN > FU=0
+  MarkKeep dracut:amd64 < none -> 108-3ubuntu3 @un umN > FU=0
+  MarkInstall initramfs-tools:amd64 < 0.147ubuntu1.1 -> 0.150ubuntu3.1 @ii umU > FU=0
+   Delayed Removing: nautilus-extension-gnome-terminal:amd64 as upgrade is not an option for nautilus:amd64 (1:49.0-1ubuntu2)
+  MarkInstall nautilus:amd64 < 1:48.0-1ubuntu1 -> 1:49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+  MarkInstall ubuntu-release-upgrader-core:amd64 < 1:25.04.18 -> 1:25.10.8 @ii umU Ib > FU=0
+  Installing screen:amd64 as Depends of ubuntu-release-upgrader-core:amd64
+    MarkInstall screen:amd64 < none -> 4.9.1-3ubuntu1 @un uN > FU=0
+    MarkKeep libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mR > FU=0
+  MarkInstall amd64-microcode:amd64 < 3.20250708.0ubuntu0.25.04.2 -> 3.20250708.1ubuntu1 @ii umU Ib > FU=0
+  Installing 3cpio:amd64 as Depends of amd64-microcode:amd64
+    MarkInstall 3cpio:amd64 < none -> 0.10.2-0ubuntu1 @un uN > FU=0
+    MarkKeep gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mR > FU=0
+    MarkKeep nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mR > FU=0
+    MarkKeep ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mR > FU=0
+Starting pkgProblemResolver with broken count: 11
+Starting 2 pkgProblemResolver with broken count: 11
+Investigating (0) libgtk-4-1:amd64 < 4.18.5+ds-0ubuntu0.1 -> 4.20.1+ds-2 @ii umU Ib >
+Broken libgtk-4-1:amd64 Breaks on libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > (< 4.19.2)
+  Considering libgtk-4-media-gstreamer:amd64 -3 as a solution to libgtk-4-1:amd64 158
+  Added libgtk-4-media-gstreamer:amd64 to the remove list
+  MarkDelete libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > FU=0
+  Fixing libgtk-4-1:amd64 via remove of libgtk-4-media-gstreamer:amd64
+Investigating (0) ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib >
+Broken ubuntu-session:amd64 Breaks on ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > (< 49~)
+  Considering ubuntu-session-xsession:amd64 0 as a solution to ubuntu-session:amd64 27
+  Added ubuntu-session-xsession:amd64 to the remove list
+  MarkDelete ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+  Fixing ubuntu-session:amd64 via remove of ubuntu-session-xsession:amd64
+Investigating (0) gpg:amd64 < 2.4.4-2ubuntu23.1 -> 2.4.8-2ubuntu2 @ii umU Ib >
+Broken gpg:amd64 Breaks on keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > (< 2.4.7-4)
+  Considering keyboxd:amd64 -3 as a solution to gpg:amd64 25
+  Added keyboxd:amd64 to the remove list
+  MarkDelete keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > FU=0
+  Fixing gpg:amd64 via remove of keyboxd:amd64
+Investigating (0) libgjs0:amd64 < none -> 1.86.0-1 @un uN Ib >
+Broken libgjs0:amd64 Conflicts on libgjs0g:amd64 < 1.82.1-1 @ii mK >
+  Considering libgjs0g:amd64 -3 as a solution to libgjs0:amd64 21
+  Added libgjs0g:amd64 to the remove list
+  MarkDelete libgjs0g:amd64 < 1.82.1-1 @ii mK > FU=0
+  Fixing libgjs0:amd64 via remove of libgjs0g:amd64
+Investigating (0) gnome-session-bin:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib >
+Broken gnome-session-bin:amd64 Breaks on gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > (< 49)
+  Considering gnome-startup-applications:amd64 -3 as a solution to gnome-session-bin:amd64 18
+  Added gnome-startup-applications:amd64 to the remove list
+  MarkDelete gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > FU=0
+  Fixing gnome-session-bin:amd64 via remove of gnome-startup-applications:amd64
+Investigating (0) nautilus:amd64 < 1:48.0-1ubuntu1 -> 1:49.0-1ubuntu2 @ii umU Ib >
+Broken nautilus:amd64 Breaks on nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > (< 3.56.0-1ubuntu2)
+  Considering nautilus-extension-gnome-terminal:amd64 -3 as a solution to nautilus:amd64 8
+  Added nautilus-extension-gnome-terminal:amd64 to the remove list
+  MarkDelete nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+  Fixing nautilus:amd64 via remove of nautilus-extension-gnome-terminal:amd64
+Investigating (0) mutter-common:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU Ib >
+Broken mutter-common:amd64 Breaks on libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > (< 49~)
+  Considering libmutter-16-0:amd64 -2 as a solution to mutter-common:amd64 8
+  Added libmutter-16-0:amd64 to the remove list
+  MarkDelete libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  Fixing mutter-common:amd64 via remove of libmutter-16-0:amd64
+Investigating (0) gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib >
+Broken gir1.2-mutter-16:amd64 Depends on libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mR > (= 48.1-1ubuntu3.1)
+  Considering libmutter-16-0:amd64 -2 as a solution to gir1.2-mutter-16:amd64 -2
+  Removing gir1.2-mutter-16:amd64 rather than change libmutter-16-0:amd64
+  MarkDelete gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+Done
+Entering ResolveByKeep
+  MarkInstall linux-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=1
+  Installing linux-image-generic:amd64 as Depends of linux-generic:amd64
+    MarkInstall linux-image-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  Installing linux-headers-generic:amd64 as Depends of linux-generic:amd64
+    MarkInstall linux-headers-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+Log time: 2025-12-18 09:10:14.801498
+  MarkInstall libm17n-0:amd64 < 1.8.4-2 -> 1.8.5-1build1 @ii umU Ib > FU=0
+  Installing libxml2-16:amd64 as Depends of libm17n-0:amd64
+    MarkInstall libxml2-16:amd64 < none -> 2.14.5+dfsg-0.2 @un uN > FU=0
+  MarkInstall linux-headers-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU Ib > FU=0
+  Installing linux-headers-6.17.0-8-generic:amd64 as Depends of linux-headers-generic-hwe-24.04:amd64
+    MarkInstall linux-headers-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-headers-6.17.0-8:amd64 as Depends of linux-headers-6.17.0-8-generic:amd64
+      MarkInstall linux-headers-6.17.0-8:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  MarkInstall linux-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU IPb > FU=0
+  new important dependency: linux-tools-6.17.0-8-generic:amd64
+  Installing linux-tools-6.17.0-8-generic:amd64 as Recommends of linux-generic-hwe-24.04:amd64
+    MarkInstall linux-tools-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-tools-6.17.0-8:amd64 as Depends of linux-tools-6.17.0-8-generic:amd64
+      MarkInstall linux-tools-6.17.0-8:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  MarkInstall libbpfcc:amd64 < 0.30.0+ds-1ubuntu5 -> 0.31.0+ds-7ubuntu2 @ii umU Ib > FU=0
+  Installing libclang-cpp20:amd64 as Depends of libbpfcc:amd64
+    MarkInstall libclang-cpp20:amd64 < none -> 1:20.1.8-0ubuntu4 @un uN > FU=0
+  MarkInstall orca:amd64 < 48.0-1ubuntu1 -> 49.1-1ubuntu1 @ii umU Ib > FU=0
+  Installing python3-dasbus:amd64 as Depends of orca:amd64
+    MarkInstall python3-dasbus:amd64 < none -> 1.7-2 @un uN > FU=0
+  Installing python3-setproctitle:amd64 as Depends of orca:amd64
+    MarkInstall python3-setproctitle:amd64 < none -> 1.3.6-2 @un uN > FU=0
+  Installing python3-psutil:amd64 as Depends of orca:amd64
+    MarkInstall python3-psutil:amd64 < none -> 7.0.0-2ubuntu1 @un uN > FU=0
+  MarkInstall cups-filters:amd64 < 2.0.1-0ubuntu3.25.04.1 -> 2.0.1-0ubuntu3.25.10.1 @ii umU NPb IPb > FU=0
+  ignore old unsatisfied important dependency on printer-driver-braille:amd64
+  MarkInstall coreutils:amd64 < 9.5-1ubuntu1.25.04.2 -> 9.5-1ubuntu2+0.0.0~ubuntu24 @ii umU Ib > FU=0
+  Installing coreutils-from-uutils:amd64 as PreDepends of coreutils:amd64
+    MarkInstall coreutils-from-uutils:amd64 < none -> 0.0.0~ubuntu24 @un uN Ib > FU=0
+    Installing rust-coreutils:amd64 as PreDepends of coreutils-from-uutils:amd64
+      MarkInstall rust-coreutils:amd64 < none -> 0.2.2-0ubuntu2.1 @un uN > FU=0
+    Installing gnu-coreutils:amd64 as PreDepends of coreutils-from-uutils:amd64
+      MarkInstall gnu-coreutils:amd64 < none -> 9.5-1ubuntu4 @un uN > FU=0
+  MarkInstall nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+    nautilus-extension-gnome-terminal:amd64 Depends on gnome-terminal:amd64 < 3.56.0-1ubuntu1 -> 3.56.2-4ubuntu1 @ii umU > (= 3.56.0-1ubuntu1) can't be satisfied! (dep)
+  MarkInstall cpp:amd64 < 4:14.2.0-1ubuntu1 -> 4:15.2.0-4ubuntu1 @ii umU Ib > FU=0
+  Installing cpp-15:amd64 as Depends of cpp:amd64
+    MarkInstall cpp-15:amd64 < none -> 15.2.0-4ubuntu4 @un uN Ib > FU=0
+    Installing cpp-15-x86-64-linux-gnu:amd64 as Depends of cpp-15:amd64
+      MarkInstall cpp-15-x86-64-linux-gnu:amd64 < none -> 15.2.0-4ubuntu4 @un uN > FU=0
+  MarkInstall gnome-initial-setup:amd64 < 48.0-1ubuntu4.2 -> 49.0-1ubuntu4 @ii umU Ib > FU=0
+  Installing libinsights0:amd64 as Depends of gnome-initial-setup:amd64
+    MarkInstall libinsights0:amd64 < none -> 0.6.2 @un uN > FU=0
+  MarkInstall gjs:amd64 < 1.82.1-1 -> 1.86.0-1 @ii umU Ib > FU=0
+  Installing libgjs0:amd64 as Depends of gjs:amd64
+     Delayed Removing: libgjs0g:amd64 as upgrade is not an option for libgjs0:amd64 (1.86.0-1)
+    MarkInstall libgjs0:amd64 < none -> 1.86.0-1 @un uN Ib > FU=0
+    Installing gir1.2-girepository-3.0:amd64 as Depends of libgjs0:amd64
+      MarkInstall gir1.2-girepository-3.0:amd64 < none -> 2.86.0-2 @un uN Ib > FU=0
+      Installing libgirepository-2.0-0:amd64 as Depends of gir1.2-girepository-3.0:amd64
+        MarkInstall libgirepository-2.0-0:amd64 < none -> 2.86.0-2 @un uN > FU=0
+    Installing libmozjs-140-0:amd64 as Depends of libgjs0:amd64
+      MarkInstall libmozjs-140-0:amd64 < none -> 140.3.0-1 @un uN > FU=0
+    MarkDelete libgjs0g:amd64 < 1.82.1-1 @ii mK > FU=0
+   Delayed Removing: keyboxd:amd64 as upgrade is not an option for gpg:amd64 (2.4.8-2ubuntu2)
+  MarkInstall gpg:amd64 < 2.4.4-2ubuntu23.1 -> 2.4.8-2ubuntu2 @ii umU Ib > FU=0
+  MarkDelete keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > FU=0
+  MarkInstall ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+    ubuntu-session-xsession:amd64 Depends on ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > (= 47.0.1-2ubuntu3) can't be satisfied! (dep)
+    MarkKeep libgjs0g:amd64 < 1.82.1-1 @ii mR > FU=0
+  MarkInstall libbinutils:amd64 < 2.44-3ubuntu1.3 -> 2.45-7ubuntu1.2 @ii umU Ib > FU=0
+  Installing libsframe2:amd64 as Depends of libbinutils:amd64
+    MarkInstall libsframe2:amd64 < none -> 2.45-7ubuntu1.2 @un uN > FU=0
+   Delayed Removing: gnome-startup-applications:amd64 as upgrade is not an option for gnome-session-bin:amd64 (49.0-1ubuntu2)
+  MarkInstall gnome-session-bin:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > FU=0
+  MarkInstall libmanette-0.2-0:amd64 < 0.2.9-2 -> 0.2.12-2 @ii umU Ib > FU=0
+  Installing libhidapi-hidraw0:amd64 as Depends of libmanette-0.2-0:amd64
+    MarkInstall libhidapi-hidraw0:amd64 < none -> 0.14.0-1build1 @un uN > FU=0
+  MarkInstall libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+    libmutter-16-0:amd64 Depends on mutter-common-bin:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU > (= 48.1-1ubuntu3.1) can't be satisfied! (dep)
+  MarkInstall gnome-remote-desktop:amd64 < 48.0-1ubuntu0.1 -> 49.0-0ubuntu1.1 @ii umU Ib > FU=0
+  Installing libmutter-17-0:amd64 as Depends of gnome-remote-desktop:amd64
+    MarkInstall libmutter-17-0:amd64 < none -> 49.0-2ubuntu5.3 @un uN Ib > FU=0
+    Installing libglycin-2-0:amd64 as Depends of libmutter-17-0:amd64
+      MarkInstall libglycin-2-0:amd64 < none -> 2.0.0+ds-1ubuntu2 @un uN Ib > FU=0
+      Installing glycin-loaders:amd64 as Depends of libglycin-2-0:amd64
+        MarkInstall glycin-loaders:amd64 < none -> 2.0.0+ds-1ubuntu2 @un uN > FU=0
+  Installing libfuse3-4:amd64 as Depends of gnome-remote-desktop:amd64
+    MarkInstall libfuse3-4:amd64 < none -> 3.17.4-1 @un uN > FU=0
+    MarkKeep keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mR > FU=0
+   Delayed Removing: libmutter-16-0:amd64 as upgrade is not an option for mutter-common:amd64 (49.0-2ubuntu5.3)
+  MarkInstall mutter-common:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU Ib > FU=0
+  MarkDelete libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  MarkInstall util-linux:amd64 < 2.40.2-14ubuntu1.2 -> 2.41-4ubuntu4.1 @ii umU Ib > FU=0
+  Installing liblastlog2-2:amd64 as PreDepends of util-linux:amd64
+    MarkInstall liblastlog2-2:amd64 < none -> 2.41-4ubuntu4.1 @un uN > FU=0
+  MarkInstall gnome-shell:amd64 < 48.0-1ubuntu1.3 -> 49.0-1ubuntu1.2 @ii umU Ib > FU=0
+  Installing gir1.2-mutter-17:amd64 as Depends of gnome-shell:amd64
+    MarkInstall gir1.2-mutter-17:amd64 < none -> 49.0-2ubuntu5.3 @un uN > FU=0
+  MarkInstall ubuntu-wallpapers:amd64 < 25.04.2 -> 25.10.2 @ii umU Ib > FU=0
+  Installing ubuntu-wallpapers-questing:amd64 as Depends of ubuntu-wallpapers:amd64
+    MarkInstall ubuntu-wallpapers-questing:amd64 < none -> 25.10.2 @un uN > FU=0
+  MarkInstall gamemode:amd64 < 1.8.2-2 @ii mK NPb IPb > FU=0
+  ignore old unsatisfied important dependency on libgamemode0:i386:any
+  ignore old unsatisfied important dependency on libgamemodeauto0:i386:any
+  MarkInstall libphonenumber8:amd64 < 8.13.51+ds-4.2 -> 8.13.51+ds-4.2ubuntu1 @ii umU Ib > FU=0
+  Installing libabsl20240722:amd64 as Depends of libphonenumber8:amd64
+    MarkInstall libabsl20240722:amd64 < none -> 20240722.0-4ubuntu1 @un uN > FU=0
+  MarkInstall gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  Installing libmutter-16-0:amd64 as Depends of gir1.2-mutter-16:amd64
+      MarkKeep libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mR > FU=0
+  MarkInstall bpftrace:amd64 < 0.21.2-2ubuntu3 -> 0.23.5-1ubuntu1 @ii umU Ib > FU=0
+  Installing libclang1-20:amd64 as Depends of bpftrace:amd64
+    MarkInstall libclang1-20:amd64 < none -> 1:20.1.8-0ubuntu4 @un uN > FU=0
+  MarkInstall python3-markdown-it:amd64 < 3.0.0-2 -> 3.0.0-3 @ii umU Ib > FU=0
+  Installing python3-linkify-it:amd64 as Depends of python3-markdown-it:amd64
+    MarkInstall python3-linkify-it:amd64 < none -> 2.0.3-1ubuntu2 @un uN Ib > FU=0
+    Installing python3-uc-micro:amd64 as Depends of python3-linkify-it:amd64
+      MarkInstall python3-uc-micro:amd64 < none -> 1.0.3-1 @un uN > FU=0
+  MarkInstall linux-image-generic-hwe-24.04:amd64 < 6.14.0-37.37 -> 6.17.0-8.8 @ii umU Ib > FU=0
+  Installing linux-image-6.17.0-8-generic:amd64 as Depends of linux-image-generic-hwe-24.04:amd64
+    MarkInstall linux-image-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=0
+    Installing linux-modules-6.17.0-8-generic:amd64 as Depends of linux-image-6.17.0-8-generic:amd64
+      MarkInstall linux-modules-6.17.0-8-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+   Delayed Removing: ubuntu-session-xsession:amd64 as upgrade is not an option for ubuntu-session:amd64 (49.0-1ubuntu2)
+  MarkInstall ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+  MarkInstall gnome-shell-extension-ubuntu-dock:amd64 < 100ubuntu2 -> 102ubuntu1 @ii umU IPb > FU=0
+  new important dependency: gir1.2-dbusmenu-glib-0.4:amd64
+  Installing gir1.2-dbusmenu-glib-0.4:amd64 as Recommends of gnome-shell-extension-ubuntu-dock:amd64
+    MarkInstall gir1.2-dbusmenu-glib-0.4:amd64 < none -> 18.10.20180917~bzr492+repack1-4 @un uN > FU=0
+   Delayed Removing: libgtk-4-media-gstreamer:amd64 as upgrade is not an option for libgtk-4-1:amd64 (4.20.1+ds-2)
+  MarkInstall libgtk-4-1:amd64 < 4.18.5+ds-0ubuntu0.1 -> 4.20.1+ds-2 @ii umU Ib > FU=0
+  MarkDelete libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > FU=0
+  MarkInstall sudo:amd64 < 1.9.16p2-1ubuntu1.1 -> 1.9.17p2-1ubuntu1 @ii umU IPb > FU=0
+  new important dependency: sudo-rs:amd64
+  Installing sudo-rs:amd64 as Recommends of sudo:amd64
+    MarkInstall sudo-rs:amd64 < none -> 0.2.8-1ubuntu5.2 @un uN > FU=0
+  MarkInstall ubuntu-desktop-minimal:amd64 < 1.549 -> 1.560 @ii umU IPb > FU=0
+  previously satisfied important dependency on dracut:amd64
+  Installing dracut:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkKeep initramfs-tools:amd64 < 0.147ubuntu1.1 -> 0.150ubuntu3.1 @ii umU > FU=0
+     Delayed Removing: initramfs-tools:amd64 as upgrade is not an option for dracut:amd64 (108-3ubuntu3)
+    MarkInstall dracut:amd64 < none -> 108-3ubuntu3 @un umN Ib > FU=0
+    Installing dracut-core:amd64 as Depends of dracut:amd64
+      MarkInstall dracut-core:amd64 < none -> 108-3ubuntu3 @un uN > FU=0
+    MarkDelete initramfs-tools:amd64 < 0.147ubuntu1.1 | 0.150ubuntu3.1 @ii umH Ib > FU=0
+  new important dependency: hwctl:amd64
+  Installing hwctl:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall hwctl:amd64 < none -> 0.9.3+us-0ubuntu1 @un uN > FU=0
+  new important dependency: loupe:amd64
+  Installing loupe:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall loupe:amd64 < none -> 49.0-1ubuntu1 @un uN > FU=0
+  new important dependency: ptyxis:amd64
+  Installing ptyxis:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall ptyxis:amd64 < none -> 49.1-1 @un umN Ib > FU=0
+    Installing libvte-2.91-gtk4-0:amd64 as Depends of ptyxis:amd64
+      MarkInstall libvte-2.91-gtk4-0:amd64 < none -> 0.80.3-3 @un uN > FU=0
+  new important dependency: ubuntu-insights:amd64
+  Installing ubuntu-insights:amd64 as Recommends of ubuntu-desktop-minimal:amd64
+    MarkInstall ubuntu-insights:amd64 < none -> 0.6.2 @un uN > FU=0
+  MarkKeep dracut:amd64 < none -> 108-3ubuntu3 @un umN > FU=0
+  MarkInstall initramfs-tools:amd64 < 0.147ubuntu1.1 -> 0.150ubuntu3.1 @ii umU > FU=0
+   Delayed Removing: nautilus-extension-gnome-terminal:amd64 as upgrade is not an option for nautilus:amd64 (1:49.0-1ubuntu2)
+  MarkInstall nautilus:amd64 < 1:48.0-1ubuntu1 -> 1:49.0-1ubuntu2 @ii umU Ib > FU=0
+  MarkDelete nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+  MarkInstall ubuntu-release-upgrader-core:amd64 < 1:25.04.18 -> 1:25.10.8 @ii umU Ib > FU=0
+  Installing screen:amd64 as Depends of ubuntu-release-upgrader-core:amd64
+    MarkInstall screen:amd64 < none -> 4.9.1-3ubuntu1 @un uN > FU=0
+    MarkKeep libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mR > FU=0
+  MarkInstall amd64-microcode:amd64 < 3.20250708.0ubuntu0.25.04.2 -> 3.20250708.1ubuntu1 @ii umU Ib > FU=0
+  Installing 3cpio:amd64 as Depends of amd64-microcode:amd64
+    MarkInstall 3cpio:amd64 < none -> 0.10.2-0ubuntu1 @un uN > FU=0
+    MarkKeep gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mR > FU=0
+    MarkKeep nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mR > FU=0
+    MarkKeep ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mR > FU=0
+Starting pkgProblemResolver with broken count: 11
+Starting 2 pkgProblemResolver with broken count: 11
+Investigating (0) libgtk-4-1:amd64 < 4.18.5+ds-0ubuntu0.1 -> 4.20.1+ds-2 @ii umU Ib >
+Broken libgtk-4-1:amd64 Breaks on libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > (< 4.19.2)
+  Considering libgtk-4-media-gstreamer:amd64 -3 as a solution to libgtk-4-1:amd64 158
+  Added libgtk-4-media-gstreamer:amd64 to the remove list
+  MarkDelete libgtk-4-media-gstreamer:amd64 < 4.18.5+ds-0ubuntu0.1 @ii mK > FU=0
+  Fixing libgtk-4-1:amd64 via remove of libgtk-4-media-gstreamer:amd64
+Investigating (0) ubuntu-session:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib >
+Broken ubuntu-session:amd64 Breaks on ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > (< 49~)
+  Considering ubuntu-session-xsession:amd64 0 as a solution to ubuntu-session:amd64 27
+  Added ubuntu-session-xsession:amd64 to the remove list
+  MarkDelete ubuntu-session-xsession:amd64 < 47.0.1-2ubuntu3 @ii mK Ib > FU=0
+  Fixing ubuntu-session:amd64 via remove of ubuntu-session-xsession:amd64
+Investigating (0) gpg:amd64 < 2.4.4-2ubuntu23.1 -> 2.4.8-2ubuntu2 @ii umU Ib >
+Broken gpg:amd64 Breaks on keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > (< 2.4.7-4)
+  Considering keyboxd:amd64 -3 as a solution to gpg:amd64 25
+  Added keyboxd:amd64 to the remove list
+  MarkDelete keyboxd:amd64 < 2.4.4-2ubuntu23.1 @ii mK Ib > FU=0
+  Fixing gpg:amd64 via remove of keyboxd:amd64
+Investigating (0) libgjs0:amd64 < none -> 1.86.0-1 @un uN Ib >
+Broken libgjs0:amd64 Conflicts on libgjs0g:amd64 < 1.82.1-1 @ii mK >
+  Considering libgjs0g:amd64 -3 as a solution to libgjs0:amd64 21
+  Added libgjs0g:amd64 to the remove list
+  MarkDelete libgjs0g:amd64 < 1.82.1-1 @ii mK > FU=0
+  Fixing libgjs0:amd64 via remove of libgjs0g:amd64
+Investigating (0) gnome-session-bin:amd64 < 47.0.1-2ubuntu3 -> 49.0-1ubuntu2 @ii umU Ib >
+Broken gnome-session-bin:amd64 Breaks on gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > (< 49)
+  Considering gnome-startup-applications:amd64 -3 as a solution to gnome-session-bin:amd64 18
+  Added gnome-startup-applications:amd64 to the remove list
+  MarkDelete gnome-startup-applications:amd64 < 47.0.1-2ubuntu3 @ii mK > FU=0
+  Fixing gnome-session-bin:amd64 via remove of gnome-startup-applications:amd64
+Investigating (0) nautilus:amd64 < 1:48.0-1ubuntu1 -> 1:49.0-1ubuntu2 @ii umU Ib >
+Broken nautilus:amd64 Breaks on nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > (< 3.56.0-1ubuntu2)
+  Considering nautilus-extension-gnome-terminal:amd64 -3 as a solution to nautilus:amd64 8
+  Added nautilus-extension-gnome-terminal:amd64 to the remove list
+  MarkDelete nautilus-extension-gnome-terminal:amd64 < 3.56.0-1ubuntu1 @ii mK Ib > FU=0
+  Fixing nautilus:amd64 via remove of nautilus-extension-gnome-terminal:amd64
+Investigating (0) mutter-common:amd64 < 48.1-1ubuntu3.1 -> 49.0-2ubuntu5.3 @ii umU Ib >
+Broken mutter-common:amd64 Breaks on libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > (< 49~)
+  Considering libmutter-16-0:amd64 -2 as a solution to mutter-common:amd64 8
+  Added libmutter-16-0:amd64 to the remove list
+  MarkDelete libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+  Fixing mutter-common:amd64 via remove of libmutter-16-0:amd64
+Investigating (0) gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib >
+Broken gir1.2-mutter-16:amd64 Depends on libmutter-16-0:amd64 < 48.1-1ubuntu3.1 @ii mR > (= 48.1-1ubuntu3.1)
+  Considering libmutter-16-0:amd64 -2 as a solution to gir1.2-mutter-16:amd64 -2
+  Removing gir1.2-mutter-16:amd64 rather than change libmutter-16-0:amd64
+  MarkDelete gir1.2-mutter-16:amd64 < 48.1-1ubuntu3.1 @ii mK Ib > FU=0
+Done
+Entering ResolveByKeep
+  MarkInstall linux-generic:amd64 < none -> 6.17.0-8.8 @un uN Ib > FU=1
+  Installing linux-image-generic:amd64 as Depends of linux-generic:amd64
+    MarkInstall linux-image-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+  Installing linux-headers-generic:amd64 as Depends of linux-generic:amd64
+    MarkInstall linux-headers-generic:amd64 < none -> 6.17.0-8.8 @un uN > FU=0
+Log time: 2025-12-18 09:21:34.970578
+  MarkPurge libxcb-icccm4:amd64 < 0.4.2-1 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-fbdev:amd64 < 1:0.5.0-2build2 @ii gK > FU=1
+  MarkPurge libxvmc1:amd64 < 2:1.0.12-2build3 @ii gK > FU=1
+  MarkPurge x11-session-utils:amd64 < 7.7+6build2 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-all:amd64 < 1:7.7+24ubuntu1 @ii gK Ib > FU=1
+  MarkPurge xserver-xorg-video-radeon:amd64 < 1:22.0.0-1build1 @ii gK > FU=1
+  MarkPurge libsysmetrics1:amd64 < 1.7.3ubuntu3 @ii gK > FU=1
+  MarkPurge libllvm19:amd64 < 1:19.1.7-6ubuntu3 @ii gK > FU=1
+  MarkPurge libxcb-image0:amd64 < 0.4.0-2build1 @ii gK > FU=1
+  MarkPurge xorg:amd64 < 1:7.7+24ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libsframe1:amd64 < 2.44-3ubuntu1.3 @ii gK > FU=1
+  MarkPurge apg:amd64 < 2.2.3.dfsg.1-7 @ii gK > FU=1
+  MarkPurge libmanette-0.2-0:amd64 < 0.2.12-2 @ii gK > FU=1
+  MarkPurge xserver-xorg-input-libinput:amd64 < 1.5.0-1 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-vesa:amd64 < 1:2.6.0-2 @ii gK > FU=1
+  MarkPurge libpeas-1.0-0:amd64 < 1.36.0-5 @ii gK > FU=1
+  MarkPurge libdrm-radeon1:amd64 < 2.4.125-1ubuntu0.1 @ii gK > FU=1
+  MarkPurge xfonts-scalable:amd64 < 1:1.0.3-1.3 @ii gK > FU=1
+  MarkPurge x11-apps:amd64 < 7.7+11build3 @ii gK > FU=1
+  MarkPurge libhidapi-hidraw0:amd64 < 0.14.0-1build1 @ii gK > FU=1
+  MarkPurge libxml2:amd64 < 2.12.7+dfsg+really2.9.14-0.4ubuntu0.4 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-amdgpu:amd64 < 23.0.0-1ubuntu0.25.10.1 @ii gK > FU=1
+  MarkPurge xserver-xorg-legacy:amd64 < 2:21.1.18-1ubuntu1.1 @ii gK > FU=1
+  MarkPurge libgnome-rr-4-2t64:amd64 < 44.4-1 @ii gK > FU=1
+  MarkPurge libu2f-udev:amd64 < 1.1.10-3.2 @ii gK > FU=1
+  MarkPurge libpeas-common:amd64 < 1.36.0-5 @ii gK > FU=1
+  MarkPurge linux-headers-6.14.0-37:amd64 < 6.14.0-37.37 @ii mK > FU=1
+  MarkPurge xserver-xorg-core:amd64 < 2:21.1.18-1ubuntu1.1 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-ati:amd64 < 1:22.0.0-1build1 @ii gK Ib > FU=1
+  MarkPurge xserver-xephyr:amd64 < 2:21.1.18-1ubuntu1.1 @ii gK Ib > FU=1
+  MarkPurge xcvt:amd64 < 0.1.3-1 @ii gK > FU=1
+  MarkPurge eog:amd64 < 47.0-3 @ii gK Ib > FU=1
+  MarkPurge xinit:amd64 < 1.4.2-1 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-nouveau:amd64 < 1:1.0.18-1 @ii gK Ib > FU=1
+  MarkPurge xserver-xorg-video-vmware:amd64 < 1:13.4.0-2 @ii gK Ib > FU=1
+  MarkPurge cpp-14-x86-64-linux-gnu:amd64 < 14.3.0-8ubuntu1 @ii gK > FU=1
+  MarkPurge libclang1-19:amd64 < 1:19.1.7-6ubuntu3 @ii gK Ib > FU=1
+  MarkPurge libopengl0:amd64 < 1.7.0-1build2 @ii gK > FU=1
+  MarkPurge xserver-xorg-input-wacom:amd64 < 1:1.2.3-1ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxcb-render-util0:amd64 < 0.3.10-1 @ii gK > FU=1
+  MarkPurge libxcb-keysyms1:amd64 < 0.4.1-1 @ii gK > FU=1
+  MarkPurge gcc-14-base:amd64 < 14.3.0-8ubuntu1 @ii gK > FU=1
+  MarkPurge libmozjs-128-0:amd64 < 128.14.0-1 @ii gK > FU=1
+  MarkPurge xbitmaps:amd64 < 1.1.1-2.2 @ii gK > FU=1
+  MarkPurge linux-tools-6.14.0-37:amd64 < 6.14.0-37.37 @ii mK > FU=1
+  MarkPurge libglu1-mesa:amd64 < 9.0.2-1.1build1 @ii gK Ib > FU=1
+  MarkPurge xserver-xorg:amd64 < 1:7.7+24ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libxss1:amd64 < 1:1.2.3-1build3 @ii gK > FU=1
+  MarkPurge xorg-docs-core:amd64 < 1:1.7.3-1 @ii gK > FU=1
+  MarkPurge libdrm-nouveau2:amd64 < 2.4.125-1ubuntu0.1 @ii gK > FU=1
+  MarkPurge libxcb-damage0:amd64 < 1.17.0-2build1 @ii gK > FU=1
+  MarkPurge xserver-xorg-input-all:amd64 < 1:7.7+24ubuntu1 @ii gK Ib > FU=1
+  MarkPurge xinput:amd64 < 1.6.4-1build1 @ii gK > FU=1
+  MarkPurge libllvm18:amd64 < 1:18.1.8-18ubuntu2 @ii gK > FU=1
+  MarkPurge cpp-14:amd64 < 14.3.0-8ubuntu1 @ii gK Ib > FU=1
+  MarkPurge libabsl20230802:amd64 < 20230802.1-4.2ubuntu0.2 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-qxl:amd64 < 0.1.6-1.1 @ii gK Ib > FU=1
+  MarkPurge dracut-core:amd64 < 108-3ubuntu3 @ii gK > FU=1
+  MarkPurge xserver-xorg-video-intel:amd64 < 2:2.99.917+git20210115-1build1 @ii gK Ib > FU=1
+  MarkPurge libxcb-xv0:amd64 < 1.17.0-2build1 @ii gK > FU=1
+  MarkPurge libfuse3-3:amd64 < 3.14.0-10 @ii gK > FU=1
+  MarkPurge ubuntu-wallpapers-plucky:amd64 < 25.10.2 @ii gK > FU=1
+  MarkPurge libxatracker2:amd64 < 25.1.7-1ubuntu2 @ii gK > FU=1
+  MarkPurge libclang-cpp18:amd64 < 1:18.1.8-18ubuntu2 @ii gK Ib > FU=1
+  MarkPurge libxcb-dri2-0:amd64 < 1.17.0-2build1 @ii gK > FU=1
+  MarkPurge gir1.2-peas-1.0:amd64 < 1.36.0-5 @ii gK Ib > FU=1
+Entering ResolveByKeep
+  Dependencies are not satisfied for linux-tools-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii mK Ib >
+Keeping package linux-tools-6.14.0-37-generic:amd64
+  Dependencies are not satisfied for linux-tools-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii mK Ib >
+Package linux-tools-6.14.0-37-generic:amd64 linux-tools-6.14.0-37-generic:amd64 Depends on linux-tools-6.14.0-37:amd64 < 6.14.0-37.37 @ii mP >
+  Keeping Package linux-tools-6.14.0-37:amd64 due to Depends
+  MarkKeep linux-tools-6.14.0-37:amd64 < 6.14.0-37.37 @ii mP > FU=0
+  Dependencies are not satisfied for linux-headers-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii mK Ib >
+Keeping package linux-headers-6.14.0-37-generic:amd64
+  Dependencies are not satisfied for linux-headers-6.14.0-37-generic:amd64 < 6.14.0-37.37 @ii mK Ib >
+Package linux-headers-6.14.0-37-generic:amd64 linux-headers-6.14.0-37-generic:amd64 Depends on linux-headers-6.14.0-37:amd64 < 6.14.0-37.37 @ii mP >
+  Keeping Package linux-headers-6.14.0-37:amd64 due to Depends
+  MarkKeep linux-headers-6.14.0-37:amd64 < 6.14.0-37.37 @ii mP > FU=0
