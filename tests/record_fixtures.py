@@ -21,10 +21,11 @@ the test suite never needs the network or any particular machine.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
-from uru_doctor.parsers.sanitize import read_log
+from uru_doctor.parsers.sanitize import clean, read_log
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -111,12 +112,121 @@ SOURCES: tuple[tuple[str, str, str], ...] = (
         "case: a parser trusting this would conclude the upgrade never started.",
     ),
     (
+        "logs/local-aptterm-dpkgfail.log",
+        "/tmp/opencode/aptlogs/aptterm-dpkgfail.log",
+        "dpkg terminal log for a failed configure, excerpted from this machine's "
+        "/var/log/apt/term.log (identical format to apt-term.log -- it is the same "
+        "dpkg output). The reference cascade: python3's postinst fails because a "
+        "byte-compile hook chokes on a non-UTF-8 file shipped by llvm-21-tools, and "
+        "34 packages that merely depend on python3 are left unconfigured. Contains a "
+        "wall of SyntaxWarning lines that are NOT the cause -- the apt-term analogue "
+        "of the W:/E: misdirection, and the reason the failure reason line rather "
+        "than proximity decides blame. The successful middle is elided; the elision "
+        "is marked in the file.",
+    ),
+    (
+        "logs/local-aptterm-success.log",
+        "/var/log/dist-upgrade/apt-term.log",
+        "apt-term.log from a successful run. Two 'Log started' blocks: the first is "
+        "EMPTY because a quirk called cache.commit() with nothing to do, the second "
+        "is the real dist-upgrade. Proof from the dpkg side that the presence of "
+        "apt-term.log does not mean packages were written.",
+    ),
+    (
+        "logs/local-xorg-fixup.log",
+        "/var/log/dist-upgrade/xorg_fixup.log",
+        "xorg_fixup.log, the trivial case: two INFO lines and no xorg.conf. Present "
+        "so the parser is exercised on a log that says nothing went wrong.",
+    ),
+    (
         "logs/local-history.log",
         "/var/log/dist-upgrade/history.log",
         "apt history.log with single lines of several hundred kilobytes listing two "
         "thousand packages.",
     ),
 )
+
+
+#: Launchpad bug metadata: ``(bug_id, source_json, provenance)``.
+#:
+#: Recorded as a trimmed JSON document holding only the title, tags, attachment
+#: titles and description. The description is where apport puts its structured
+#: fields, so it is the input to :mod:`uru_doctor.parsers.apportmeta`; the rest
+#: of Launchpad's bug payload is noise and is discarded rather than committed.
+LP_SOURCES: tuple[tuple[str, str, str, str], ...] = (
+    (
+        "lp/bug2150245.json",
+        "/tmp/opencode/aptlogs/bug2150245.json",
+        "/tmp/opencode/aptlogs/att2150245.json",
+        "LP#2150245 apport metadata. ProblemType: Bug, and Uname reports the "
+        "third-party kernel 6.18.7-surface-1 -- independent evidence of the "
+        "unsupported PPA, available even when no apt log is attached.",
+    ),
+    (
+        "lp/bug2150319.json",
+        "/tmp/opencode/aptlogs/bug2150319.json",
+        "",
+        "LP#2150319 apport metadata. Attachment titles include a plain 'main.log' "
+        "and one titled 'Holding Back lintian rather than change "
+        "libfile-libmagic-perl' -- a title that is itself the diagnosis, and "
+        "unrecognisable by name alone.",
+    ),
+    (
+        "lp/bug2169028.json",
+        "/tmp/opencode/aptlogs/bug2169028.json",
+        "",
+        "LP#2169028 apport metadata. The only one of the three whose dmesg "
+        "attachment is spelled 'CurrentDmesg.txt' rather than the doubled "
+        "'CurrentDmesg.txt.txt'.",
+    ),
+)
+
+
+def _clean_text(text: str) -> str:
+    """Sanitise and redact a Launchpad text field.
+
+    The same treatment the log fixtures get. Bug descriptions carry hostnames
+    in ``Uname`` and account names in ``ProcEnviron``, so they need redacting
+    just as much as the logs do.
+    """
+    return clean(text, redacted=True)
+
+
+def _record_lp(verbose: bool) -> tuple[int, list[str], list[str]]:
+    """Write the trimmed Launchpad metadata fixtures."""
+    written = 0
+    skipped: list[str] = []
+    manifest: list[str] = []
+
+    for destination, bug_json, att_json, provenance in LP_SOURCES:
+        src = Path(bug_json)
+        if not src.is_file():
+            skipped.append(f"{destination} (missing source {bug_json})")
+            continue
+        payload = json.loads(src.read_text())
+        titles: list[str] = []
+        if att_json and Path(att_json).is_file():
+            titles = [
+                entry.get("title", "")
+                for entry in json.loads(Path(att_json).read_text()).get("entries", [])
+            ]
+
+        trimmed = {
+            "id": payload.get("id"),
+            "title": _clean_text(payload.get("title", "")),
+            "tags": payload.get("tags", []),
+            "attachments": titles,
+            "description": _clean_text(payload.get("description", "")),
+        }
+        target = FIXTURES / destination
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(trimmed, indent=2) + "\n", encoding="utf-8")
+        written += 1
+        if verbose:
+            print(f"wrote {destination}  ({target.stat().st_size:,} bytes)")
+        manifest.extend([f"## `{destination}`", "", provenance, ""])
+
+    return (written, skipped, manifest)
 
 
 def record(*, verbose: bool = True) -> tuple[int, list[str]]:
@@ -152,6 +262,11 @@ def record(*, verbose: bool = True) -> tuple[int, list[str]]:
         manifest.append("")
         manifest.append(provenance)
         manifest.append("")
+
+    lp_written, lp_skipped, lp_manifest = _record_lp(verbose)
+    written += lp_written
+    skipped.extend(lp_skipped)
+    manifest.extend(lp_manifest)
 
     (FIXTURES / "MANIFEST.md").write_text("\n".join(manifest), encoding="utf-8")
     return (written, skipped)

@@ -62,6 +62,7 @@ if TYPE_CHECKING:
 #: ``libva-driver-abi-1.20`` and ``python3-numpy-abi9``.
 _VIRTUAL_HINTS: tuple[str, ...] = ("-abi-", "-abi", "abi-")
 
+
 def _is_foreign(graph: ConflictGraph, node: int, overlay: frozenset[int]) -> bool:
     """Whether ``node`` is a third-party package.
 

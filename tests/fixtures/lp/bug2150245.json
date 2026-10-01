@@ -1,0 +1,20 @@
+{
+  "id": 2150245,
+  "title": "libwacom-surface - Upgrade from 24.04 LTS to 26.04 LTS fails",
+  "tags": [
+    "amd64",
+    "apport-bug",
+    "dist-upgrade",
+    "noble",
+    "wayland-session"
+  ],
+  "attachments": [
+    "CurrentDmesg.txt.txt",
+    "Dependencies.txt",
+    "JournalErrors.txt",
+    "ProcCpuinfoMinimal.txt",
+    "VarLogDistupgradeAptlog.txt",
+    "VarLogDistupgradeMainlog.txt"
+  ],
+  "description": "Ubuntu 24.04 lts\nExpected to upgrade to 26LTS, installation was aborted.\n\nProblemType: Bug\nDistroRelease: Ubuntu 24.04\nPackage: ubuntu-release-upgrader-core 1:24.04.28\nUname: Linux 6.18.7-surface-1 x86_64\nApportVersion: 2.28.1-0ubuntu3.8\nArchitecture: amd64\nCasperMD5CheckResult: pass\nCrashDB: ubuntu\nCrashReports:\n 664:1000:109:0:2026-04-18 13:13:01.964039045 -0400:2026-04-18 13:13:01.964039045 -0400:/var/crash/_usr_bin_file-roller.1000.upload\n 600:107:109:5:2026-04-18 13:13:02.482950836 -0400:2026-04-21 22:00:36.426015391 -0400:/var/crash/_usr_bin_file-roller.1000.uploaded\n 640:1000:109:2346564:2026-04-18 13:12:57.926125049 -0400:2026-04-21 22:00:36.416015282 -0400:/var/crash/_usr_bin_file-roller.1000.crash\nCurrentDesktop: ubuntu:GNOME\nDate: Fri Apr 24 11:31:43 2026\nInstallationDate: Installed on 2026-04-14 (10 days ago)\nInstallationMedia: Ubuntu 24.04.4 LTS \"Noble Numbat\" - Release amd64 (20260210)\nPackageArchitecture: all\nProcEnviron:\n LANG=en_US.UTF-8\n PATH=(custom, no user)\n SHELL=/bin/bash\n TERM=xterm-256color\n XDG_RUNTIME_DIR=<set>\nSourcePackage: ubuntu-release-upgrader\nUpgradeStatus: Upgraded to noble on 2026-04-24 (0 days ago)"
+}

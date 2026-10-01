@@ -75,10 +75,17 @@ class Frozen(BaseModel):
     ``bytes`` round-trip as base64 rather than as UTF-8. This model is full of
     packed binary arrays, and the default byte handling tries to decode them as
     text and fails on the first graph that happens to contain a high byte.
+
+    ``extra="forbid"`` because the default, ``"ignore"``, loses data in
+    silence. Constructing an ``UpgradeRun`` with a misremembered field name
+    dropped the third-party package set without a word from pydantic or from
+    mypy, and the only symptom was a worse diagnosis on one bug. A typo should
+    be an exception, not a subtly degraded result.
     """
 
     model_config = ConfigDict(
         frozen=True,
+        extra="forbid",
         ser_json_bytes="base64",
         val_json_bytes="base64",
     )
@@ -110,6 +117,22 @@ class ProblemType(StrEnum):
     PACKAGE = "Package"
     BUG = "Bug"
     UNKNOWN = "Unknown"
+
+    @classmethod
+    def parse(cls, raw: str | None) -> ProblemType:
+        """Read apport's ``ProblemType`` field, tolerantly.
+
+        Unrecognised values become :attr:`UNKNOWN` rather than raising. The
+        field is free text in a bug description that anyone can edit, and a
+        malformed value is not a reason to refuse to analyse the attached logs.
+        """
+        if not raw:
+            return cls.UNKNOWN
+        wanted = raw.strip().casefold()
+        for member in cls:
+            if member.value.casefold() == wanted:
+                return member
+        return cls.UNKNOWN
 
 
 class Arch(StrEnum):
@@ -1178,6 +1201,36 @@ class UpgradeRun(Frozen):
     origins: tuple[OriginRef, ...] = ()
     graphs: tuple[ConflictGraph, ...] = ()
 
+    apt_broken_count: int = 0
+    """apt's own ``broken count: N``, the worst reported in the primary section.
+
+    Deliberately separate from ``counts.broken``, because the two measure
+    different things and conflating them produces confident nonsense:
+
+    - This is apt's point-in-time count at the start of a resolver pass -- the
+      number of packages it considered itself obliged to fix. For LP#2150245 it
+      is 22.
+    - ``counts.broken`` is the number of distinct packages observed in a broken
+      state at any point in the trace, which for the same bug is 420, because
+      the resolver breaks and re-fixes packages as it explores.
+
+    Neither is wrong; they answer different questions. apt's figure is the one
+    to quote back at apt, and the observed set is the one to reason about.
+    """
+
+    third_party: tuple[PkgId, ...] = ()
+    """Packages known to come from outside Ubuntu.
+
+    From ``main.log``'s ``Foreign (before rewriting sources)`` list, resolved
+    against the architecture-qualified names the apt log uses. Carried on the
+    record rather than recomputed because the resolution depends on interning
+    order -- see :mod:`uru_doctor.ingest`.
+
+    Used to reorient blame across symmetric ``Conflicts``/``Breaks`` edges,
+    where apt's direction carries no judgement about fault, and to drive the
+    candidate-Invalid section of the report.
+    """
+
     apt_error_entries: tuple[StrId, ...] = ()
     """The ``E:`` entries split out of ``ERROR Dist-upgrade failed: '...'``.
 
@@ -1212,9 +1265,35 @@ class UpgradeRun(Frozen):
         """The highest-ranked finding, which drives the title."""
         return self.findings[0] if self.findings else None
 
+    dpkg_wrote: bool | None = None
+    """Whether dpkg actually wrote packages, when the logs settle it.
+
+    ``None`` means unknown. Set by ingest from the parsed ``apt-term.log``,
+    because the question cannot be answered from which files exist:
+
+    - apport's ``attach_file_if_exists`` attaches on *existence*, not content,
+      so an empty ``apt-term.log`` is still reported.
+    - A successful run's ``apt-term.log`` opens with an **empty**
+      ``Log started``/``Log ended`` block, because the upgrader commits once
+      before re-planning. Presence of the file proves nothing.
+    - ``history.log`` lists the full planned package set for every commit,
+      including ones whose dpkg run did nothing, so it cannot arbitrate either.
+
+    The only reliable signal is a non-empty ``apt-term.log`` block.
+    """
+
     @property
     def reached_dpkg(self) -> bool:
-        """Whether any package was unpacked."""
+        """Whether any package was written to the system.
+
+        Prefers :attr:`dpkg_wrote` when ingest could determine it. The
+        fallback on :attr:`logs_present` is deliberately asymmetric: absence
+        of both ``apt-term.log`` and ``history.log`` does mean dpkg never ran,
+        but presence does not mean it did, so the fallback can only ever be a
+        weaker guess than the parsed answer.
+        """
+        if self.dpkg_wrote is not None:
+            return self.dpkg_wrote
         return LogSource.APT_TERM in self.logs_present or LogSource.HISTORY in self.logs_present
 
     @property

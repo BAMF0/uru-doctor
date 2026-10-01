@@ -52,6 +52,30 @@ Developer machine main.log, apt 3.2.0, complete run through to PostInstallScript
 
 Developer machine main.log that ends at 're-exec inside screen'. The stub case: a parser trusting this would conclude the upgrade never started.
 
+## `logs/local-aptterm-dpkgfail.log`
+
+dpkg terminal log for a failed configure, excerpted from this machine's /var/log/apt/term.log (identical format to apt-term.log -- it is the same dpkg output). The reference cascade: python3's postinst fails because a byte-compile hook chokes on a non-UTF-8 file shipped by llvm-21-tools, and 34 packages that merely depend on python3 are left unconfigured. Contains a wall of SyntaxWarning lines that are NOT the cause -- the apt-term analogue of the W:/E: misdirection, and the reason the failure reason line rather than proximity decides blame. The successful middle is elided; the elision is marked in the file.
+
+## `logs/local-aptterm-success.log`
+
+apt-term.log from a successful run. Two 'Log started' blocks: the first is EMPTY because a quirk called cache.commit() with nothing to do, the second is the real dist-upgrade. Proof from the dpkg side that the presence of apt-term.log does not mean packages were written.
+
+## `logs/local-xorg-fixup.log`
+
+xorg_fixup.log, the trivial case: two INFO lines and no xorg.conf. Present so the parser is exercised on a log that says nothing went wrong.
+
 ## `logs/local-history.log`
 
 apt history.log with single lines of several hundred kilobytes listing two thousand packages.
+
+## `lp/bug2150245.json`
+
+LP#2150245 apport metadata. ProblemType: Bug, and Uname reports the third-party kernel 6.18.7-surface-1 -- independent evidence of the unsupported PPA, available even when no apt log is attached.
+
+## `lp/bug2150319.json`
+
+LP#2150319 apport metadata. Attachment titles include a plain 'main.log' and one titled 'Holding Back lintian rather than change libfile-libmagic-perl' -- a title that is itself the diagnosis, and unrecognisable by name alone.
+
+## `lp/bug2169028.json`
+
+LP#2169028 apport metadata. The only one of the three whose dmesg attachment is spelled 'CurrentDmesg.txt' rather than the doubled 'CurrentDmesg.txt.txt'.

@@ -99,9 +99,21 @@ def sanitize_line(line: str) -> str:
 
 
 def sanitize(text: str) -> str:
-    """Sanitise a whole log, dropping lines that were nothing but escapes."""
+    """Sanitise a whole log, dropping lines that were nothing but escapes.
+
+    Split on ``\\n`` only, deliberately. :meth:`str.splitlines` also breaks on
+    a bare ``\\r``, which would hand :func:`collapse_carriage_returns` lines
+    that no longer contain the carriage returns it exists to collapse -- so
+    ``(Reading database ... 5%\\r(Reading database ... 10%`` would survive as
+    two separate lines instead of one.
+
+    That is not cosmetic. ``apt-term.log`` is roughly four hundred such
+    fragments per run, and leaving them intact both inflates the stored events
+    and forks one template into four hundred, which skews the document
+    frequencies that similarity scoring depends on.
+    """
     out: list[str] = []
-    for raw in text.splitlines():
+    for raw in text.split("\n"):
         cleaned = sanitize_line(raw)
         if cleaned.strip() or not raw.strip():
             out.append(cleaned)
@@ -117,6 +129,26 @@ _UNAME = re.compile(r"(uname information:\s*'Linux\s+)(\S+)")
 
 #: ``Requested-By: user (1000)`` in ``history.log``.
 _REQUESTED_BY = re.compile(r"(Requested-By:\s*)(\S+)(\s*\(\d+\))")
+
+#: Journal lines echoed into ``apt-term.log`` by a failing maintainer script.
+#:
+#: ``Jun 23 11:25:23 hostname systemd[1]: ...`` -- classic syslog, where the
+#: field after the timestamp is the hostname. Maintainer scripts that call
+#: ``systemctl`` or ``journalctl`` paste these straight into the terminal log,
+#: so the hostname arrives in a file that otherwise has no business containing
+#: one.
+_SYSLOG_HOST = re.compile(
+    r"(?m)^(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+)(?P<host>[A-Za-z0-9_.-]+)(?=\s+\S)"
+)
+
+#: ``adduser``/``usermod`` messages, which quote the account name.
+#:
+#: ``warn: The user `alice' is already a member of `libvirt'.`` Only the user
+#: name is replaced -- the group name is package-provided configuration and is
+#: sometimes the point of the message.
+_QUOTED_USER = re.compile(
+    r"\b(The user|Adding user|Removing user|user)(\s+[`'])(?P<name>[^'`\s]+)(')"
+)
 
 #: Home directories. The account name is replaced; the rest of the path stays,
 #: because a path under a home directory is occasionally the bug.
@@ -180,6 +212,8 @@ def redact(text: str) -> str:
     text = _URL_CREDENTIALS.sub("://", text)
     text = _UNAME.sub(lambda m: f"{m.group(1)}{HOST}", text)
     text = _REQUESTED_BY.sub(lambda m: f"{m.group(1)}{USER}{m.group(3)}", text)
+    text = _SYSLOG_HOST.sub(lambda m: f"{m.group(1)}{HOST}", text)
+    text = _QUOTED_USER.sub(lambda m: f"{m.group(1)}{m.group(2)}{USER}{m.group(4)}", text)
     text = _PROMPT.sub(lambda m: f"{USER}@{HOST}:{m.group(3)}$", text)
     text = _HOME.sub(f"/home/{USER}", text)
     text = _ROOT_HOME.sub("/root/", text)

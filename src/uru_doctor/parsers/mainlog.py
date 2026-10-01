@@ -37,6 +37,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
+from datetime import datetime
 from itertools import pairwise
 from typing import Final
 
@@ -135,6 +136,15 @@ class MainLogRecord:
     continuation: tuple[str, ...] = ()
     """Subsequent physical lines, verbatim and unparsed."""
 
+    stamp: datetime | None = None
+    """Absolute local wall clock, when the record's timestamp parsed.
+
+    Needed to tell which run a log belongs to. ``/var/log/dist-upgrade`` is
+    archived wholesale at startup, so one ``YYYYMMDD-HHMM`` directory can hold
+    a ``main.log`` from today beside an ``apt.log`` from six months ago.
+    Offsets cannot detect that; absolute times can.
+    """
+
     @property
     def full(self) -> str:
         """The record reassembled, for traceback and stanza extraction."""
@@ -153,6 +163,28 @@ class AptMessage:
     @property
     def is_warning(self) -> bool:
         return not self.is_error
+
+
+def _to_stamp(date: str, time: str, ms: str) -> datetime | None:
+    """Parse a record timestamp into a local, naive datetime.
+
+    Naive on purpose: the upgrader logs local time with no zone, and so do
+    ``apt.log``, ``apt-term.log`` and ``history.log``. Correlating them only
+    requires that they share a clock, which they do.
+    """
+    try:
+        hour, minute, second = (int(part) for part in time.split(":"))
+        return datetime(
+            int(date[0:4]),
+            int(date[5:7]),
+            int(date[8:10]),
+            hour,
+            minute,
+            second,
+            int(ms) * 1000,
+        )
+    except ValueError:
+        return None
 
 
 def _to_ms(date: str, time: str, ms: str) -> int:
@@ -187,6 +219,7 @@ def iter_records(lines: Sequence[str]) -> Iterator[MainLogRecord]:
             level=_LEVELS.get(pending["level"], Level.UNKNOWN),
             message=pending["message"],
             continuation=tuple(continuation),
+            stamp=_to_stamp(pending["date"], pending["time"], pending["ms"]),
         )
 
     for index, line in enumerate(lines, start=1):
@@ -271,6 +304,12 @@ class MainLog:
     duration_ms: int = 0
     record_count: int = 0
 
+    started_at: datetime | None = None
+    """Absolute local time of the first record."""
+
+    ended_at: datetime | None = None
+    """Absolute local time of the last record."""
+
     @property
     def reached_commit(self) -> bool:
         """Whether dpkg ran, which decides if the system was modified."""
@@ -310,6 +349,10 @@ def parse_main_log(lines: Sequence[str], interner: Interner) -> MainLog:
     for record in iter_records(lines):
         log.record_count += 1
         last_ms = record.t_ms
+        if record.stamp is not None:
+            if log.started_at is None:
+                log.started_at = record.stamp
+            log.ended_at = record.stamp
         message = record.message
         phase = tracker.feed(message, record.line_no)
 
