@@ -56,6 +56,15 @@ SOURCES: tuple[tuple[str, str, str], ...] = (
         "which is why the bug was irreproducible on a clean install.",
     ),
     (
+        "apt/lp2150319-c19-apt.log",
+        "/tmp/opencode/aptlogs/b2150319-c19-apt.log",
+        "LP#2150319 apt.log from a SECOND reporter (comment 19), eight days later "
+        "on a different machine. The deduplication ground truth: two independently "
+        "filed logs for one Launchpad-confirmed bug, differing in length, date, "
+        "package versions and installed software, which must produce the same "
+        "root-cause fingerprint.",
+    ),
+    (
         "apt/lp2150245-apt.log",
         "/tmp/opencode/aptlogs/b2150245-apt.log",
         "LP#2150245 'libwacom-surface Upgrade form 24LTS to 26LTS fails'; apt 2.8.x. "

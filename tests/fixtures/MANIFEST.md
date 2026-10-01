@@ -20,6 +20,10 @@ LP#2169028 main.log; ends mid-run at Quirks.PreDistUpgradeCache with no error re
 
 LP#2150319 '[SRU] lintian breaks upgrade from 24.04 to 26.04'; apt 2.8.x. The holdback: libfile-libmagic-perl declined with an apt score margin of 1, which is why the bug was irreproducible on a clean install.
 
+## `apt/lp2150319-c19-apt.log`
+
+LP#2150319 apt.log from a SECOND reporter (comment 19), eight days later on a different machine. The deduplication ground truth: two independently filed logs for one Launchpad-confirmed bug, differing in length, date, package versions and installed software, which must produce the same root-cause fingerprint.
+
 ## `apt/lp2150245-apt.log`
 
 LP#2150245 'libwacom-surface Upgrade form 24LTS to 26LTS fails'; apt 2.8.x. Third-party blocker from the unsupported linux-surface PPA. Closed Invalid with THIRTEEN Launchpad-confirmed duplicates, whose titles range from 'Ubgrade does not work' to 'upgrade to 26.4' -- free ground truth for the deduplicator, which must cluster them on root identity alone.

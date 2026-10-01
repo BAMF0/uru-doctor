@@ -38,7 +38,9 @@ from typing import Final
 
 from uru_doctor.apt.graph import build_graph
 from uru_doctor.apt.lexer import LexStats
+from uru_doctor.apt.livelock import detect_oscillations
 from uru_doctor.apt.sections import read_sections
+from uru_doctor.distroinfo import series_table
 from uru_doctor.intern import Interner
 from uru_doctor.models import (
     Arch,
@@ -347,12 +349,33 @@ def terminal_errors(main: MainLog) -> list[tuple[int, str]]:
     return [(line, msg) for line, msg in main.errors if is_terminal_error(msg)]
 
 
-def _series_from_main(main: MainLog, interner: Interner) -> tuple[str, str]:
+def _series_from_main(
+    main: MainLog, interner: Interner, meta: ApportMeta | None
+) -> tuple[str, str]:
+    """Resolve the release pair, falling back to the apport metadata.
+
+    ``main.log``'s ``Upgrading from X to Y`` is authoritative and names both
+    codenames directly. When no ``main.log`` was attached -- common, because
+    reporters often attach only the apt log -- the source release is still
+    recoverable from apport's ``DistroRelease: Ubuntu 24.04`` via
+    ``/usr/share/distro-info/ubuntu.csv``.
+
+    The *target* is deliberately left blank in that case rather than guessed.
+    A 24.04 system can be upgrading to 24.10 or to 26.04, the log does not say
+    which, and a title that asserts the wrong target is worse than one that
+    admits to not knowing.
+    """
+
     def get(key: str) -> str:
         value = main.meta.get(key)
         return interner.text(value) if value is not None else ""
 
-    return (get("from_release"), get("to_release"))
+    from_series, to_series = get("from_release"), get("to_release")
+    if from_series or meta is None or not meta.distro_release:
+        return (from_series, to_series)
+
+    entry = series_table().by_version(meta.distro_release)
+    return (entry.series if entry else "", to_series)
 
 
 def _phase_spans(main: MainLog, *, failed: bool) -> tuple[PhaseSpan, ...]:
@@ -458,12 +481,17 @@ def ingest_logs(
     graphs: list[ConflictGraph] = []
     apt_truncated = False
     apt_broken_count = 0
+    oscillations: tuple[tuple[int, int, int, int], ...] = ()
     if log_set.has(LogSource.APT):
         sectioned = read_sections(log_set.lines(LogSource.APT), stats=stats)
         apt_truncated = sectioned.truncated
         if sectioned.primary is not None:
             graphs.append(build_graph(sectioned.primary, interner))
             apt_broken_count = sectioned.primary.broken_count or 0
+            oscillations = tuple(
+                (o.pkg_id, o.reversals, o.blocked_by, o.forced_by)
+                for o in detect_oscillations(sectioned.primary, interner)
+            )
 
     # 4. Only now can the third-party set be resolved.
     third_party = resolve_third_party(main, interner)
@@ -481,7 +509,7 @@ def ingest_logs(
     failed = bool(fatal) or main.aborted or bool(term and term.roots)
     evidence_complete = _evidence_complete(main, apt_truncated, term)
 
-    from_series, to_series = _series_from_main(main, interner)
+    from_series, to_series = _series_from_main(main, interner, meta)
     delta, counts = _delta(main, graphs)
 
     return UpgradeRun(
@@ -520,6 +548,7 @@ def ingest_logs(
         tags=meta.tags if meta else (),
         third_party=third_party,
         apt_broken_count=apt_broken_count,
+        oscillations=oscillations,
     )
 
 
@@ -552,6 +581,12 @@ def _evidence_complete(main: MainLog, apt_truncated: bool, term: TermLog | None)
     """
     if apt_truncated or (term is not None and term.truncated):
         return False
+    if term is not None and term.roots:
+        # dpkg reported a failure it could not recover from. That is a definite
+        # conclusion on its own, whatever main.log does or does not say -- and
+        # bugs filed against a failing package routinely carry apt-term.log
+        # without a main.log at all.
+        return True
     if main.record_count == 0:
         # No main.log at all. An apt log on its own can still be analysed, but
         # we cannot claim to know how the run ended.

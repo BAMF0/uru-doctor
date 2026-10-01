@@ -1,0 +1,1445 @@
+Log time: 2026-05-03 14:08:34.325393
+Log time: 2026-05-03 14:09:32.996235
+Log time: 2026-05-03 14:10:47.224545
+  MarkInstall ubuntu-minimal:amd64 < 1.539.2 -> 1.570 @ii umU Ib > FU=1
+  Upgrading ubuntu-standard:amd64 < 1.539.2 | 1.570 @ii umH NPb IPb > due to ubuntu-minimal:amd64
+  Upgrading ubuntu-kernel-accessories:amd64 < 1.539.2 | 1.570 @ii umH > due to ubuntu-minimal:amd64
+  Upgrading ubuntu-desktop-minimal:amd64 < 1.539.2 | 1.570 @ii umH > due to ubuntu-minimal:amd64
+  Upgrading ubuntu-desktop:amd64 < 1.539.2 | 1.570 @ii umH > due to ubuntu-minimal:amd64
+    MarkInstall ubuntu-desktop:amd64 < 1.539.2 -> 1.570 @ii umU Ib > FU=0
+    Installing gnome-shell-ubuntu-extensions:amd64 as Depends of ubuntu-desktop:amd64
+       Delayed Removing: gnome-shell-extension-appindicator:amd64 as upgrade is not an option for gnome-shell-ubuntu-extensions:amd64 (50.26.04.7ubuntu)
+       Delayed Removing: gnome-shell-extension-desktop-icons-ng:amd64 as upgrade is not an option for gnome-shell-ubuntu-extensions:amd64 (50.26.04.7ubuntu)
+       Delayed Removing: gnome-shell-extension-ubuntu-dock:amd64 as upgrade is not an option for gnome-shell-ubuntu-extensions:amd64 (50.26.04.7ubuntu)
+       Delayed Removing: gnome-shell-extension-ubuntu-tiling-assistant:amd64 as upgrade is not an option for gnome-shell-ubuntu-extensions:amd64 (50.26.04.7ubuntu)
+      MarkInstall gnome-shell-ubuntu-extensions:amd64 < none -> 50.26.04.7ubuntu @un uN Ib > FU=0
+         Upgrading: gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 | 50.1-0ubuntu1 @ii umH > due to gnome-shell:amd64 Depends on gnome-shell-common:amd64 < 46.0-0ubuntu6~24.04.13 | 50.1-0ubuntu1 @ii umH > (= 46.0-0ubuntu6~24.04.13)
+        MarkInstall gnome-shell-common:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > FU=0
+        Upgrading gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 | 50.1-0ubuntu1 @ii umH Ib > due to gnome-shell-common:amd64
+           Upgrading: gnome-shell-extension-ubuntu-tiling-assistant:amd64 < 46-1ubuntu1.1 @ii mK Ib > due to gnome-shell-extension-ubuntu-tiling-assistant:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > (< 47~)
+           Upgrading: gnome-shell-extension-ubuntu-dock:amd64 < 90ubuntu3 @ii mK Ib > due to gnome-shell-extension-ubuntu-dock:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > (< 47~)
+           Upgrading: gnome-shell-extension-desktop-icons-ng:amd64 < 46+really47.0.9-1ubuntu5 @ii mK Ib > due to gnome-shell-extension-desktop-icons-ng:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > (< 47~)
+           Upgrading: gnome-shell-extension-appindicator:amd64 < 58-1ubuntu24.04.1 @ii mK Ib > due to gnome-shell-extension-appindicator:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > (< 47~)
+          MarkInstall gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii umU Ib > FU=0
+            MarkInstall gnome-session:amd64 < 46.0-1ubuntu4 -> 50.0-0ubuntu3 @ii umU Ib > FU=0
+            Upgrading ubuntu-session:amd64 < 46.0-1ubuntu4 | 50.0-0ubuntu3 @ii umH > due to gnome-session:amd64
+            Upgrading gnome-session-common:amd64 < 46.0-1ubuntu4 | 50.0-0ubuntu3 @ii umH > due to gnome-session:amd64
+            Upgrading gnome-session-bin:amd64 < 46.0-1ubuntu4 | 50.0-0ubuntu3 @ii umH > due to gnome-session:amd64
+              MarkInstall ubuntu-session:amd64 < 46.0-1ubuntu4 -> 50.0-0ubuntu3 @ii umU Ib > FU=0
+              Installing user-session-migration:amd64 as Depends of ubuntu-session:amd64
+                MarkInstall user-session-migration:amd64 < none -> 0.5.1 @un uN > FU=0
+               Delayed Removing: gnome-startup-applications:amd64 as upgrade is not an option for gnome-session-bin:amd64 (50.0-0ubuntu3)
+              MarkInstall gnome-session-bin:amd64 < 46.0-1ubuntu4 -> 50.0-0ubuntu3 @ii umU Ib > FU=0
+                MarkInstall gdm3:amd64 < 46.2-1ubuntu1~24.04.7 -> 50.0-0ubuntu1 @ii umU Ib > FU=0
+                Upgrading libgdm1:amd64 < 46.2-1ubuntu1~24.04.7 | 50.0-0ubuntu1 @ii umH > due to gdm3:amd64
+                Upgrading gir1.2-gdm-1.0:amd64 < 46.2-1ubuntu1~24.04.7 | 50.0-0ubuntu1 @ii umH > due to gdm3:amd64
+                  MarkInstall libgdm1:amd64 < 46.2-1ubuntu1~24.04.7 -> 50.0-0ubuntu1 @ii umU Ib > FU=0
+                  Installing libglib2.0-0t64:amd64 as Depends of libgdm1:amd64
+                     Upgrading: libglib2.0-bin:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH > due to libglib2.0-bin:amd64 Depends on libglib2.0-0t64:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH > (= 2.80.0-6ubuntu3.8)
+                     Upgrading: gir1.2-glib-2.0:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH > due to gir1.2-glib-2.0:amd64 Depends on libglib2.0-0t64:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH > (= 2.80.0-6ubuntu3.8)
+                    MarkInstall libglib2.0-0t64:amd64 < 2.80.0-6ubuntu3.8 -> 2.88.0-1 @ii umU Ib > FU=0
+                    Upgrading libglib2.0-data:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH > due to libglib2.0-0t64:amd64
+                    Upgrading libglib2.0-bin:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH Ib > due to libglib2.0-0t64:amd64
+                    Upgrading gir1.2-glib-2.0:amd64 < 2.80.0-6ubuntu3.8 | 2.88.0-1 @ii umH Ib > due to libglib2.0-0t64:amd64
+                       Delayed Removing: libgjs0g:amd64 as upgrade is not an option for gir1.2-glib-2.0:amd64 (2.88.0-1)
+                      MarkInstall gir1.2-glib-2.0:amd64 < 2.80.0-6ubuntu3.8 -> 2.88.0-1 @ii umU Ib > FU=0
+                        MarkInstall cinnamon:amd64 < 6.0.4-4 -> 6.4.13-2 @ii umU Ib > FU=0
+                        Upgrading cinnamon-common:amd64 < 6.0.4-4 | 6.4.13-2 @ii umH > due to cinnamon:amd64
+                          MarkInstall cinnamon-common:amd64 < 6.0.4-4 -> 6.4.13-2 @ii umU Ib > FU=0
+                          Installing gir1.2-cinnamondesktop-3.0:amd64 as Depends of cinnamon-common:amd64
+                            MarkInstall gir1.2-cinnamondesktop-3.0:amd64 < 6.0.0-2 -> 6.4.2-1 @ii umU Ib > FU=0
+                            Upgrading libcvc0t64:amd64 < 6.0.0-2 | 6.4.2-1 @ii umH > due to gir1.2-cinnamondesktop-3.0:amd64
+                            Upgrading libcinnamon-desktop4t64:amd64 < 6.0.0-2 | 6.4.2-1 @ii umH > due to gir1.2-cinnamondesktop-3.0:amd64
+                            Upgrading gir1.2-cvc-1.0:amd64 < 6.0.0-2 | 6.4.2-1 @ii umH > due to gir1.2-cinnamondesktop-3.0:amd64
+                            Upgrading cinnamon-desktop-data:amd64 < 6.0.0-2 | 6.4.2-1 @ii umH > due to gir1.2-cinnamondesktop-3.0:amd64
+                              MarkInstall cinnamon-desktop-data:amd64 < 6.0.0-2 -> 6.4.2-1 @ii umU Ib > FU=0
+                                MarkInstall cinnamon-control-center:amd64 < 6.0.1-3 -> 6.4.2-1 @ii umU Ib > FU=0
+                                Upgrading libcinnamon-control-center1:amd64 < 6.0.1-3 | 6.4.2-1 @ii umH > due to cinnamon-control-center:amd64
+                                Upgrading cinnamon-control-center-data:amd64 < 6.0.1-3 | 6.4.2-1 @ii umH > due to cinnamon-control-center:amd64
+                                 Delayed Removing: gir1.2-cscreensaver-1.0:amd64 as upgrade is not an option for cinnamon-screensaver:amd64 (6.4.1-1)
+                                 Delayed Removing: libcscreensaver0:amd64 as upgrade is not an option for cinnamon-screensaver:amd64 (6.4.1-1)
+                                MarkInstall cinnamon-screensaver:amd64 < 6.0.3-1build2 -> 6.4.1-1 @ii umU Ib > FU=0
+                                MarkDelete gir1.2-cscreensaver-1.0:amd64 < 6.0.3-1build2 @ii mK > FU=0
+                                MarkDelete libcscreensaver0:amd64 < 6.0.3-1build2 @ii mK > FU=0
+                                MarkInstall cinnamon-session:amd64 < 6.0.4-1build3 -> 6.4.2-1 @ii umU Ib > FU=0
+                                Upgrading cinnamon-session-common:amd64 < 6.0.4-1build3 | 6.4.2-1 @ii umH > due to cinnamon-session:amd64
+                                Installing libsm6:amd64 as Depends of cinnamon-session:amd64
+                                   Upgrading: libsm-dev:amd64 < 2:1.2.3-1build3 | 2:1.2.6-1build1 @ii umH > due to libsm-dev:amd64 Depends on libsm6:amd64 < 2:1.2.3-1build3 | 2:1.2.6-1build1 @ii umH > (= 2:1.2.3-1build3)
+                                  MarkInstall libsm6:amd64 < 2:1.2.3-1build3 -> 2:1.2.6-1build1 @ii umU > FU=0
+                                  Upgrading libsm-dev:amd64 < 2:1.2.3-1build3 | 2:1.2.6-1build1 @ii umH Ib > due to libsm6:amd64
+                                Installing libxau6:amd64 as Depends of cinnamon-session:amd64
+                                   Upgrading: libxau-dev:amd64 < 1:1.0.9-1build6 | 1:1.0.11-1build2 @ii umH > due to libxau-dev:amd64 Depends on libxau6:amd64 < 1:1.0.9-1build6 | 1:1.0.11-1build2 @ii umH > (= 1:1.0.9-1build6)
+                                  MarkInstall libxau6:amd64 < 1:1.0.9-1build6 -> 1:1.0.11-1build2 @ii umU > FU=0
+                                  Upgrading libxau-dev:amd64 < 1:1.0.9-1build6 | 1:1.0.11-1build2 @ii umH Ib > due to libxau6:amd64
+                                Installing libxcomposite1:amd64 as Depends of cinnamon-session:amd64
+                                   Upgrading: libxcomposite-dev:amd64 < 1:0.4.5-1build3 | 1:0.4.6-1build1 @ii umH > due to libxcomposite-dev:amd64 Depends on libxcomposite1:amd64 < 1:0.4.5-1build3 | 1:0.4.6-1build1 @ii umH > (= 1:0.4.5-1build3)
+                                  MarkInstall libxcomposite1:amd64 < 1:0.4.5-1build3 -> 1:0.4.6-1build1 @ii umU > FU=0
+                                  Upgrading libxcomposite-dev:amd64 < 1:0.4.5-1build3 | 1:0.4.6-1build1 @ii umH Ib > due to libxcomposite1:amd64
+                                MarkInstall cinnamon-settings-daemon:amd64 < 6.0.0-1build4 -> 6.4.3-1build1 @ii umU IPb > FU=0
+                                previously satisfied important dependency on cinnamon-l10n:amd64
+                                Installing cinnamon-l10n:amd64 as Recommends of cinnamon-settings-daemon:amd64
+                                  MarkInstall cinnamon-l10n:amd64 < 6.0.2-1 -> 6.4.2-1build1 @ii umU Ib > FU=0
+                                    MarkInstall nemo:amd64 < 6.0.2-1ubuntu2 -> 6.4.5-1build1 @ii umU Ib > FU=0
+                                    Upgrading nemo-data:amd64 < 6.0.2-1ubuntu2 | 6.4.5-1build1 @ii umH > due to nemo:amd64
+                                    Upgrading libnemo-extension1:amd64 < 6.0.2-1ubuntu2 | 6.4.5-1build1 @ii umH > due to nemo:amd64
+                                    Upgrading gir1.2-nemo-3.0:amd64 < 6.0.2-1ubuntu2 | 6.4.5-1build1 @ii umH > due to nemo:amd64
+                                      MarkInstall nemo-data:amd64 < 6.0.2-1ubuntu2 -> 6.4.5-1build1 @ii umU Ib > FU=0
+                                      Installing gir1.2-xmlb-2.0:amd64 as Depends of nemo-data:amd64
+                                        MarkInstall gir1.2-xmlb-2.0:amd64 < none -> 0.3.24-2 @un uN Ib > FU=0
+                                        Upgrading libxmlb2:amd64 < 0.3.18-1 | 0.3.24-2 @ii umH > due to gir1.2-xmlb-2.0:amd64
+                              MarkInstall libcinnamon-desktop4t64:amd64 < 6.0.0-2 -> 6.4.2-1 @ii umU Ib > FU=0
+                                 Upgrading: gir1.2-meta-muffin-0.0:amd64 < 6.0.1-2build2 | 6.4.1-1build1 @ii umH > due to gir1.2-meta-muffin-0.0:amd64 Depends on libmuffin0t64:amd64 < 6.0.1-2build2 | 6.4.1-1build1 @ii umH > (= 6.0.1-2build2)
+                                MarkInstall libmuffin0t64:amd64 < 6.0.1-2build2 -> 6.4.1-1build1 @ii umU Ib > FU=0
+                                Upgrading muffin-common:amd64 < 6.0.1-2build2 | 6.4.1-1build1 @ii umH > due to libmuffin0t64:amd64
+                                Upgrading muffin:amd64 < 6.0.1-2build2 | 6.4.1-1build1 @ii umH > due to libmuffin0t64:amd64
+                                Upgrading gir1.2-meta-muffin-0.0:amd64 < 6.0.1-2build2 | 6.4.1-1build1 @ii umH Ib > due to libmuffin0t64:amd64
+                                Installing libc6:amd64 as Depends of libmuffin0t64:amd64
+                                   Upgrading: libc6-dev:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc6-dev:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > (= 2.39-0ubuntu8.7)
+                                   Upgrading: libc6-dbg:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc6-dbg:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > (= 2.39-0ubuntu8.7)
+                                   Upgrading: libc-dev-bin:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc-dev-bin:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > (< 2.40)
+                                   Upgrading: libc-bin:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc-bin:amd64 Depends on libc6:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > (< 2.40)
+                                  MarkInstall libc6:amd64 < 2.39-0ubuntu8.7 -> 2.43-2ubuntu2 @ii umU Ib > FU=0
+                                  Upgrading libc-devtools:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc6:amd64
+                                  Upgrading libc6-dev:i386 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc6:amd64
+                                  Upgrading libc6:i386 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH Ib > due to libc6:amd64
+                                  Upgrading locales:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH > due to libc6:amd64
+                                  Upgrading libc6-dev:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH Ib > due to libc6:amd64
+                                  Upgrading libc6-dbg:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH Ib > due to libc6:amd64
+                                  Upgrading libc-dev-bin:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH Ib > due to libc6:amd64
+                                  Upgrading libc-bin:amd64 < 2.39-0ubuntu8.7 | 2.43-2ubuntu2 @ii umH Ib > due to libc6:amd64
+                                    MarkInstall libc6-dev:amd64 < 2.39-0ubuntu8.7 -> 2.43-2ubuntu2 @ii umU Ib > FU=0
+                                       Upgrading: dpkg-dev:amd64 < 1.22.6ubuntu6.5 | 1.23.7ubuntu1 @ii umH > due to dpkg-dev:amd64 Depends on libdpkg-perl:amd64 < 1.22.6ubuntu6.5 | 1.23.7ubuntu1 @ii umH > (= 1.22.6ubuntu6.5)
+                                      MarkInstall libdpkg-perl:amd64 < 1.22.6ubuntu6.5 -> 1.23.7ubuntu1 @ii umU > FU=0
+                                      Upgrading dpkg-dev:amd64 < 1.22.6ubuntu6.5 | 1.23.7ubuntu1 @ii umH Ib > due to libdpkg-perl:amd64
+                                      Upgrading dpkg:amd64 < 1.22.6ubuntu6.5 | 1.23.7ubuntu1 @ii umH > due to libdpkg-perl:amd64
+                                        MarkInstall dpkg-dev:amd64 < 1.22.6ubuntu6.5 -> 1.23.7ubuntu1 @ii umU Ib > FU=0
+                                        Installing make:amd64 as Depends of dpkg-dev:amd64
+                                          MarkInstall make:amd64 < 4.3-4.1build2 -> 4.4.1-3 @ii umU > FU=0
+                                    MarkInstall libc6:i386 < 2.39-0ubuntu8.7 -> 2.43-2ubuntu2 @ii umU Ib > FU=0
+                                      MarkInstall base-files:amd64 < 13ubuntu10.4 -> 14ubuntu6 @ii umU > FU=0
+                                      MarkInstall libqt6webenginecore6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                                      Upgrading libqt6webenginewidgets6:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+                                      Upgrading libqt6webenginequick6:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+                                      Upgrading libqt6webenginecore6-bin:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+                                      Upgrading libqt6webengine6-data:amd64 < 6.4.2-final+dfsg-12ubuntu9 | 6.10.2+dfsg-1 @ii umH > due to libqt6webenginecore6:amd64
+                                        MarkInstall libqt6webenginecore6-bin:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                                        Installing libicu78:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                                          MarkInstall libicu78:amd64 < none -> 78.2-2ubuntu1 @un uN > FU=0
+                                        Installing libpng16-16t64:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                                           Upgrading: libpng-dev:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH > due to libpng-dev:amd64 Depends on libpng16-16t64:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH > (= 1.6.43-5ubuntu0.5)
+                                           Upgrading: libpng-tools:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH > due to libpng-tools:amd64 Depends on libpng16-16t64:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH > (= 1.6.43-5ubuntu0.5)
+                                          MarkInstall libpng16-16t64:amd64 < 1.6.43-5ubuntu0.5 -> 1.6.57-1 @ii umU > FU=0
+                                          Upgrading libpng-tools:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH Ib > due to libpng16-16t64:amd64
+                                          Upgrading libpng-dev:amd64 < 1.6.43-5ubuntu0.5 | 1.6.57-1 @ii umH Ib > due to libpng16-16t64:amd64
+                                        Installing libqt6core6t64:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                                          MarkInstall libqt6core6t64:amd64 < 6.4.2+dfsg-21.1build5 -> 6.10.2+dfsg-7 @ii umU > FU=0
+                                          Upgrading qt6-qpa-plugins:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                                          Upgrading qt6-gtk-platformtheme:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                                          Upgrading libqt6wlshellintegration6:amd64 < 6.4.2-5build3 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                                          Upgrading libqt6waylandclient6:amd64 < 6.4.2-5build3 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                                          Upgrading libqt6sql6-sqlite:amd64 < 6.4.2+dfsg-21.1build5 | 6.10.2+dfsg-7 @ii umH Ib > due to libqt6core6t64:amd64
+                                            MarkInstall libqt6sql6-sqlite:amd64 < 6.4.2+dfsg-21.1build5 -> 6.10.2+dfsg-7 @ii umU Ib > FU=0
+                                            Installing libqt6sql6:amd64 as Depends of libqt6sql6-sqlite:amd64
+                                               Delayed Removing: libqt6sql6t64:amd64 as upgrade is not an option for libqt6sql6:amd64 (6.10.2+dfsg-7)
+                                              MarkInstall libqt6sql6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                                              MarkDelete libqt6sql6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                            MarkInstall libqt6wlshellintegration6:amd64 < 6.4.2-5build3 -> 6.10.2+dfsg-7 @ii umU Ib > FU=0
+                                               Delayed Removing: libqt6waylandeglclienthwintegration6:amd64 as upgrade is not an option for qt6-wayland:amd64 (6.10.2-4)
+                                               Delayed Removing: libqt6waylandeglcompositorhwintegration6:amd64 as upgrade is not an option for qt6-wayland:amd64 (6.10.2-4)
+                                              MarkInstall qt6-wayland:amd64 < 6.4.2-5build3 -> 6.10.2-4 @ii umU Ib > FU=0
+                                              Upgrading libqt6waylandcompositor6:amd64 < 6.4.2-5build3 | 6.10.2-4 @ii umH Ib > due to qt6-wayland:amd64
+                                                MarkInstall libqt6waylandcompositor6:amd64 < 6.4.2-5build3 -> 6.10.2-4 @ii umU Ib > FU=0
+                                                Installing libqt6gui6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                                                   Delayed Removing: libqt6gui6t64:amd64 as upgrade is not an option for libqt6gui6:amd64 (6.10.2+dfsg-7)
+                                                  MarkInstall libqt6gui6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                                                  Installing libqt6dbus6:amd64 as Depends of libqt6gui6:amd64
+                                                     Delayed Removing: libqt6dbus6t64:amd64 as upgrade is not an option for libqt6dbus6:amd64 (6.10.2+dfsg-7)
+                                                    MarkInstall libqt6dbus6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                                                    MarkDelete libqt6dbus6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                                  Installing libxcb-cursor0:amd64 as Depends of libqt6gui6:amd64
+                                                    MarkInstall libxcb-cursor0:amd64 < none -> 0.1.6-1 @un uN > FU=0
+                                                  Installing libxcb-icccm4:amd64 as Depends of libqt6gui6:amd64
+                                                    MarkInstall libxcb-icccm4:amd64 < 0.4.1-1.1build3 -> 0.4.2-1build1 @ii umU > FU=0
+                                                  Installing libxcb-keysyms1:amd64 as Depends of libqt6gui6:amd64
+                                                    MarkInstall libxcb-keysyms1:amd64 < 0.4.0-1build4 -> 0.4.1-1build1 @ii umU > FU=0
+                                                  Installing libxcb-xinput0:amd64 as Depends of libqt6gui6:amd64
+                                                    MarkInstall libxcb-xinput0:amd64 < 1.15-1ubuntu2 -> 1.17.0-2ubuntu1 @ii umU > FU=0
+                                                    Upgrading libxcb1-dev:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-xv0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-xkb1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-xinerama0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-xfixes0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-sync1:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-shm0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-shape0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-res0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-render0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-record0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-randr0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-present0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-glx0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-dri3-0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-dri2-0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-damage0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                    Upgrading libxcb-composite0:amd64 < 1.15-1ubuntu2 | 1.17.0-2ubuntu1 @ii umH > due to libxcb-xinput0:amd64
+                                                      MarkInstall libxcb1:amd64 < 1.15-1ubuntu2 -> 1.17.0-2ubuntu1 @ii umU Ib > FU=0
+                                                      Installing libxdmcp6:amd64 as Depends of libxcb1:amd64
+                                                         Upgrading: libxdmcp-dev:amd64 < 1:1.1.3-0ubuntu6 | 1:1.1.5-2 @ii umH > due to libxdmcp-dev:amd64 Depends on libxdmcp6:amd64 < 1:1.1.3-0ubuntu6 | 1:1.1.5-2 @ii umH > (= 1:1.1.3-0ubuntu6)
+                                                        MarkInstall libxdmcp6:amd64 < 1:1.1.3-0ubuntu6 -> 1:1.1.5-2 @ii umU > FU=0
+                                                        Upgrading libxdmcp-dev:amd64 < 1:1.1.3-0ubuntu6 | 1:1.1.5-2 @ii umH Ib > due to libxdmcp6:amd64
+                                                  Installing qt6-svg-plugins:amd64 as Recommends of libqt6gui6:amd64
+                                                    MarkInstall qt6-svg-plugins:amd64 < none -> 6.10.2-2 @un uN Ib > FU=0
+                                                    Upgrading libqt6svgwidgets6:amd64 < 6.4.2-4ubuntu3 | 6.10.2-2 @ii umH Ib > due to qt6-svg-plugins:amd64
+                                                    Upgrading libqt6svg6:amd64 < 6.4.2-4ubuntu3 | 6.10.2-2 @ii umH Ib > due to qt6-svg-plugins:amd64
+                                                      MarkInstall libqt6svgwidgets6:amd64 < 6.4.2-4ubuntu3 -> 6.10.2-2 @ii umU Ib > FU=0
+                                                      Installing libqt6widgets6:amd64 as Depends of libqt6svgwidgets6:amd64
+                                                         Delayed Removing: libqt6widgets6t64:amd64 as upgrade is not an option for libqt6widgets6:amd64 (6.10.2+dfsg-7)
+                                                        MarkInstall libqt6widgets6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                                                        MarkDelete libqt6widgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                                  MarkDelete libqt6gui6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                                Installing libqt6opengl6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                                                   Delayed Removing: libqt6opengl6t64:amd64 as upgrade is not an option for libqt6opengl6:amd64 (6.10.2+dfsg-7)
+                                                  MarkInstall libqt6opengl6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib > FU=0
+                                                  MarkDelete libqt6opengl6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                                Installing libqt6qml6:amd64 as Depends of libqt6waylandcompositor6:amd64
+                                                  MarkInstall libqt6qml6:amd64 < 6.4.2+dfsg-4build3 -> 6.10.2+dfsg-3 @ii umU Ib > FU=0
+                                                  Upgrading libqt6quickwidgets6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                                                  Upgrading libqt6quick6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                                                  Upgrading libqt6qmlmodels6:amd64 < 6.4.2+dfsg-4build3 | 6.10.2+dfsg-3 @ii umH Ib > due to libqt6qml6:amd64
+                                                    MarkInstall libqt6quick6:amd64 < 6.4.2+dfsg-4build3 -> 6.10.2+dfsg-3 @ii umU Ib > FU=0
+                                                    Installing libqt6network6:amd64 as Depends of libqt6quick6:amd64
+                                                       Delayed Removing: libqt6network6t64:amd64 as upgrade is not an option for libqt6network6:amd64 (6.10.2+dfsg-7)
+                                                      MarkInstall libqt6network6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                                                      MarkDelete libqt6network6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                                    Installing libqt6qmlmeta6:amd64 as Depends of libqt6quick6:amd64
+                                                      MarkInstall libqt6qmlmeta6:amd64 < none -> 6.10.2+dfsg-3 @un uN Ib > FU=0
+                                                      Installing libqt6qmlworkerscript6:amd64 as Depends of libqt6qmlmeta6:amd64
+                                                        MarkInstall libqt6qmlworkerscript6:amd64 < none -> 6.10.2+dfsg-3 @un uN > FU=0
+                                              MarkDelete libqt6waylandeglclienthwintegration6:amd64 < 6.4.2-5build3 @ii mK Ib > FU=0
+                                              MarkDelete libqt6waylandeglcompositorhwintegration6:amd64 < 6.4.2-5build3 @ii mK Ib > FU=0
+                                        Installing libwebp7:amd64 as Depends of libqt6webenginecore6-bin:amd64
+                                          MarkInstall libwebp7:amd64 < 1.3.2-0.4build3 -> 1.5.0-0.1build1 @ii umU Ib > FU=0
+                                          Upgrading webp:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                                          Upgrading libwebpmux3:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                                          Upgrading libwebpdemux2:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                                          Upgrading libsharpyuv0:amd64 < 1.3.2-0.4build3 | 1.5.0-0.1build1 @ii umH > due to libwebp7:amd64
+                                        MarkInstall libqt6webenginewidgets6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                                        Installing libqt6printsupport6:amd64 as Depends of libqt6webenginewidgets6:amd64
+                                           Delayed Removing: libqt6printsupport6t64:amd64 as upgrade is not an option for libqt6printsupport6:amd64 (6.10.2+dfsg-7)
+                                          MarkInstall libqt6printsupport6:amd64 < none -> 6.10.2+dfsg-7 @un umN Ib > FU=0
+                                          MarkDelete libqt6printsupport6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+                                        MarkInstall libqt6webenginequick6:amd64 < 6.4.2-final+dfsg-12ubuntu9 -> 6.10.2+dfsg-1 @ii umU Ib > FU=0
+                                        Installing libqt6webchannelquick6:amd64 as Depends of libqt6webenginequick6:amd64
+                                          MarkInstall libqt6webchannelquick6:amd64 < none -> 6.10.2-1 @un uN Ib > FU=0
+                                          Upgrading libqt6webchannel6:amd64 < 6.4.2-3build2 | 6.10.2-1 @ii umH Ib > due to libqt6webchannelquick6:amd64
+                                      Installing libqt6positioning6:amd64 as Depends of libqt6webenginecore6:amd64
+                                        MarkInstall libqt6positioning6:amd64 < 6.4.2-3build3 -> 6.10.2-1 @ii umU > FU=0
+                                      Installing libsnappy1v5:amd64 as Depends of libqt6webenginecore6:amd64
+                                        MarkInstall libsnappy1v5:amd64 < 1.1.10-1build1 -> 1.2.2-2 @ii umU > FU=0
+                                      Installing libtiff6:amd64 as Depends of libqt6webenginecore6:amd64
+                                        MarkInstall libtiff6:amd64 < 4.5.1+git230720-4ubuntu2.5 -> 4.7.0-3ubuntu4 @ii umU > FU=0
+                                      Installing libxml2-16:amd64 as Depends of libqt6webenginecore6:amd64
+                                        MarkInstall libxml2-16:amd64 < none -> 2.15.2+dfsg-0.1 @un uN Ib > FU=0
+                                          MarkInstall libxml-libxml-perl:amd64 < 2.0207+dfsg+really+2.0134-1build4 -> 2.0207+dfsg+really+2.0207-0ubuntu7 @ii umU Ib > FU=0
+                                          Installing perl:amd64 as Depends of libxml-libxml-perl:amd64
+                                             Upgrading: libclass-xsaccessor-perl:amd64 < 1.19-4build4 | 1.19-4build6 @ii umH > due to libclass-xsaccessor-perl:amd64 Depends on perl:amd64 < 5.38.2-3.2ubuntu0.2 | 5.40.1-7build1 @ii umH > (< 5.38.3~)
+                                            MarkInstall perl:amd64 < 5.38.2-3.2ubuntu0.2 -> 5.40.1-7build1 @ii umU Ib > FU=0
+                                            Upgrading perl-base:amd64 < 5.38.2-3.2ubuntu0.2 | 5.40.1-7build1 @ii umH > due to perl:amd64
+                                              MarkInstall libclass-xsaccessor-perl:amd64 < 1.19-4build4 -> 1.19-4build6 @ii umU > FU=0
+                                            Installing perl-modules-5.40:amd64 as Depends of perl:amd64
+                                              MarkInstall perl-modules-5.40:amd64 < none -> 5.40.1-7build1 @un uN > FU=0
+                                            Installing libperl5.40:amd64 as Depends of perl:amd64
+                                              MarkInstall libperl5.40:amd64 < none -> 5.40.1-7build1 @un uN > FU=0
+                                      Installing libxtst6:amd64 as Depends of libqt6webenginecore6:amd64
+                                         Upgrading: libxtst-dev:amd64 < 2:1.2.3-1.1build1 | 2:1.2.5-1build1 @ii umH > due to libxtst-dev:amd64 Depends on libxtst6:amd64 < 2:1.2.3-1.1build1 | 2:1.2.5-1build1 @ii umH > (= 2:1.2.3-1.1build1)
+                                        MarkInstall libxtst6:amd64 < 2:1.2.3-1.1build1 -> 2:1.2.5-1build1 @ii umU > FU=0
+                                        Upgrading libxtst-dev:amd64 < 2:1.2.3-1.1build1 | 2:1.2.5-1build1 @ii umH Ib > due to libxtst6:amd64
+                                    Installing libc-gconv-modules-extra:i386 as Depends of libc6:i386
+                                      MarkInstall libc-gconv-modules-extra:i386 < none -> 2.43-2ubuntu2 @un uN > FU=0
+                                  Installing libc-gconv-modules-extra:amd64 as Depends of libc6:amd64
+                                    MarkInstall libc-gconv-modules-extra:amd64 < none -> 2.43-2ubuntu2 @un uN > FU=0
+                        Installing cjs:amd64 as Depends of cinnamon:amd64
+                          MarkInstall cjs:amd64 < 6.0.0-2build3 -> 128.1-2 @ii umU Ib > FU=0
+                          Upgrading libcjs0:amd64 < 6.0.0-2build3 | 128.1-2 @ii umH > due to cjs:amd64
+                            MarkInstall libcjs0:amd64 < 6.0.0-2build3 -> 128.1-2 @ii umU Ib > FU=0
+                            Installing libmozjs-128-0:amd64 as Depends of libcjs0:amd64
+                              MarkInstall libmozjs-128-0:amd64 < none -> 128.14.0-1 @un uN > FU=0
+                        Installing gir1.2-gcr-3:amd64 as Depends of cinnamon:amd64
+                          MarkInstall gir1.2-gcr-3:amd64 < none -> 3.41.2-6 @un uN Ib > FU=0
+                          Upgrading libgcr-ui-3-1:amd64 < 3.41.2-1build3 | 3.41.2-6 @ii umH > due to gir1.2-gcr-3:amd64
+                          Upgrading libgcr-base-3-1:amd64 < 3.41.2-1build3 | 3.41.2-6 @ii umH > due to gir1.2-gcr-3:amd64
+                          Upgrading libgck-1-0:amd64 < 3.41.2-1build3 | 3.41.2-6 @ii umH > due to gir1.2-gcr-3:amd64
+                          Upgrading gcr:amd64 < 3.41.2-1build3 | 3.41.2-6 @ii umH > due to gir1.2-gcr-3:amd64
+                            MarkInstall libgcr-base-3-1:amd64 < 3.41.2-1build3 -> 3.41.2-6 @ii umU Ib > FU=0
+                            Installing libgcrypt20:amd64 as Depends of libgcr-base-3-1:amd64
+                              MarkInstall libgcrypt20:amd64 < 1.10.3-2build1 -> 1.12.0-2 @ii umU Ib > FU=0
+                              Upgrading libgcrypt20-dev:i386 < 1.10.3-2build1 | 1.12.0-2 @ii umH > due to libgcrypt20:amd64
+                              Upgrading libgcrypt20:i386 < 1.10.3-2build1 | 1.12.0-2 @ii umH Ib > due to libgcrypt20:amd64
+                                MarkInstall libgcrypt20:i386 < 1.10.3-2build1 -> 1.12.0-2 @ii umU Ib > FU=0
+                                Installing libgpg-error0:i386 as Depends of libgcrypt20:i386
+                                   Upgrading: libgpg-error-dev:i386 < 1.47-3build2.1 | 1.58-2 @ii umH > due to libgpg-error-dev:i386 Depends on libgpg-error0:i386 < 1.47-3build2.1 | 1.58-2 @ii umH > (= 1.47-3build2.1)
+                                  MarkInstall libgpg-error0:i386 < 1.47-3build2.1 -> 1.58-2 @ii umU Ib > FU=0
+                                  Upgrading libgpg-error-dev:i386 < 1.47-3build2.1 | 1.58-2 @ii umH Ib > due to libgpg-error0:i386
+                                  Upgrading libgpg-error0:amd64 < 1.47-3build2.1 | 1.58-2 @ii umH Ib > due to libgpg-error0:i386
+                                  Upgrading libgpg-error-l10n:amd64 < 1.47-3build2.1 | 1.58-2 @ii umH > due to libgpg-error0:i386
+                          Installing gir1.2-gck-1:amd64 as Depends of gir1.2-gcr-3:amd64
+                            MarkInstall gir1.2-gck-1:amd64 < none -> 3.41.2-6 @un uN > FU=0
+                        Installing libjxl-gdk-pixbuf:amd64 as Depends of cinnamon:amd64
+                          MarkInstall libjxl-gdk-pixbuf:amd64 < none -> 0.11.1-6ubuntu4 @un uN Ib > FU=0
+                          Installing libjxl0.11:amd64 as Depends of libjxl-gdk-pixbuf:amd64
+                            MarkInstall libjxl0.11:amd64 < none -> 0.11.1-6ubuntu4 @un uN > FU=0
+                        Installing nm-connection-editor:amd64 as Depends of cinnamon:amd64
+                          MarkInstall nm-connection-editor:amd64 < none -> 1.36.0-4ubuntu1 @un uN Ib > FU=0
+                          Upgrading network-manager-gnome:amd64 < 1.34.0-1ubuntu3 | 1.36.0-4ubuntu1 @ii umH > due to nm-connection-editor:amd64
+                            MarkInstall network-manager-gnome:amd64 < 1.34.0-1ubuntu3 -> 1.36.0-4ubuntu1 @ii umU Ib > FU=0
+                            Installing network-manager-applet:amd64 as Depends of network-manager-gnome:amd64
+                              MarkInstall network-manager-applet:amd64 < none -> 1.36.0-4ubuntu1 @un uN > FU=0
+                        Installing python3-pytz:amd64 as Depends of cinnamon:amd64
+                          MarkInstall python3-pytz:amd64 < none -> 2025.2-5 @un uN Ib > FU=0
+                          Upgrading python3-tz:amd64 < 2024.1-2 | 2025.2-5 @ii umH > due to python3-pytz:amd64
+                        MarkInstall gnome-menus:amd64 < 3.36.0-1.1ubuntu3 -> 3.38.1-1ubuntu1 @ii umU > FU=0
+                        Upgrading libgnome-menu-3-0:amd64 < 3.36.0-1.1ubuntu3 | 3.38.1-1ubuntu1 @ii umH > due to gnome-menus:amd64
+                        Upgrading gir1.2-gmenu-3.0:amd64 < 3.36.0-1.1ubuntu3 | 3.38.1-1ubuntu1 @ii umH > due to gnome-menus:amd64
+                         Upgrading: python3-gi-cairo:amd64 < 3.48.2-1 | 3.56.2-1 @ii umH > due to python3-gi-cairo:amd64 Depends on python3-gi:amd64 < 3.48.2-1 | 3.56.2-1 @ii umH > (= 3.48.2-1)
+                        MarkInstall python3-gi:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib > FU=0
+                        Upgrading python3-gi-cairo:amd64 < 3.48.2-1 | 3.56.2-1 @ii umH Ib > due to python3-gi:amd64
+                          MarkInstall python3-gi-cairo:amd64 < 3.48.2-1 -> 3.56.2-1 @ii umU Ib > FU=0
+                          Installing python3:amd64 as Depends of python3-gi-cairo:amd64
+                             Upgrading: rhythmbox-plugins:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-yaml:amd64 < 6.0.1-2build2 | 6.0.3-1build1 @ii umH > due to python3-yaml:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-xxhash:amd64 < 3.2.0-1build3 | 3.2.0-1build7 @ii umH > due to python3-xxhash:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-unicodedata2:amd64 < 15.1.0+ds-1build1 | 16.0.0+ds-1build2 @ii umH > due to python3-unicodedata2:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-tk:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH > due to python3-tk:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-tdb:amd64 < 1.4.10-1build1 | 2:1.4.14+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-talloc:amd64 < 2.4.2-1build2 | 2:2.4.3+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-talloc:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-systemd:amd64 < 235-1build4 | 235-1build9 @ii umH > due to python3-systemd:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-setproctitle:amd64 < 1.3.3-1build2 | 1.3.7-2build1 @ii umH > due to python3-setproctitle:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-scipy:amd64 < 1.11.4-6build1 | 1.16.3-4build1 @ii umH > due to python3-scipy:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-samba:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-samba:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-regex:amd64 < 0.1.20221031-2build1 | 0.1.20250918-1build1 @ii umH > due to python3-regex:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-pyrsistent:amd64 < 0.20.0-1build2 | 0.20.0-3build1 @ii umH > due to python3-pyrsistent:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-pyqt6.sip:amd64 < 13.6.0-1build2 | 13.11.0-1build1 @ii umH > due to python3-pyqt6.sip:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-pyqt5.sip:amd64 < 12.13.0-1build3 | 12.17.2-1build1 @ii umH > due to python3-pyqt5.sip:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-pil.imagetk:amd64 < 10.2.0-1ubuntu1 | 12.1.1-2ubuntu1.1 @ii umH > due to python3-pil.imagetk:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-pil:amd64 < 10.2.0-1ubuntu1 | 12.1.1-2ubuntu1.1 @ii umH > due to python3-pil:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-numpy:amd64 < 1:1.26.4+ds-6ubuntu1 | 1:2.3.5+ds-3ubuntu1 @ii umH > due to python3-numpy:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-netifaces:amd64 < 0.11.0-2build3 | 0.11.0-2build7 @ii umH > due to python3-netifaces:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-msgpack:amd64 < 1.0.3-3build2 | 1.1.2-2build1 @ii umH > due to python3-msgpack:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-matplotlib:amd64 < 3.6.3-1ubuntu5 | 3.10.7+dfsg1-2build1 @ii umH > due to python3-matplotlib:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-markupsafe:amd64 < 2.1.5-1build2 | 3.0.3-1build1 @ii umH > due to python3-markupsafe:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-lz4:amd64 < 4.0.2+dfsg-1build4 | 4.4.5+dfsg-1build1 @ii umH > due to python3-lz4:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-lxml:amd64 < 5.2.1-1 | 6.0.2-1build1 @ii umH > due to python3-lxml:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-ldb:amd64 < 2:2.8.0+samba4.19.5+dfsg-4ubuntu9.4 | 2:2.11.0+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-ldb:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-kiwisolver:amd64 < 1.4.4-2build1 | 1.4.10~rc0-1build1 @ii umH > due to python3-kiwisolver:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-html5-parser:amd64 < 0.4.12+ds-1build1 | 0.4.12+ds-8build1 @ii umH > due to python3-html5-parser:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-gpg:amd64 < 1.18.0-4.1ubuntu4 | 2.0.0-2build1 @ii umH > due to python3-gpg:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-gdbm:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH > due to python3-gdbm:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-all:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > due to python3-all:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (= 3.12.3-0ubuntu2.1)
+                             Upgrading: python3-fonttools:amd64 < 4.46.0-1ubuntu0.1~esm1 | 4.61.1-3build1 @ii umH > due to python3-fonttools:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-dbus:amd64 < 1.3.2-5build3 | 1.4.0-1build2 @ii umH > due to python3-dbus:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-cups:amd64 < 2.0.1-5build6 | 2.0.4-3build1 @ii umH > due to python3-cups:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-contourpy:amd64 < 1.0.7-2build1 | 1.3.3-1build1 @ii umH > due to python3-contourpy:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-chm:amd64 < 0.8.6-4build1 | 0.8.6+ds-7build1 @ii umH > due to python3-chm:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-cffi-backend:amd64 < 1.16.0-2build1 | 2.0.0-3build1 @ii umH > due to python3-cffi-backend:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-cairo:amd64 < 1.25.1-2build2 | 1.27.0-2build2 @ii umH > due to python3-cairo:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-brotli:amd64 < 1.1.0-2build2 | 1.2.0-3build1 @ii umH > due to python3-brotli:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-brlapi:amd64 < 6.6-4ubuntu5 | 6.7-1ubuntu6 @ii umH > due to python3-brlapi:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-apt:amd64 < 2.7.7ubuntu5.2 | 3.1.0ubuntu1 @ii umH > due to python3-apt:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: python3-apsw:amd64 < 3.43.0.0-1build2 | 3.46.0.1-1build4 @ii umH > due to python3-apsw:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: hplip:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to hplip:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: duplicity:amd64 < 2.1.4-3ubuntu2 | 3.0.6.3-2build1 @ii umH > due to duplicity:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                             Upgrading: blueman:amd64 < 2.3.5-3build1 | 2.4.4-1build1 @ii umH > due to blueman:amd64 Depends on python3:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > (< 3.13)
+                            MarkInstall python3:amd64 < 3.12.3-0ubuntu2.1 -> 3.14.3-0ubuntu2 @ii umU Ib > FU=0
+                            Upgrading python3-tk:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH Ib > due to python3:amd64
+                            Upgrading python3-minimal:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > due to python3:amd64
+                            Upgrading python3-gdbm:amd64 < 3.12.3-0ubuntu1 | 3.14.3-0ubuntu2 @ii umH Ib > due to python3:amd64
+                            Upgrading python3-all:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH Ib > due to python3:amd64
+                            Upgrading libpython3-stdlib:amd64 < 3.12.3-0ubuntu2.1 | 3.14.3-0ubuntu2 @ii umH > due to python3:amd64
+                              MarkInstall python3-tk:amd64 < 3.12.3-0ubuntu1 -> 3.14.3-0ubuntu2 @ii umU Ib > FU=0
+                              Installing python3.14:amd64 as Depends of python3-tk:amd64
+                                MarkInstall python3.14:amd64 < none -> 3.14.4-1 @un uN Ib > FU=0
+                                Installing python3.14-minimal:amd64 as Depends of python3.14:amd64
+                                  MarkInstall python3.14-minimal:amd64 < none -> 3.14.4-1 @un uN Ib > FU=0
+                                  Installing libpython3.14-minimal:amd64 as Depends of python3.14-minimal:amd64
+                                    MarkInstall libpython3.14-minimal:amd64 < none -> 3.14.4-1 @un uN Ib > FU=0
+                                    Installing libssl3t64:amd64 as Depends of libpython3.14-minimal:amd64
+                                      MarkInstall libssl3t64:amd64 < 3.0.13-0ubuntu3.9 -> 3.5.5-1ubuntu3 @ii umU Ib > FU=0
+                                      Upgrading libssl3t64:i386 < 3.0.13-0ubuntu3.9 | 3.5.5-1ubuntu3 @ii ugH Ib > due to libssl3t64:amd64
+                                      Upgrading openssl:amd64 < 3.0.13-0ubuntu3.9 | 3.5.5-1ubuntu3 @ii umH > due to libssl3t64:amd64
+                                        MarkInstall libssl3t64:i386 < 3.0.13-0ubuntu3.9 -> 3.5.5-1ubuntu3 @ii ugU Ib > FU=0
+                                        Installing openssl-provider-legacy:amd64 as Depends of libssl3t64:i386
+                                          MarkInstall openssl-provider-legacy:amd64 < none -> 3.5.5-1ubuntu3 @un uN > FU=0
+                                    Installing libpython3.14-stdlib:amd64 as Recommends of libpython3.14-minimal:amd64
+                                      MarkInstall libpython3.14-stdlib:amd64 < none -> 3.14.4-1 @un uN > FU=0
+                                  Installing libexpat1:amd64 as Depends of python3.14-minimal:amd64
+                                     Upgrading: libexpat1-dev:amd64 < 2.6.1-2ubuntu0.4 | 2.7.4-1 @ii umH > due to libexpat1-dev:amd64 Depends on libexpat1:amd64 < 2.6.1-2ubuntu0.4 | 2.7.4-1 @ii umH > (= 2.6.1-2ubuntu0.4)
+                                    MarkInstall libexpat1:amd64 < 2.6.1-2ubuntu0.4 -> 2.7.4-1 @ii umU > FU=0
+                                    Upgrading expat:amd64 < 2.6.1-2ubuntu0.4 | 2.7.4-1 @ii umH > due to libexpat1:amd64
+                                    Upgrading libexpat1-dev:amd64 < 2.6.1-2ubuntu0.4 | 2.7.4-1 @ii umH Ib > due to libexpat1:amd64
+                              Installing python3.14-tk:amd64 as Depends of python3-tk:amd64
+                                MarkInstall python3.14-tk:amd64 < none -> 3.14.4-1 @un uN > FU=0
+                              MarkInstall python3-gdbm:amd64 < 3.12.3-0ubuntu1 -> 3.14.3-0ubuntu2 @ii umU Ib > FU=0
+                              Installing python3.14-gdbm:amd64 as Depends of python3-gdbm:amd64
+                                MarkInstall python3.14-gdbm:amd64 < none -> 3.14.4-1 @un uN > FU=0
+                              MarkInstall rhythmbox-plugins:amd64 < 3.4.7-2ubuntu6 -> 3.4.9-3ubuntu3 @ii umU Ib > FU=0
+                              Upgrading rhythmbox-plugin-cdrecorder:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64
+                              Upgrading rhythmbox-data:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64
+                              Upgrading rhythmbox:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64
+                              Upgrading librhythmbox-core10:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64
+                              Upgrading gir1.2-rb-3.0:amd64 < 3.4.7-2ubuntu6 | 3.4.9-3ubuntu3 @ii umH > due to rhythmbox-plugins:amd64
+                                MarkInstall gir1.2-rb-3.0:amd64 < 3.4.7-2ubuntu6 -> 3.4.9-3ubuntu3 @ii umU Ib > FU=0
+                                Installing gir1.2-gstreamer-1.0:amd64 as Depends of gir1.2-rb-3.0:amd64
+                                  MarkInstall gir1.2-gstreamer-1.0:amd64 < 1.24.2-1ubuntu0.1 -> 1.28.2-1 @ii umU Ib > FU=0
+                                  Upgrading libgstreamer1.0-0:amd64 < 1.24.2-1ubuntu0.1 | 1.28.2-1 @ii umH > due to gir1.2-gstreamer-1.0:amd64
+                                  Upgrading gstreamer1.0-tools:amd64 < 1.24.2-1ubuntu0.1 | 1.28.2-1 @ii umH > due to gir1.2-gstreamer-1.0:amd64
+                                Installing gir1.2-gst-plugins-base-1.0:amd64 as Depends of gir1.2-rb-3.0:amd64
+                                  MarkInstall gir1.2-gst-plugins-base-1.0:amd64 < 1.24.2-1ubuntu0.4 -> 1.28.2-1 @ii umU Ib > FU=0
+                                  Upgrading libgstreamer-plugins-base1.0-0:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading libgstreamer-gl1.0-0:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading gstreamer1.0-x:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading gstreamer1.0-plugins-base-apps:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading gstreamer1.0-plugins-base:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading gstreamer1.0-gl:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                  Upgrading gstreamer1.0-alsa:amd64 < 1.24.2-1ubuntu0.4 | 1.28.2-1 @ii umH > due to gir1.2-gst-plugins-base-1.0:amd64
+                                    MarkInstall gstreamer1.0-plugins-base:amd64 < 1.24.2-1ubuntu0.4 -> 1.28.2-1 @ii umU Ib > FU=0
+                                    Installing libtheoradec2:amd64 as Depends of gstreamer1.0-plugins-base:amd64
+                                      MarkInstall libtheoradec2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+                                    Installing libtheoraenc2:amd64 as Depends of gstreamer1.0-plugins-base:amd64
+                                      MarkInstall libtheoraenc2:amd64 < none -> 1.2.0+dfsg-6 @un uN > FU=0
+                                    MarkInstall gstreamer1.0-x:amd64 < 1.24.2-1ubuntu0.4 -> 1.28.2-1 @ii umU Ib > FU=0
+                                    Installing libxv1:amd64 as Depends of gstreamer1.0-x:amd64
+                                       Upgrading: libxv-dev:amd64 < 2:1.0.11-1.1build1 | 2:1.0.13-1 @ii umH > due to libxv-dev:amd64 Depends on libxv1:amd64 < 2:1.0.11-1.1build1 | 2:1.0.13-1 @ii umH > (= 2:1.0.11-1.1build1)
+                                      MarkInstall libxv1:amd64 < 2:1.0.11-1.1build1 -> 2:1.0.13-1 @ii umU > FU=0
+                                      Upgrading libxv-dev:amd64 < 2:1.0.11-1.1build1 | 2:1.0.13-1 @ii umH Ib > due to libxv1:amd64
+                                MarkInstall librhythmbox-core10:amd64 < 3.4.7-2ubuntu6 -> 3.4.9-3ubuntu3 @ii umU Ib > FU=0
+                                Installing libgirepository-2.0-0:amd64 as Depends of librhythmbox-core10:amd64
+                                  MarkInstall libgirepository-2.0-0:amd64 < none -> 2.88.0-1 @un uN > FU=0
+                                Installing libpeas-1.0-1:amd64 as Depends of librhythmbox-core10:amd64
+                                   Delayed Removing: libpeas-1.0-0:amd64 as upgrade is not an option for libpeas-1.0-1:amd64 (1.38.1-4ubuntu1)
+                                  MarkInstall libpeas-1.0-1:amd64 < none -> 1.38.1-4ubuntu1 @un uN Ib > FU=0
+                                  Upgrading libpeas-common:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > due to libpeas-1.0-1:amd64
+                                  Upgrading gir1.2-peas-1.0:amd64 < 1.36.0-3build4 | 1.38.1-4ubuntu1 @ii umH > due to libpeas-1.0-1:amd64
+                                    MarkInstall gir1.2-peas-1.0:amd64 < 1.36.0-3build4 -> 1.38.1-4ubuntu1 @ii umU Ib > FU=0
+                                    Installing gir1.2-girepository-3.0:amd64 as Depends of gir1.2-peas-1.0:amd64
+                                      MarkInstall gir1.2-girepository-3.0:amd64 < none -> 2.88.0-1 @un uN > FU=0
+                                  Installing libpython3.14:amd64 as Depends of libpeas-1.0-1:amd64
+                                    MarkInstall libpython3.14:amd64 < none -> 3.14.4-1 @un uN > FU=0
+                                  MarkDelete libpeas-1.0-0:amd64 < 1.36.0-3build4 @ii mK > FU=0
+                              MarkInstall python3-yaml:amd64 < 6.0.1-2build2 -> 6.0.3-1build1 @ii umU > FU=0
+                              MarkInstall python3-xxhash:amd64 < 3.2.0-1build3 -> 3.2.0-1build7 @ii umU > FU=0
+                              MarkInstall python3-uno:amd64 < 4:24.2.7-0ubuntu0.24.04.4 -> 4:26.2.2.2-0ubuntu1 @ii umU Ib > FU=0
+                              Upgrading libreoffice-style-breeze:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading ure:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading uno-libs-private:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libuno-salhelpergcc3-3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libuno-sal3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libuno-purpenvhelpergcc3-3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libuno-cppuhelpergcc3-3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libuno-cppu3t64:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-writer:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-writer:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-math:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-impress:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-draw:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-common:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-uiconfig-calc:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-style-yaru:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-style-elementary:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-style-colibre:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-math:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-impress:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-help-en-us:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-help-common:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-gtk3:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-gnome:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-draw:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-common:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-calc:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading libreoffice-base-core:amd64 < 4:24.2.7-0ubuntu0.24.04.4 | 4:26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                              Upgrading fonts-opensymbol:amd64 < 4:102.12+LibO24.2.7-0ubuntu0.24.04.4 | 4:102.12+LibO26.2.2.2-0ubuntu1 @ii umH > due to python3-uno:amd64
+                                MarkInstall libreoffice-core:amd64 < 4:24.2.7-0ubuntu0.24.04.4 -> 4:26.2.2.2-0ubuntu1 @ii umU Ib > FU=0
+                                Installing libabsl20260107:amd64 as Depends of libreoffice-core:amd64
+                                  MarkInstall libabsl20260107:amd64 < none -> 20260107.0-4 @un uN > FU=0
+                                Installing libboost-locale1.90.0:amd64 as Depends of libreoffice-core:amd64
+                                  MarkInstall libboost-locale1.90.0:amd64 < none -> 1.90.0-6ubuntu1 @un uN Ib > FU=0
+                                  Installing libboost-thread1.90.0:amd64 as Depends of libboost-locale1.90.0:amd64
+                                    MarkInstall libboost-thread1.90.0:amd64 < none -> 1.90.0-6ubuntu1 @un uN > FU=0
+                                Installing libgpgmepp7:amd64 as Depends of libreoffice-core:amd64
+                                  MarkInstall libgpgmepp7:amd64 < none -> 2.0.0-2 @un uN Ib > FU=0
+                                  Installing libgpgme45:amd64 as Depends of libgpgmepp7:amd64
+                                    MarkInstall libgpgme45:amd64 < none -> 2.0.1-2build1 @un uN Ib > FU=0
+                                    Installing libassuan9:amd64 as Depends of libgpgme45:amd64
+                                      MarkInstall libassuan9:amd64 < none -> 3.0.2-2build1 @un uN > FU=0
+                                Installing liborcus-0.21-0:amd64 as Depends of libreoffice-core:amd64
+                                  MarkInstall liborcus-0.21-0:amd64 < none -> 0.21.0-4 @un uN Ib > FU=0
+                                  Installing libboost-iostreams1.90.0:amd64 as Depends of liborcus-0.21-0:amd64
+                                    MarkInstall libboost-iostreams1.90.0:amd64 < none -> 1.90.0-6ubuntu1 @un uN > FU=0
+                                  Installing liborcus-parser-0.21-0:amd64 as Depends of liborcus-0.21-0:amd64
+                                    MarkInstall liborcus-parser-0.21-0:amd64 < none -> 0.21.0-4 @un uN > FU=0
+                                Installing libpoppler156:amd64 as Depends of libreoffice-core:amd64
+                                  MarkInstall libpoppler156:amd64 < none -> 26.01.0-2build2 @un uN > FU=0
+                                  Upgrading poppler-utils:amd64 < 24.02.0-1ubuntu9.8 | 26.01.0-2build2 @ii umH > due to libpoppler156:amd64
+                                  Upgrading libpoppler-glib8t64:amd64 < 24.02.0-1ubuntu9.8 | 26.01.0-2build2 @ii umH > due to libpoppler156:amd64
+                                Installing libxmlsec1-1:amd64 as Depends of libreoffice-core:amd64
+                                   Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64:amd64 as upgrade is not an option for libxmlsec1-1:amd64 (1.3.9-1)
+                                  MarkInstall libxmlsec1-1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+                                  MarkDelete libxmlsec1t64:amd64 < 1.2.39-5build2 @ii mK > FU=0
+                                Installing libxmlsec1-nss1:amd64 as Depends of libreoffice-core:amd64
+                                   Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+                                   Delayed Removing: libxmlsec1t64-nss:amd64 as upgrade is not an option for libxmlsec1-nss1:amd64 (1.3.9-1)
+                                  MarkInstall libxmlsec1-nss1:amd64 < none -> 1.3.9-1 @un uN Ib > FU=0
+                                  MarkDelete libxmlsec1t64-nss:amd64 < 1.2.39-5build2 @ii mK Ib > FU=0
+                                Installing libxrender1:amd64 as Depends of libreoffice-core:amd64
+                                   Upgrading: libxrender-dev:amd64 < 1:0.9.10-1.1build1 | 1:0.9.12-1build1 @ii umH > due to libxrender-dev:amd64 Depends on libxrender1:amd64 < 1:0.9.10-1.1build1 | 1:0.9.12-1build1 @ii umH > (= 1:0.9.10-1.1build1)
+                                  MarkInstall libxrender1:amd64 < 1:0.9.10-1.1build1 -> 1:0.9.12-1build1 @ii umU > FU=0
+                                  Upgrading libxrender-dev:amd64 < 1:0.9.10-1.1build1 | 1:0.9.12-1build1 @ii umH Ib > due to libxrender1:amd64
+                              MarkInstall python3-unicodedata2:amd64 < 15.1.0+ds-1build1 -> 16.0.0+ds-1build2 @ii umU > FU=0
+                              MarkInstall python3-tdb:amd64 < 1.4.10-1build1 -> 2:1.4.14+samba4.23.6+dfsg-1ubuntu2 @ii umU > FU=0
+                              Upgrading samba-vfs-modules:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba-ad-provision:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading tdb-tools:amd64 < 1.4.10-1build1 | 2:1.4.14+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba-libs:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba-dsdb-modules:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba-common-bin:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba-common:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading samba:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading python3-talloc:amd64 < 2.4.2-1build2 | 2:2.4.3+samba4.23.6+dfsg-1ubuntu2 @ii umH Ib > due to python3-tdb:amd64
+                              Upgrading python3-samba:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH Ib > due to python3-tdb:amd64
+                              Upgrading python3-ldb:amd64 < 2:2.8.0+samba4.19.5+dfsg-4ubuntu9.4 | 2:2.11.0+samba4.23.6+dfsg-1ubuntu2 @ii umH Ib > due to python3-tdb:amd64
+                              Upgrading libwbclient0:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading libtevent0t64:amd64 < 0.16.1-2build1 | 2:0.17.1+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading libtdb1:amd64 < 1.4.10-1build1 | 2:1.4.14+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading libtalloc2:amd64 < 2.4.2-1build2 | 2:2.4.3+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading libsmbclient0:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 | 2:4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                              Upgrading libldb2:amd64 < 2:2.8.0+samba4.19.5+dfsg-4ubuntu9.4 | 2:2.11.0+samba4.23.6+dfsg-1ubuntu2 @ii umH > due to python3-tdb:amd64
+                                MarkInstall samba-vfs-modules:amd64 < 2:4.19.5+dfsg-4ubuntu9.4 -> 2:4.23.6+dfsg-1ubuntu2 @ii umU Ib > FU=0
+                                Installing samba-vfs-ceph:amd64 as Depends of samba-vfs-modules:amd64
+                                  MarkInstall samba-vfs-ceph:amd64 < none -> 2:4.23.6+dfsg-1ubuntu2 @un uN > FU=0
+                              MarkInstall python3-systemd:amd64 < 235-1build4 -> 235-1build9 @ii umU > FU=0
+                              MarkInstall python3-setproctitle:amd64 < 1.3.3-1build2 -> 1.3.7-2build1 @ii umU > FU=0
+                              MarkInstall python3-scipy:amd64 < 1.11.4-6build1 -> 1.16.3-4build1 @ii umU IPb > FU=0
+                              new important dependency: python3-pooch:amd64
+                              Installing python3-pooch:amd64 as Recommends of python3-scipy:amd64
+                                MarkInstall python3-pooch:amd64 < none -> 1.9.0-1 @un uN Ib > FU=0
+                                Installing python3-platformdirs:amd64 as Depends of python3-pooch:amd64
+                                  MarkInstall python3-platformdirs:amd64 < none -> 4.9.4-1 @un uN > FU=0
+                                Installing python3-tqdm:amd64 as Recommends of python3-pooch:amd64
+                                  MarkInstall python3-tqdm:amd64 < none -> 4.67.3-1build1 @un uN > FU=0
+                              MarkInstall python3-regex:amd64 < 0.1.20221031-2build1 -> 0.1.20250918-1build1 @ii umU > FU=0
+                              MarkInstall python3-pyrsistent:amd64 < 0.20.0-1build2 -> 0.20.0-3build1 @ii umU > FU=0
+                              MarkInstall python3-pyqt6.sip:amd64 < 13.6.0-1build2 -> 13.11.0-1build1 @ii umU > FU=0
+                              MarkInstall python3-pyqt5.sip:amd64 < 12.13.0-1build3 -> 12.17.2-1build1 @ii umU > FU=0
+                              MarkInstall python3-pil.imagetk:amd64 < 10.2.0-1ubuntu1 -> 12.1.1-2ubuntu1.1 @ii umU Ib > FU=0
+                              Upgrading python3-pil:amd64 < 10.2.0-1ubuntu1 | 12.1.1-2ubuntu1.1 @ii umH Ib > due to python3-pil.imagetk:amd64
+                              MarkInstall python3-numpy:amd64 < 1:1.26.4+ds-6ubuntu1 -> 1:2.3.5+ds-3ubuntu1 @ii umU Ib > FU=0
+                              Installing python3-numpy-dev:amd64 as Depends of python3-numpy:amd64
+                                MarkInstall python3-numpy-dev:amd64 < none -> 1:2.3.5+ds-3ubuntu1 @un uN > FU=0
+                              MarkInstall python3-netifaces:amd64 < 0.11.0-2build3 -> 0.11.0-2build7 @ii umU > FU=0
+                              MarkInstall python3-msgpack:amd64 < 1.0.3-3build2 -> 1.1.2-2build1 @ii umU > FU=0
+                              MarkInstall python3-matplotlib:amd64 < 3.6.3-1ubuntu5 -> 3.10.7+dfsg1-2build1 @ii umU Ib > FU=0
+                              Upgrading python-matplotlib-data:amd64 < 3.6.3-1ubuntu5 | 3.10.7+dfsg1-2build1 @ii umH > due to python3-matplotlib:amd64
+                              MarkInstall python3-markupsafe:amd64 < 2.1.5-1build2 -> 3.0.3-1build1 @ii umU > FU=0
+                              MarkInstall python3-lz4:amd64 < 4.0.2+dfsg-1build4 -> 4.4.5+dfsg-1build1 @ii umU > FU=0
+                              MarkInstall python3-lxml:amd64 < 5.2.1-1 -> 6.0.2-1build1 @ii umU > FU=0
+                              MarkInstall python3-kiwisolver:amd64 < 1.4.4-2build1 -> 1.4.10~rc0-1build1 @ii umU > FU=0
+                              MarkInstall python3-html5-parser:amd64 < 0.4.12+ds-1build1 -> 0.4.12+ds-8build1 @ii umU > FU=0
+                              MarkInstall python3-gpg:amd64 < 1.18.0-4.1ubuntu4 -> 2.0.0-2build1 @ii umU > FU=0
+                              MarkInstall python3-fonttools:amd64 < 4.46.0-1ubuntu0.1~esm1 -> 4.61.1-3build1 @ii umU Ib > FU=0
+                              Installing python3-ufolib2:amd64 as Depends of python3-fonttools:amd64
+                                MarkInstall python3-ufolib2:amd64 < 0.16.0+dfsg1-1 -> 0.18.1+dfsg1-1 @ii umU > FU=0
+                              Installing python3-zopfli:amd64 as Depends of python3-fonttools:amd64
+                                MarkInstall python3-zopfli:amd64 < none -> 0.4.1-1 @un uN Ib > FU=0
+                                Installing libzopfli1:amd64 as Depends of python3-zopfli:amd64
+                                  MarkInstall libzopfli1:amd64 < none -> 1.0.3-3build1 @un uN > FU=0
+                              Installing unicode-data:amd64 as Depends of python3-fonttools:amd64
+                                MarkInstall unicode-data:amd64 < 15.1.0-1 -> 16.0.0-1build1 @ii umU > FU=0
+                              MarkInstall python3-dbus:amd64 < 1.3.2-5build3 -> 1.4.0-1build2 @ii umU > FU=0
+                              MarkInstall python3-cups:amd64 < 2.0.1-5build6 -> 2.0.4-3build1 @ii umU > FU=0
+                              MarkInstall python3-contourpy:amd64 < 1.0.7-2build1 -> 1.3.3-1build1 @ii umU > FU=0
+                              MarkInstall python3-chm:amd64 < 0.8.6-4build1 -> 0.8.6+ds-7build1 @ii umU > FU=0
+                              MarkInstall python3-cffi-backend:amd64 < 1.16.0-2build1 -> 2.0.0-3build1 @ii umU > FU=0
+                              MarkInstall python3-cairo:amd64 < 1.25.1-2build2 -> 1.27.0-2build2 @ii umU Ib > FU=0
+                              Installing libcairo2:amd64 as Depends of python3-cairo:amd64
+                                 Upgrading: libcairo-gobject2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH > due to libcairo-gobject2:amd64 Depends on libcairo2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH > (= 1.18.0-3build1)
+                                 Upgrading: libcairo-script-interpreter2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH > due to libcairo-script-interpreter2:amd64 Depends on libcairo2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH > (= 1.18.0-3build1)
+                                MarkInstall libcairo2:amd64 < 1.18.0-3build1 -> 1.18.4-3 @ii umU > FU=0
+                                Upgrading libcairo-script-interpreter2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH Ib > due to libcairo2:amd64
+                                Upgrading libcairo-gobject2:amd64 < 1.18.0-3build1 | 1.18.4-3 @ii umH Ib > due to libcairo2:amd64
+                              MarkInstall python3-brotli:amd64 < 1.1.0-2build2 -> 1.2.0-3build1 @ii umU > FU=0
+                              Upgrading libbrotli1:amd64 < 1.1.0-2build2 | 1.2.0-3build1 @ii umH > due to python3-brotli:amd64
+                              Upgrading libbrotli-dev:amd64 < 1.1.0-2build2 | 1.2.0-3build1 @ii umH > due to python3-brotli:amd64
+                              MarkInstall python3-brlapi:amd64 < 6.6-4ubuntu5 -> 6.7-1ubuntu6 @ii umU Ib > FU=0
+                              Upgrading xbrlapi:amd64 < 6.6-4ubuntu5 | 6.7-1ubuntu6 @ii umH > due to python3-brlapi:amd64
+                              Upgrading libbrlapi0.8:amd64 < 6.6-4ubuntu5 | 6.7-1ubuntu6 @ii umH > due to python3-brlapi:amd64
+                              Upgrading brltty:amd64 < 6.6-4ubuntu5 | 6.7-1ubuntu6 @ii umH > due to python3-brlapi:amd64
+                                MarkInstall brltty:amd64 < 6.6-4ubuntu5 -> 6.7-1ubuntu6 @ii umU Ib > FU=0
+                                Installing liblouis20:amd64 as Depends of brltty:amd64
+                                  MarkInstall liblouis20:amd64 < 3.29.0-1build1 -> 3.36.0-1 @ii umU Ib > FU=0
+                                  Upgrading python3-louis:amd64 < 3.29.0-1build1 | 3.36.0-1 @ii umH > due to liblouis20:amd64
+                                  Upgrading liblouis-data:amd64 < 3.29.0-1build1 | 3.36.0-1 @ii umH > due to liblouis20:amd64
+                              MarkInstall python3-apt:amd64 < 2.7.7ubuntu5.2 -> 3.1.0ubuntu1 @ii umU Ib > FU=0
+                              Upgrading python-apt-common:amd64 < 2.7.7ubuntu5.2 | 3.1.0ubuntu1 @ii umH > due to python3-apt:amd64
+                              Installing libapt-pkg7.0:amd64 as Depends of python3-apt:amd64
+                                MarkInstall libapt-pkg7.0:amd64 < none -> 3.2.0 @un uN IPb > FU=0
+                                Upgrading apt-utils:amd64 < 2.8.3 | 3.2.0 @ii umH > due to libapt-pkg7.0:amd64
+                                Upgrading apt:amd64 < 2.8.3 | 3.2.0 @ii umH > due to libapt-pkg7.0:amd64
+                              MarkInstall python3-apsw:amd64 < 3.43.0.0-1build2 -> 3.46.0.1-1build4 @ii umU > FU=0
+                               Upgrading: libsane-hpaio:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to libsane-hpaio:amd64 Recommends on hplip:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH Ib > (= 3.23.12+dfsg0-0ubuntu5)
+                              MarkInstall hplip:amd64 < 3.23.12+dfsg0-0ubuntu5 -> 3.24.4+dfsg0-0ubuntu8 @ii umU Ib > FU=0
+                              Upgrading printer-driver-postscript-hp:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to hplip:amd64
+                              Upgrading printer-driver-hpcups:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to hplip:amd64
+                              Upgrading libsane-hpaio:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH IPb > due to hplip:amd64
+                              Upgrading libhpmud0:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to hplip:amd64
+                              Upgrading hplip-data:amd64 < 3.23.12+dfsg0-0ubuntu5 | 3.24.4+dfsg0-0ubuntu8 @ii umH > due to hplip:amd64
+                              MarkInstall duplicity:amd64 < 2.1.4-3ubuntu2 -> 3.0.6.3-2build1 @ii umU IPb > FU=0
+                              new important dependency: python3-socks:amd64
+                              Installing python3-socks:amd64 as Recommends of duplicity:amd64
+                                MarkInstall python3-socks:amd64 < none -> 1.7.1+dfsg-1build1 @un uN > FU=0
+                              MarkInstall blueman:amd64 < 2.3.5-3build1 -> 2.4.4-1build1 @ii umU > FU=0
+                          MarkInstall eog:amd64 < 45.3-1ubuntu2 -> 49.1-1build1 @ii umU > FU=0
+                          MarkInstall gedit:amd64 < 46.2-2 -> 48.1-9build1 @ii umU Ib > FU=0
+                          Upgrading gedit-common:amd64 < 46.2-2 | 48.1-9build1 @ii umH > due to gedit:amd64
+                          Installing gir1.2-tepl-6:amd64 as Depends of gedit:amd64
+                            MarkInstall gir1.2-tepl-6:amd64 < 6.8.0-2build4 -> 6.13.0-3build1 @ii umU Ib > FU=0
+                            Installing gir1.2-amtk-5:amd64 as Depends of gir1.2-tepl-6:amd64
+                              MarkInstall gir1.2-amtk-5:amd64 < 5.8.0-4build2 -> 5.9.2-1 @ii umU > FU=0
+                              Upgrading libgedit-amtk-5-common:amd64 < 5.8.0-4build2 | 5.9.2-1 @ii umH > due to gir1.2-amtk-5:amd64
+                              Upgrading libgedit-amtk-5-0:amd64 < 5.8.0-4build2 | 5.9.2-1 @ii umH > due to gir1.2-amtk-5:amd64
+                            Installing gir1.2-gtksource-300:amd64 as Depends of gir1.2-tepl-6:amd64
+                              MarkInstall gir1.2-gtksource-300:amd64 < 299.0.4-3build1 -> 299.5.0-4 @ii umU Ib > FU=0
+                              Upgrading libgedit-gtksourceview-300-common:amd64 < 299.0.4-3build1 | 299.5.0-4 @ii umH > due to gir1.2-gtksource-300:amd64
+                              Installing libgedit-gtksourceview-300-3:amd64 as Depends of gir1.2-gtksource-300:amd64
+                                MarkInstall libgedit-gtksourceview-300-3:amd64 < none -> 299.5.0-4 @un uN > FU=0
+                            Installing libgedit-tepl-6-3:amd64 as Depends of gir1.2-tepl-6:amd64
+                              MarkInstall libgedit-tepl-6-3:amd64 < none -> 6.13.0-3build1 @un uN Ib > FU=0
+                              Installing libgedit-tepl-common:amd64 as Depends of libgedit-tepl-6-3:amd64
+                                 Delayed Removing: libtepl-common:amd64 as upgrade is not an option for libgedit-tepl-common:amd64 (6.13.0-3build1)
+                                MarkInstall libgedit-tepl-common:amd64 < none -> 6.13.0-3build1 @un uN Ib > FU=0
+                                MarkDelete libtepl-common:amd64 < 6.8.0-2build4 @ii mK > FU=0
+                              Installing libgedit-gfls-1-0:amd64 as Depends of libgedit-tepl-6-3:amd64
+                                MarkInstall libgedit-gfls-1-0:amd64 < none -> 0.3.1-2 @un uN Ib > FU=0
+                                Installing libgedit-gfls-common:amd64 as Depends of libgedit-gfls-1-0:amd64
+                                  MarkInstall libgedit-gfls-common:amd64 < none -> 0.3.1-2 @un uN > FU=0
+                          Installing libgspell-1-3:amd64 as Depends of gedit:amd64
+                            MarkInstall libgspell-1-3:amd64 < none -> 1.14.2-2 @un uN Ib > FU=0
+                            Upgrading libgspell-1-common:amd64 < 1.12.2-1build4 | 1.14.2-2 @ii umH > due to libgspell-1-3:amd64
+                           Upgrading: totem-plugins:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH Ib > due to totem-plugins:amd64 Depends on totem:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH > (= 43.0-2ubuntu4)
+                          MarkInstall totem:amd64 < 43.0-2ubuntu4 -> 43.2-11 @ii umU Ib > FU=0
+                          Upgrading totem-plugins:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH Ib > due to totem:amd64
+                          Upgrading totem-common:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH > due to totem:amd64
+                          Upgrading libtotem0:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH Ib > due to totem:amd64
+                          Upgrading gir1.2-totem-1.0:amd64 < 43.0-2ubuntu4 | 43.2-11 @ii umH > due to totem:amd64
+                          Installing grilo-plugins-0.3:amd64 as Depends of totem:amd64
+                            MarkInstall grilo-plugins-0.3:amd64 < none -> 0.3.18-1ubuntu1 @un uN Ib > FU=0
+                            Upgrading grilo-plugins-0.3-base:amd64 < 0.3.16-1.1ubuntu6.1~24.04.1 | 0.3.18-1ubuntu1 @ii umH > due to grilo-plugins-0.3:amd64
+                            Installing liboauth0:amd64 as Depends of grilo-plugins-0.3:amd64
+                              MarkInstall liboauth0:amd64 < none -> 1.0.3-5build3 @un uN > FU=0
+                            Installing libtinysparql-3.0-0:amd64 as Depends of grilo-plugins-0.3:amd64
+                               Delayed Removing: libtracker-sparql-3.0-0:amd64 as upgrade is not an option for libtinysparql-3.0-0:amd64 (3.11.0-1)
+                              MarkInstall libtinysparql-3.0-0:amd64 < none -> 3.11.0-1 @un uN Ib > FU=0
+                              Upgrading tracker:amd64 < 3.7.1-1build1 | 3.11.0-1 @ii umH > due to libtinysparql-3.0-0:amd64
+                                MarkInstall tracker:amd64 < 3.7.1-1build1 -> 3.11.0-1 @ii umU Ib > FU=0
+                                Installing tinysparql:amd64 as Depends of tracker:amd64
+                                  MarkInstall tinysparql:amd64 < none -> 3.11.0-1 @un uN IPb > FU=0
+                                  Installing localsearch:amd64 as Recommends of tinysparql:amd64
+                                    MarkInstall localsearch:amd64 < none -> 3.11.0-1ubuntu1 @un uN Ib > FU=0
+                                    Upgrading tracker-miner-fs:amd64 < 3.7.1-1ubuntu0.1 | 3.11.0-1ubuntu1 @ii umH > due to localsearch:amd64
+                                    Upgrading tracker-extract:amd64 < 3.7.1-1ubuntu0.1 | 3.11.0-1ubuntu1 @ii umH > due to localsearch:amd64
+                              MarkDelete libtracker-sparql-3.0-0:amd64 < 3.7.1-1build1 @ii mK > FU=0
+                          Installing totem-video-thumbnailer:amd64 as Depends of totem:amd64
+                            MarkInstall totem-video-thumbnailer:amd64 < none -> 43.2-11 @un uN > FU=0
+                      MarkDelete libgjs0g:amd64 < 1.80.2-1build2 @ii mK > FU=0
+                    Installing libmount1:amd64 as Depends of libglib2.0-0t64:amd64
+                      MarkInstall libmount1:amd64 < 2.39.3-9ubuntu6.5 -> 2.41.3-3ubuntu2 @ii umU Ib > FU=0
+                      Upgrading uuid-runtime:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading uuid-dev:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading util-linux:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading rfkill:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading mount:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading login:amd64 < 1:4.13+dfsg1-4ubuntu3.2 | 1:4.16.0-2+really2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading libuuid1:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading libsmartcols1:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading libfdisk1:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading libblkid1:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading fdisk:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading eject:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading bsdutils:amd64 < 1:2.39.3-9ubuntu6.5 | 1:2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                      Upgrading bsdextrautils:amd64 < 2.39.3-9ubuntu6.5 | 2.41.3-3ubuntu2 @ii umH > due to libmount1:amd64
+                        MarkInstall login:amd64 < 1:4.13+dfsg1-4ubuntu3.2 -> 1:4.16.0-2+really2.41.3-3ubuntu2 @ii umU Ib > FU=0
+                        Installing login.defs:amd64 as PreDepends of login:amd64
+                          MarkInstall login.defs:amd64 < none -> 1:4.17.4-2ubuntu3 @un uN > FU=0
+                          Upgrading passwd:amd64 < 1:4.13+dfsg1-4ubuntu3.2 | 1:4.17.4-2ubuntu3 @ii umH > due to login.defs:amd64
+                            MarkInstall passwd:amd64 < 1:4.13+dfsg1-4ubuntu3.2 -> 1:4.17.4-2ubuntu3 @ii umU Ib > FU=0
+                            Installing base-passwd:amd64 as Depends of passwd:amd64
+                              MarkInstall base-passwd:amd64 < 3.6.3build1 -> 3.6.8 @ii umU > FU=0
+                        new important dependency: util-linux-extra:amd64
+                        Installing util-linux-extra:amd64 as Recommends of login:amd64
+                          MarkInstall util-linux-extra:amd64 < none -> 2.41.3-3ubuntu2 @un uN Ib > FU=0
+                          Installing liblastlog2-2:amd64 as Depends of util-linux-extra:amd64
+                            MarkInstall liblastlog2-2:amd64 < none -> 2.41.3-3ubuntu2 @un uN > FU=0
+                  Installing libsystemd0:amd64 as Depends of libgdm1:amd64
+                     Upgrading: systemd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to systemd:amd64 Depends on libsystemd0:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > (= 255.4-1ubuntu8.15)
+                    MarkInstall libsystemd0:amd64 < 255.4-1ubuntu8.15 -> 259.5-0ubuntu3 @ii umU > FU=0
+                    Upgrading udev:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd-timesyncd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd-sysv:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd-resolved:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd-oomd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd-dev:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading systemd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH Ib > due to libsystemd0:amd64
+                    Upgrading libudev1:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading libsystemd-shared:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading libpam-systemd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                    Upgrading libnss-systemd:amd64 < 255.4-1ubuntu8.15 | 259.5-0ubuntu3 @ii umH > due to libsystemd0:amd64
+                      MarkInstall systemd:amd64 < 255.4-1ubuntu8.15 -> 259.5-0ubuntu3 @ii umU IPb > FU=0
+                      new important dependency: linux-sysctl-defaults:amd64
+                      Installing linux-sysctl-defaults:amd64 as Recommends of systemd:amd64
+                        MarkInstall linux-sysctl-defaults:amd64 < none -> 4.15ubuntu5 @un uN > FU=0
+                        Upgrading linux-base:amd64 < 4.5ubuntu9+24.04.2 | 4.15ubuntu5 @ii umH > due to linux-sysctl-defaults:amd64
+                          MarkInstall linux-base:amd64 < 4.5ubuntu9+24.04.2 -> 4.15ubuntu5 @ii umU Ib > FU=0
+                            MarkInstall apport:amd64 < 2.28.1-0ubuntu3.8 -> 2.34.0-0ubuntu2 @ii umU Ib > FU=0
+                            Upgrading python3-problem-report:amd64 < 2.28.1-0ubuntu3.8 | 2.34.0-0ubuntu2 @ii umH > due to apport:amd64
+                            Upgrading python3-apport:amd64 < 2.28.1-0ubuntu3.8 | 2.34.0-0ubuntu2 @ii umH > due to apport:amd64
+                            Upgrading apport-gtk:amd64 < 2.28.1-0ubuntu3.8 | 2.34.0-0ubuntu2 @ii umH > due to apport:amd64
+                            Upgrading apport-core-dump-handler:amd64 < 2.28.1-0ubuntu3.8 | 2.34.0-0ubuntu2 @ii umH > due to apport:amd64
+                      new important dependency: systemd-cryptsetup:amd64
+                      Installing systemd-cryptsetup:amd64 as Recommends of systemd:amd64
+                        MarkInstall systemd-cryptsetup:amd64 < none -> 259.5-0ubuntu3 @un uN > FU=0
+                  MarkInstall gnome-remote-desktop:amd64 < 46.3-0ubuntu1.2 -> 50.0-0ubuntu2 @ii umU Ib > FU=0
+                  Installing pipewire:amd64 as Depends of gnome-remote-desktop:amd64
+                     Upgrading: pipewire-pulse:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire-pulse:amd64 Depends on pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > (= 1.0.5-1ubuntu3.2)
+                     Upgrading: gstreamer1.0-pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to gstreamer1.0-pipewire:amd64 Depends on pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > (= 1.0.5-1ubuntu3.2)
+                     Upgrading: pipewire-jack:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire-jack:amd64 Depends on pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > (= 1.0.5-1ubuntu3.2)
+                     Upgrading: pipewire-alsa:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire-alsa:amd64 Depends on pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > (= 1.0.5-1ubuntu3.2)
+                    MarkInstall pipewire:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                    Upgrading pipewire-jack:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH Ib > due to pipewire:amd64
+                    Upgrading pipewire-audio-client-libraries:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading libspa-0.2-jack:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading pipewire-pulse:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH Ib > due to pipewire:amd64
+                    Upgrading pipewire-bin:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading pipewire-audio:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading pipewire-alsa:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH Ib > due to pipewire:amd64
+                    Upgrading libspa-0.2-modules:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading libspa-0.2-bluetooth:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading libpipewire-0.3-modules:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading libpipewire-0.3-common:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading libpipewire-0.3-0t64:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH > due to pipewire:amd64
+                    Upgrading gstreamer1.0-pipewire:amd64 < 1.0.5-1ubuntu3.2 | 1.6.2-1ubuntu1 @ii umH Ib > due to pipewire:amd64
+                      MarkInstall libspa-0.2-bluetooth:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                      Installing libsbc1:amd64 as Depends of libspa-0.2-bluetooth:amd64
+                        MarkInstall libsbc1:amd64 < 2.0-1build1 -> 2.1-1build1 @ii umU > FU=0
+                      MarkInstall pipewire-audio:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                      Installing wireplumber:amd64 as Depends of pipewire-audio:amd64
+                        MarkInstall wireplumber:amd64 < 0.4.17-1ubuntu4.1 -> 0.5.13-1ubuntu1 @ii umU Ib > FU=0
+                        Installing libwireplumber-0.5-0:amd64 as Depends of wireplumber:amd64
+                          MarkInstall libwireplumber-0.5-0:amd64 < none -> 0.5.13-1ubuntu1 @un uN Ib > FU=0
+                          Installing libsnapd-glib-2-1:amd64 as Depends of libwireplumber-0.5-0:amd64
+                             Upgrading: gir1.2-snapd-2:amd64 < 1.64-0ubuntu5 | 1.72-0ubuntu3 @ii umH > due to gir1.2-snapd-2:amd64 Depends on libsnapd-glib-2-1:amd64 < 1.64-0ubuntu5 | 1.72-0ubuntu3 @ii umH > (= 1.64-0ubuntu5)
+                            MarkInstall libsnapd-glib-2-1:amd64 < 1.64-0ubuntu5 -> 1.72-0ubuntu3 @ii umU > FU=0
+                            Upgrading gir1.2-snapd-2:amd64 < 1.64-0ubuntu5 | 1.72-0ubuntu3 @ii umH Ib > due to libsnapd-glib-2-1:amd64
+                      MarkInstall libspa-0.2-modules:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                      Installing libwebrtc-audio-processing-1-3:amd64 as Depends of libspa-0.2-modules:amd64
+                        MarkInstall libwebrtc-audio-processing-1-3:amd64 < none -> 1.3-3build2 @un uN > FU=0
+                      MarkInstall libpipewire-0.3-modules:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                      Installing libroc0.4:amd64 as Depends of libpipewire-0.3-modules:amd64
+                        MarkInstall libroc0.4:amd64 < none -> 0.4.0+dfsg-5ubuntu3 @un uN > FU=0
+                      MarkInstall pipewire-alsa:amd64 < 1.0.5-1ubuntu3.2 -> 1.6.2-1ubuntu1 @ii umU Ib > FU=0
+                      Installing libasound2t64:amd64 as Depends of pipewire-alsa:amd64
+                        MarkInstall libasound2t64:amd64 < 1.2.11-1ubuntu0.2 -> 1.2.15.3-1ubuntu1 @ii umU Ib > FU=0
+                        Upgrading libatopology2t64:amd64 < 1.2.11-1ubuntu0.2 | 1.2.15.3-1ubuntu1 @ii umH > due to libasound2t64:amd64
+                        Upgrading libasound2-data:amd64 < 1.2.11-1ubuntu0.2 | 1.2.15.3-1ubuntu1 @ii umH > due to libasound2t64:amd64
+                  Installing libei1:amd64 as Depends of gnome-remote-desktop:amd64
+                    MarkInstall libei1:amd64 < 1.2.1-1 -> 1.5.0-3 @ii umU > FU=0
+                    Upgrading libeis1:amd64 < 1.2.1-1 | 1.5.0-3 @ii umH > due to libei1:amd64
+                  Installing libfreerdp3-3:amd64 as Depends of gnome-remote-desktop:amd64
+                     Upgrading: libfreerdp-client3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH > due to libfreerdp-client3-3:amd64 Depends on libfreerdp3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH > (= 3.5.1+dfsg1-0ubuntu1.5)
+                     Upgrading: libfreerdp-server3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH > due to libfreerdp-server3-3:amd64 Depends on libfreerdp3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH > (= 3.5.1+dfsg1-0ubuntu1.5)
+                    MarkInstall libfreerdp3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 -> 3.24.2+dfsg-1ubuntu1 @ii umU Ib > FU=0
+                    Upgrading libwinpr3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH > due to libfreerdp3-3:amd64
+                    Upgrading libfreerdp-server3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH Ib > due to libfreerdp3-3:amd64
+                    Upgrading libfreerdp-client3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 | 3.24.2+dfsg-1ubuntu1 @ii umH Ib > due to libfreerdp3-3:amd64
+                      MarkInstall libfreerdp-client3-3:amd64 < 3.5.1+dfsg1-0ubuntu1.5 -> 3.24.2+dfsg-1ubuntu1 @ii umU Ib > FU=0
+                      Installing libfuse3-4:amd64 as Depends of libfreerdp-client3-3:amd64
+                        MarkInstall libfuse3-4:amd64 < none -> 3.18.2-1 @un uN > FU=0
+                        Upgrading fuse3:amd64 < 3.14.0-5build1 | 3.18.2-1 @ii umH > due to libfuse3-4:amd64
+                  new important dependency: libmutter-17-0:amd64
+                  Installing libmutter-18-0:amd64 as Recommends of gnome-remote-desktop:amd64
+                    MarkInstall libmutter-18-0:amd64 < none -> 50.1-0ubuntu2 @un uN Ib > FU=0
+                    Upgrading mutter-common-bin:amd64 < 46.2-1ubuntu0.24.04.15 | 50.1-0ubuntu2 @ii umH > due to libmutter-18-0:amd64
+                    Upgrading mutter-common:amd64 < 46.2-1ubuntu0.24.04.15 | 50.1-0ubuntu2 @ii umH > due to libmutter-18-0:amd64
+                       Delayed Removing: libmutter-14-0:amd64 as upgrade is not an option for mutter-common:amd64 (50.1-0ubuntu2)
+                      MarkInstall mutter-common:amd64 < 46.2-1ubuntu0.24.04.15 -> 50.1-0ubuntu2 @ii umU Ib > FU=0
+                      MarkDelete libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii mK Ib > FU=0
+                       Upgrading: libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii mR > due to libmutter-14-0:amd64 Depends on mutter-common-bin:amd64 < 46.2-1ubuntu0.24.04.15 -> 50.1-0ubuntu2 @ii umU Ib > (= 46.2-1ubuntu0.24.04.15)
+                      MarkInstall mutter-common-bin:amd64 < 46.2-1ubuntu0.24.04.15 -> 50.1-0ubuntu2 @ii umU Ib > FU=0
+                          MarkKeep libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii mR > FU=0
+                      Installing libgtk-4-1:amd64 as Depends of mutter-common-bin:amd64
+                         Delayed Removing: libgtk-4-media-gstreamer:amd64 as upgrade is not an option for libgtk-4-1:amd64 (4.22.2+ds-1ubuntu1)
+                         Delayed Removing: libgtk-4-media-gstreamer:amd64 as upgrade is not an option for libgtk-4-1:amd64 (4.22.2+ds-1ubuntu1)
+                        MarkInstall libgtk-4-1:amd64 < 4.14.5+ds-0ubuntu0.10 -> 4.22.2+ds-1ubuntu1 @ii umU Ib > FU=0
+                        Upgrading libgtk-4-common:amd64 < 4.14.5+ds-0ubuntu0.10 | 4.22.2+ds-1ubuntu1 @ii umH > due to libgtk-4-1:amd64
+                        Upgrading libgtk-4-bin:amd64 < 4.14.5+ds-0ubuntu0.10 | 4.22.2+ds-1ubuntu1 @ii umH > due to libgtk-4-1:amd64
+                        Upgrading gtk-update-icon-cache:amd64 < 3.24.41-4ubuntu1.3 | 4.22.2+ds-1ubuntu1 @ii umH > due to libgtk-4-1:amd64
+                        Upgrading gir1.2-gtk-4.0:amd64 < 4.14.5+ds-0ubuntu0.10 | 4.22.2+ds-1ubuntu1 @ii umH > due to libgtk-4-1:amd64
+                          MarkInstall gir1.2-gtk-4.0:amd64 < 4.14.5+ds-0ubuntu0.10 -> 4.22.2+ds-1ubuntu1 @ii umU Ib > FU=0
+                          Installing gir1.2-pango-1.0:amd64 as Depends of gir1.2-gtk-4.0:amd64
+                            MarkInstall gir1.2-pango-1.0:amd64 < 1.52.1+ds-1build1 -> 1.57.0-1 @ii umU Ib > FU=0
+                            Upgrading libpangoxft-1.0-0:amd64 < 1.52.1+ds-1build1 | 1.57.0-1 @ii umH > due to gir1.2-pango-1.0:amd64
+                            Upgrading libpangoft2-1.0-0:amd64 < 1.52.1+ds-1build1 | 1.57.0-1 @ii umH > due to gir1.2-pango-1.0:amd64
+                            Upgrading libpangocairo-1.0-0:amd64 < 1.52.1+ds-1build1 | 1.57.0-1 @ii umH > due to gir1.2-pango-1.0:amd64
+                            Upgrading libpango-1.0-0:amd64 < 1.52.1+ds-1build1 | 1.57.0-1 @ii umH > due to gir1.2-pango-1.0:amd64
+                              MarkInstall libpango-1.0-0:amd64 < 1.52.1+ds-1build1 -> 1.57.0-1 @ii umU Ib > FU=0
+                              Installing fontconfig:amd64 as Depends of libpango-1.0-0:amd64
+                                MarkInstall fontconfig:amd64 < 2.15.0-1.1ubuntu2 -> 2.17.1-3ubuntu1 @ii umU Ib > FU=0
+                                Upgrading libfontconfig1-dev:amd64 < 2.15.0-1.1ubuntu2 | 2.17.1-3ubuntu1 @ii umH > due to fontconfig:amd64
+                                Upgrading libfontconfig1:amd64 < 2.15.0-1.1ubuntu2 | 2.17.1-3ubuntu1 @ii umH > due to fontconfig:amd64
+                                Upgrading libfontconfig-dev:amd64 < 2.15.0-1.1ubuntu2 | 2.17.1-3ubuntu1 @ii umH > due to fontconfig:amd64
+                                Upgrading fontconfig-config:amd64 < 2.15.0-1.1ubuntu2 | 2.17.1-3ubuntu1 @ii umH > due to fontconfig:amd64
+                              Installing libharfbuzz0b:amd64 as Depends of libpango-1.0-0:amd64
+                                MarkInstall libharfbuzz0b:amd64 < 8.3.0-2build2 -> 12.3.2-2 @ii umU > FU=0
+                                Upgrading libharfbuzz-subset0:amd64 < 8.3.0-2build2 | 12.3.2-2 @ii umH > due to libharfbuzz0b:amd64
+                                Upgrading libharfbuzz-icu0:amd64 < 8.3.0-2build2 | 12.3.2-2 @ii umH > due to libharfbuzz0b:amd64
+                                Upgrading libharfbuzz-gobject0:amd64 < 8.3.0-2build2 | 12.3.2-2 @ii umH > due to libharfbuzz0b:amd64
+                                Upgrading gir1.2-harfbuzz-0.0:amd64 < 8.3.0-2build2 | 12.3.2-2 @ii umH > due to libharfbuzz0b:amd64
+                          MarkInstall libgtk-4-bin:amd64 < 4.14.5+ds-0ubuntu0.10 -> 4.22.2+ds-1ubuntu1 @ii umU Ib > FU=0
+                          Installing libgstreamer-plugins-extra1.0-0:amd64 as Depends of libgtk-4-bin:amd64
+                             Delayed Removing: libgstreamer-plugins-good1.0-0:amd64 as upgrade is not an option for libgstreamer-plugins-extra1.0-0:amd64 (1.28.2-1ubuntu1)
+                            MarkInstall libgstreamer-plugins-extra1.0-0:amd64 < none -> 1.28.2-1ubuntu1 @un uN Ib > FU=0
+                            Upgrading libgstreamer-plugins-bad1.0-0:amd64 < 1.24.2-1ubuntu4+esm1 | 1.28.2-1ubuntu1 @ii umH > due to libgstreamer-plugins-extra1.0-0:amd64
+                            Upgrading gstreamer1.0-plugins-bad:amd64 < 1.24.2-1ubuntu4+esm1 | 1.28.2-1ubuntu1 @ii umH > due to libgstreamer-plugins-extra1.0-0:amd64
+                            Upgrading gir1.2-gst-plugins-bad-1.0:amd64 < 1.24.2-1ubuntu4+esm1 | 1.28.2-1ubuntu1 @ii umH > due to libgstreamer-plugins-extra1.0-0:amd64
+                              MarkInstall gir1.2-gst-plugins-bad-1.0:amd64 < 1.24.2-1ubuntu4+esm1 -> 1.28.2-1ubuntu1 @ii umU Ib > FU=0
+                              Installing gir1.2-gst-plugins-extra-1.0:amd64 as Depends of gir1.2-gst-plugins-bad-1.0:amd64
+                                MarkInstall gir1.2-gst-plugins-extra-1.0:amd64 < none -> 1.28.2-1ubuntu1 @un uN > FU=0
+                              MarkInstall gstreamer1.0-plugins-bad:amd64 < 1.24.2-1ubuntu4+esm1 -> 1.28.2-1ubuntu1 @ii umU Ib > FU=0
+                                MarkInstall gstreamer1.0-plugins-good:amd64 < 1.24.2-1ubuntu1.3 -> 1.28.2-2 @ii umU Ib > FU=0
+                                Upgrading gstreamer1.0-pulseaudio:amd64 < 1.24.2-1ubuntu1.3 | 1.28.2-2 @ii umH > due to gstreamer1.0-plugins-good:amd64
+                                Upgrading gstreamer1.0-gtk3:amd64 < 1.24.2-1ubuntu1.3 | 1.28.2-2 @ii umH > due to gstreamer1.0-plugins-good:amd64
+                                Installing libflac14:amd64 as Depends of gstreamer1.0-plugins-good:amd64
+                                  MarkInstall libflac14:amd64 < none -> 1.5.0+ds-5 @un uN > FU=0
+                                Installing libtag2:amd64 as Depends of gstreamer1.0-plugins-good:amd64
+                                  MarkInstall libtag2:amd64 < none -> 2.2.1-3 @un uN > FU=0
+                                Installing libvpx12:amd64 as Depends of gstreamer1.0-plugins-good:amd64
+                                  MarkInstall libvpx12:amd64 < none -> 1.16.0-3 @un uN > FU=0
+                              Installing gstreamer1.0-plugins-extra:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall gstreamer1.0-plugins-extra:amd64 < none -> 1.28.2-1ubuntu1 @un uN > FU=0
+                              Installing libimath-3-1-29t64:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libimath-3-1-29t64:amd64 < 3.1.9-3.1ubuntu2 -> 3.1.12-1ubuntu5 @ii umU > FU=0
+                              Installing libmjpegutils-2.2-0:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libmjpegutils-2.2-0:amd64 < none -> 1:2.2.1-3 @un uN > FU=0
+                              Installing libmpeg2encpp-2.2-0:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libmpeg2encpp-2.2-0:amd64 < none -> 1:2.2.1-3 @un uN > FU=0
+                              Installing libmplex2-2.2-0:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libmplex2-2.2-0:amd64 < none -> 1:2.2.1-3 @un uN > FU=0
+                              Installing libonnxruntime1.23:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libonnxruntime1.23:amd64 < none -> 1.23.2+dfsg-6ubuntu1 @un uN Ib > FU=0
+                                Installing libcpuinfo0:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libcpuinfo0:amd64 < none -> 0.0~git20250905.877328f-1 @un uN > FU=0
+                                Installing libonnx1t64:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libonnx1t64:amd64 < none -> 1.20.0-1 @un uN > FU=0
+                                Installing libpthreadpool0:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libpthreadpool0:amd64 < none -> 0.0~git20251020.0e6ca13-1 @un uN > FU=0
+                                Installing libre2-11:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libre2-11:amd64 < none -> 20250805-1build3 @un uN > FU=0
+                                Installing libxnnpack0.20241108:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libxnnpack0.20241108:amd64 < none -> 0.0~git20241108.4ea82e5-2build1 @un uN > FU=0
+                                Installing libonnxruntime-providers:amd64 as Depends of libonnxruntime1.23:amd64
+                                  MarkInstall libonnxruntime-providers:amd64 < none -> 1.23.2+dfsg-6ubuntu1 @un uN Ib > FU=0
+                                  Installing libdnnl3.6:amd64 as Depends of libonnxruntime-providers:amd64
+                                    MarkInstall libdnnl3.6:amd64 < none -> 3.9.1+ds-2 @un uN > FU=0
+                              Installing libopenexr-3-1-30:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libopenexr-3-1-30:amd64 < 3.1.5-5.1build3 -> 3.1.13-2build1 @ii umU > FU=0
+                              Installing libopenh264-8:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libopenh264-8:amd64 < none -> 2.6.0+dfsg-2build1 @un uN > FU=0
+                              Installing libsrt1.5-gnutls:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libsrt1.5-gnutls:amd64 < 1.5.3-1build2 -> 1.5.4-3 @ii umU > FU=0
+                              Installing libsvtav1enc2:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libsvtav1enc2:amd64 < none -> 2.3.0+dfsg-1build1 @un uN > FU=0
+                              Installing libtensorflow-lite2.14.1:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libtensorflow-lite2.14.1:amd64 < none -> 2.14.1+dfsg-3build1 @un uN Ib > FU=0
+                                Installing libfarmhash0:amd64 as Depends of libtensorflow-lite2.14.1:amd64
+                                  MarkInstall libfarmhash0:amd64 < none -> 0~git20190513.0d859a8-4 @un uN > FU=0
+                              Installing libx265-215:amd64 as Depends of gstreamer1.0-plugins-bad:amd64
+                                MarkInstall libx265-215:amd64 < none -> 4.1-4 @un uN > FU=0
+                              MarkInstall libgstreamer-plugins-bad1.0-0:amd64 < 1.24.2-1ubuntu4+esm1 -> 1.28.2-1ubuntu1 @ii umU Ib > FU=0
+                              Installing libwayland-client0:amd64 as Depends of libgstreamer-plugins-bad1.0-0:amd64
+                                MarkInstall libwayland-client0:amd64 < 1.22.0-2.1build1 -> 1.24.0-2 @ii umU > FU=0
+                                Upgrading libwayland-server0:amd64 < 1.22.0-2.1build1 | 1.24.0-2 @ii umH > due to libwayland-client0:amd64
+                                Upgrading libwayland-egl1:amd64 < 1.22.0-2.1build1 | 1.24.0-2 @ii umH > due to libwayland-client0:amd64
+                                Upgrading libwayland-cursor0:amd64 < 1.22.0-2.1build1 | 1.24.0-2 @ii umH > due to libwayland-client0:amd64
+                            Installing libva2:amd64 as Depends of libgstreamer-plugins-extra1.0-0:amd64
+                               Upgrading: libva-drm2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > due to libva-drm2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > (< 2.20.0.1)
+                               Upgrading: libva-x11-2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > due to libva-x11-2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > (< 2.20.0.1)
+                               Upgrading: libva-wayland2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > due to libva-wayland2:amd64 Depends on libva2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > (< 2.20.0.1)
+                              MarkInstall libva2:amd64 < 2.20.0-2ubuntu0.1 -> 2.23.0-1ubuntu1 @ii umU > FU=0
+                              Upgrading va-driver-all:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH > due to libva2:amd64
+                              Upgrading libva-x11-2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH Ib > due to libva2:amd64
+                              Upgrading libva-wayland2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH Ib > due to libva2:amd64
+                              Upgrading libva-drm2:amd64 < 2.20.0-2ubuntu0.1 | 2.23.0-1ubuntu1 @ii umH Ib > due to libva2:amd64
+                            MarkDelete libgstreamer-plugins-good1.0-0:amd64 < 1.24.2-1ubuntu1.3 @ii mK > FU=0
+                          MarkInstall gnome-control-center:amd64 < 1:46.7-0ubuntu0.24.04.4 -> 1:50.0-0ubuntu6 @ii umU Ib > FU=0
+                          Upgrading gnome-control-center-faces:amd64 < 1:46.7-0ubuntu0.24.04.4 | 1:50.0-0ubuntu6 @ii umH > due to gnome-control-center:amd64
+                          Upgrading gnome-control-center-data:amd64 < 1:46.7-0ubuntu0.24.04.4 | 1:50.0-0ubuntu6 @ii umH > due to gnome-control-center:amd64
+                          Installing gnome-online-accounts:amd64 as Depends of gnome-control-center:amd64
+                            MarkInstall gnome-online-accounts:amd64 < 3.50.4-0ubuntu2 -> 3.58.0-1 @ii umU Ib > FU=0
+                            Upgrading libgoa-backend-1.0-2:amd64 < 3.50.4-0ubuntu2 | 3.58.0-1 @ii umH > due to gnome-online-accounts:amd64
+                            Upgrading libgoa-1.0-common:amd64 < 3.50.4-0ubuntu2 | 3.58.0-1 @ii umH > due to gnome-online-accounts:amd64
+                            Upgrading libgoa-1.0-0b:amd64 < 3.50.4-0ubuntu2 | 3.58.0-1 @ii umH > due to gnome-online-accounts:amd64
+                              MarkInstall libgoa-backend-1.0-2:amd64 < 3.50.4-0ubuntu2 -> 3.58.0-1 @ii umU Ib > FU=0
+                              Installing libadwaita-1-0:amd64 as Depends of libgoa-backend-1.0-2:amd64
+                                MarkInstall libadwaita-1-0:amd64 < 1.5.0-1ubuntu2 -> 1.9.0-0ubuntu1 @ii umU > FU=0
+                                Upgrading gir1.2-adw-1:amd64 < 1.5.0-1ubuntu2 | 1.9.0-0ubuntu1 @ii umH > due to libadwaita-1-0:amd64
+                          Installing gnome-settings-daemon:amd64 as Depends of gnome-control-center:amd64
+                            MarkInstall gnome-settings-daemon:amd64 < 46.0-1ubuntu1.24.04.1 -> 50.0-1ubuntu1 @ii umU Ib > FU=0
+                            Upgrading gnome-settings-daemon-common:amd64 < 46.0-1ubuntu1.24.04.1 | 50.0-1ubuntu1 @ii umH > due to gnome-settings-daemon:amd64
+                              MarkInstall gnome-settings-daemon-common:amd64 < 46.0-1ubuntu1.24.04.1 -> 50.0-1ubuntu1 @ii umU Ib > FU=0
+                                MarkInstall gnome-initial-setup:amd64 < 46.3-1ubuntu3~24.04.2 -> 50.0-0ubuntu7 @ii umU Ib > FU=0
+                                Installing libgnome-qr-gtk-4-0:amd64 as Depends of gnome-initial-setup:amd64
+                                  MarkInstall libgnome-qr-gtk-4-0:amd64 < none -> 44.5-1ubuntu1 @un uN Ib > FU=0
+                                  Upgrading libgnome-rr-4-2t64:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading libgnome-desktop-4-2t64:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading libgnome-desktop-3-20t64:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading libgnome-bg-4-2t64:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading gnome-desktop3-data:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading gir1.2-gnomedesktop-4.0:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading gir1.2-gnomedesktop-3.0:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Upgrading gir1.2-gnomebg-4.0:amd64 < 44.0-5build2 | 44.5-1ubuntu1 @ii umH > due to libgnome-qr-gtk-4-0:amd64
+                                  Installing libgnome-qr-4-0:amd64 as Depends of libgnome-qr-gtk-4-0:amd64
+                                    MarkInstall libgnome-qr-4-0:amd64 < none -> 44.5-1ubuntu1 @un uN > FU=0
+                                Installing libinsights0:amd64 as Depends of gnome-initial-setup:amd64
+                                  MarkInstall libinsights0:amd64 < none -> 0.9.3ubuntu @un uN > FU=0
+                            Installing libnotify4:amd64 as Depends of gnome-settings-daemon:amd64
+                              MarkInstall libnotify4:amd64 < 0.8.3-1build2 -> 0.8.8-1 @ii umU > FU=0
+                              Upgrading libnotify-bin:amd64 < 0.8.3-1build2 | 0.8.8-1 @ii umH > due to libnotify4:amd64
+                              Upgrading gir1.2-notify-0.7:amd64 < 0.8.3-1build2 | 0.8.8-1 @ii umH > due to libnotify4:amd64
+                          Installing gsettings-desktop-schemas:amd64 as Depends of gnome-control-center:amd64
+                            MarkInstall gsettings-desktop-schemas:amd64 < 46.1-0ubuntu1 -> 50.0-1ubuntu2 @ii umU > FU=0
+                            Upgrading gir1.2-gdesktopenums-3.0:amd64 < 46.1-0ubuntu1 | 50.0-1ubuntu2 @ii umH > due to gsettings-desktop-schemas:amd64
+                          Installing tecla:amd64 as Depends of gnome-control-center:amd64
+                            MarkInstall tecla:amd64 < 46.0-1ubuntu0.1 -> 49.0-2 @ii umU > FU=0
+                          Installing libmalcontent-0-0:amd64 as Depends of gnome-control-center:amd64
+                            MarkInstall libmalcontent-0-0:amd64 < 0.11.1-1ubuntu1.3 -> 0.14.0-0ubuntu1 @ii umU Ib > FU=0
+                            Installing libmalcontent-common:amd64 as Depends of libmalcontent-0-0:amd64
+                              MarkInstall libmalcontent-common:amd64 < none -> 0.14.0-0ubuntu1 @un uN > FU=0
+                          Installing libnm0:amd64 as Depends of gnome-control-center:amd64
+                             Upgrading: network-manager:amd64 < 1.46.0-1ubuntu2.7 | 1.54.3-2ubuntu3 @ii umH > due to network-manager:amd64 Depends on libnm0:amd64 < 1.46.0-1ubuntu2.7 | 1.54.3-2ubuntu3 @ii umH > (= 1.46.0-1ubuntu2.7)
+                            MarkInstall libnm0:amd64 < 1.46.0-1ubuntu2.7 -> 1.54.3-2ubuntu3 @ii umU > FU=0
+                            Upgrading network-manager-config-connectivity-ubuntu:amd64 < 1.46.0-1ubuntu2.7 | 1.54.3-2ubuntu3 @ii umH > due to libnm0:amd64
+                            Upgrading network-manager:amd64 < 1.46.0-1ubuntu2.7 | 1.54.3-2ubuntu3 @ii umH Ib > due to libnm0:amd64
+                            Upgrading gir1.2-nm-1.0:amd64 < 1.46.0-1ubuntu2.7 | 1.54.3-2ubuntu3 @ii umH > due to libnm0:amd64
+                              MarkInstall network-manager:amd64 < 1.46.0-1ubuntu2.7 -> 1.54.3-2ubuntu3 @ii umU Ib > FU=0
+                                 Upgrading: network-manager-pptp:amd64 < 1.2.12-3build2 | 1.2.12-6 @ii umH > due to network-manager-pptp:amd64 Depends on ppp:amd64 < 2.4.9-1+1.1ubuntu4 | 2.5.2-1+1.2 @ii umH > (< 2.4.9-2~)
+                                MarkInstall ppp:amd64 < 2.4.9-1+1.1ubuntu4 -> 2.5.2-1+1.2 @ii umU > FU=0
+                                   Upgrading: network-manager-pptp-gnome:amd64 < 1.2.12-3build2 | 1.2.12-6 @ii umH > due to network-manager-pptp-gnome:amd64 Depends on network-manager-pptp:amd64 < 1.2.12-3build2 | 1.2.12-6 @ii umH Ib > (= 1.2.12-3build2)
+                                  MarkInstall network-manager-pptp:amd64 < 1.2.12-3build2 -> 1.2.12-6 @ii umU > FU=0
+                                  Upgrading network-manager-pptp-gnome:amd64 < 1.2.12-3build2 | 1.2.12-6 @ii umH Ib > due to network-manager-pptp:amd64
+                              Installing libnetplan1:amd64 as Depends of network-manager:amd64
+                                 Upgrading: netplan-generator:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > due to netplan-generator:amd64 Depends on libnetplan1:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > (= 1.1.2-8ubuntu1~24.04.2)
+                                 Upgrading: python3-netplan:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > due to python3-netplan:amd64 Depends on libnetplan1:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > (= 1.1.2-8ubuntu1~24.04.2)
+                                 Upgrading: netplan.io:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > due to netplan.io:amd64 Depends on libnetplan1:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH > (= 1.1.2-8ubuntu1~24.04.2)
+                                MarkInstall libnetplan1:amd64 < 1.1.2-8ubuntu1~24.04.2 -> 1.2-1ubuntu5 @ii umU > FU=0
+                                Upgrading python3-netplan:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH Ib > due to libnetplan1:amd64
+                                Upgrading netplan.io:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH Ib > due to libnetplan1:amd64
+                                Upgrading netplan-generator:amd64 < 1.1.2-8ubuntu1~24.04.2 | 1.2-1ubuntu5 @ii umH Ib > due to libnetplan1:amd64
+                              Installing libnewt0.52:amd64 as Depends of network-manager:amd64
+                                MarkInstall libnewt0.52:amd64 < 0.52.24-2ubuntu2 -> 0.52.25-1ubuntu3 @ii umU > FU=0
+                                Upgrading whiptail:amd64 < 0.52.24-2ubuntu2 | 0.52.25-1ubuntu3 @ii umH > due to libnewt0.52:amd64
+                              new important dependency: network-manager-l10n:amd64
+                              Installing network-manager-l10n:amd64 as Recommends of network-manager:amd64
+                                MarkInstall network-manager-l10n:amd64 < none -> 1.54.3-2ubuntu3 @un uN > FU=0
+                          Installing libupower-glib3:amd64 as Depends of gnome-control-center:amd64
+                             Upgrading: upower:amd64 < 1.90.3-1 | 1.91.1-1 @ii umH > due to upower:amd64 Depends on libupower-glib3:amd64 < 1.90.3-1 | 1.91.1-1 @ii umH > (= 1.90.3-1)
+                            MarkInstall libupower-glib3:amd64 < 1.90.3-1 -> 1.91.1-1 @ii umU > FU=0
+                            Upgrading upower:amd64 < 1.90.3-1 | 1.91.1-1 @ii umH Ib > due to libupower-glib3:amd64
+                            Upgrading gir1.2-upowerglib-1.0:amd64 < 1.90.3-1 | 1.91.1-1 @ii umH > due to libupower-glib3:amd64
+                              MarkInstall upower:amd64 < 1.90.3-1 -> 1.91.1-1 @ii umU Ib > FU=0
+                              Installing libimobiledevice-1.0-6:amd64 as Depends of upower:amd64
+                                 Delayed Removing: libimobiledevice6:amd64 as upgrade is not an option for libimobiledevice-1.0-6:amd64 (1.4.0-1build1)
+                                MarkInstall libimobiledevice-1.0-6:amd64 < none -> 1.4.0-1build1 @un uN Ib > FU=0
+                                Installing libimobiledevice-glue-1.0-0:amd64 as Depends of libimobiledevice-1.0-6:amd64
+                                  MarkInstall libimobiledevice-glue-1.0-0:amd64 < none -> 1.3.2-2build1 @un uN Ib > FU=0
+                                  Installing libplist-2.0-4:amd64 as Depends of libimobiledevice-glue-1.0-0:amd64
+                                    MarkInstall libplist-2.0-4:amd64 < 2.3.0-1~exp2build2 -> 2.7.0+git20250820-1build1 @ii umU > FU=0
+                                Installing libusbmuxd-2.0-7:amd64 as Depends of libimobiledevice-1.0-6:amd64
+                                  MarkInstall libusbmuxd-2.0-7:amd64 < none -> 2.1.1-1 @un uN > FU=0
+                                MarkDelete libimobiledevice6:amd64 < 1.3.0-8.1build3 @ii mK > FU=0
+                          MarkInstall xdg-desktop-portal-gnome:amd64 < 46.2-0ubuntu1 -> 50.0-0ubuntu1 @ii umU IPb > FU=0
+                          new important dependency: papers:amd64
+                          Installing papers:amd64 as Recommends of xdg-desktop-portal-gnome:amd64
+                            MarkInstall papers:amd64 < none -> 50.1-0ubuntu1 @un uN Ib > FU=0
+                            Installing libppsdocument-4.0-6:amd64 as Depends of papers:amd64
+                              MarkInstall libppsdocument-4.0-6:amd64 < none -> 50.1-0ubuntu1 @un uN Ib > FU=0
+                              Installing libdjvulibre21:amd64 as Depends of libppsdocument-4.0-6:amd64
+                                MarkInstall libdjvulibre21:amd64 < 3.5.28-2ubuntu0.24.04.2 -> 3.5.29-1 @ii umU Ib > FU=0
+                                Upgrading libdjvulibre-text:amd64 < 3.5.28-2ubuntu0.24.04.2 | 3.5.29-1 @ii umH > due to libdjvulibre21:amd64
+                            Installing libppsview-4.0-5:amd64 as Depends of papers:amd64
+                              MarkInstall libppsview-4.0-5:amd64 < none -> 50.1-0ubuntu1 @un uN Ib > FU=0
+                              Installing libspelling-1-2:amd64 as Depends of libppsview-4.0-5:amd64
+                                MarkInstall libspelling-1-2:amd64 < none -> 0.4.9-1build1 @un uN Ib > FU=0
+                                Installing libspelling-common:amd64 as Depends of libspelling-1-2:amd64
+                                  MarkInstall libspelling-common:amd64 < none -> 0.4.9-1build1 @un uN > FU=0
+                            Installing papers-common:amd64 as Depends of papers:amd64
+                              MarkInstall papers-common:amd64 < none -> 50.1-0ubuntu1 @un uN > FU=0
+                        MarkDelete libgtk-4-media-gstreamer:amd64 < 4.14.5+ds-0ubuntu0.10 @ii mK > FU=0
+                    Installing libdisplay-info3:amd64 as Depends of libmutter-18-0:amd64
+                      MarkInstall libdisplay-info3:amd64 < none -> 0.3.0-1 @un uN > FU=0
+                    Installing libglycin-2-0:amd64 as Depends of libmutter-18-0:amd64
+                      MarkInstall libglycin-2-0:amd64 < none -> 2.1.1+ds-0ubuntu1 @un uN Ib > FU=0
+                      Installing glycin-loaders:amd64 as Depends of libglycin-2-0:amd64
+                        MarkInstall glycin-loaders:amd64 < none -> 2.1.1+ds-0ubuntu1 @un uN > FU=0
+                    Installing libinput10:amd64 as Depends of libmutter-18-0:amd64
+                      MarkInstall libinput10:amd64 < 1.25.0-1ubuntu3.4 -> 1.31.1-1 @ii umU Ib > FU=0
+                      Upgrading libinput-bin:amd64 < 1.25.0-1ubuntu3.4 | 1.31.1-1 @ii umH > due to libinput10:amd64
+                      Installing libwacom9:amd64 as Depends of libinput10:amd64
+                        MarkInstall libwacom9:amd64 < 2.10.0-2 -> 2.18.0-1 @ii umU > FU=0
+                        Upgrading libwacom-common:amd64 < 2.10.0-2 | 2.18.0-1 @ii umH > due to libwacom9:amd64
+              MarkDelete gnome-startup-applications:amd64 < 46.0-1ubuntu4 @ii mK > FU=0
+            Installing fonts-adwaita:amd64 as Depends of gnome-session:amd64
+              MarkInstall fonts-adwaita:amd64 < none -> 49.0+dfsg-2 @un uN Ib > FU=0
+              Installing fonts-adwaita-sans:amd64 as Depends of fonts-adwaita:amd64
+                MarkInstall fonts-adwaita-sans:amd64 < none -> 49.0+dfsg-2 @un uN > FU=0
+            MarkInstall gnome-shell-extension-ubuntu-tiling-assistant:amd64 < 46-1ubuntu1.1 @ii mK Ib > FU=0
+              gnome-shell-extension-ubuntu-tiling-assistant:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii pumU Ib > (< 47~) can't be satisfied! (dep)
+           Removing: gnome-shell-extension-ubuntu-tiling-assistant:amd64 as upgrade is not possible
+            MarkDelete gnome-shell-extension-ubuntu-tiling-assistant:amd64 < 46-1ubuntu1.1 @ii mK Ib > FU=0
+            MarkInstall gnome-shell-extension-ubuntu-dock:amd64 < 90ubuntu3 @ii mK Ib > FU=0
+              gnome-shell-extension-ubuntu-dock:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii pumU Ib > (< 47~) can't be satisfied! (dep)
+           Removing: gnome-shell-extension-ubuntu-dock:amd64 as upgrade is not possible
+            MarkDelete gnome-shell-extension-ubuntu-dock:amd64 < 90ubuntu3 @ii mK Ib > FU=0
+            MarkInstall gnome-shell-extension-desktop-icons-ng:amd64 < 46+really47.0.9-1ubuntu5 @ii mK Ib > FU=0
+              gnome-shell-extension-desktop-icons-ng:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii pumU Ib > (< 47~) can't be satisfied! (dep)
+           Removing: gnome-shell-extension-desktop-icons-ng:amd64 as upgrade is not possible
+            MarkDelete gnome-shell-extension-desktop-icons-ng:amd64 < 46+really47.0.9-1ubuntu5 @ii mK Ib > FU=0
+            MarkInstall gnome-shell-extension-appindicator:amd64 < 58-1ubuntu24.04.1 @ii mK Ib > FU=0
+              gnome-shell-extension-appindicator:amd64 Depends on gnome-shell:amd64 < 46.0-0ubuntu6~24.04.13 -> 50.1-0ubuntu1 @ii pumU Ib > (< 47~) can't be satisfied! (dep)
+           Removing: gnome-shell-extension-appindicator:amd64 as upgrade is not possible
+            MarkDelete gnome-shell-extension-appindicator:amd64 < 58-1ubuntu24.04.1 @ii mK Ib > FU=0
+          Installing gir1.2-gnomeqr-4.0:amd64 as Depends of gnome-shell:amd64
+            MarkInstall gir1.2-gnomeqr-4.0:amd64 < none -> 44.5-1ubuntu1 @un uN > FU=0
+          Installing gir1.2-mutter-18:amd64 as Depends of gnome-shell:amd64
+            MarkInstall gir1.2-mutter-18:amd64 < none -> 50.1-0ubuntu2 @un uN > FU=0
+          Installing gjs:amd64 as Depends of gnome-shell:amd64
+            MarkInstall gjs:amd64 < 1.80.2-1build2 -> 1.88.0-1 @ii umU Ib > FU=0
+            Installing libgjs0:amd64 as Depends of gjs:amd64
+              MarkInstall libgjs0:amd64 < none -> 1.88.0-1 @un uN Ib > FU=0
+              Installing libmozjs-140-0:amd64 as Depends of libgjs0:amd64
+                MarkInstall libmozjs-140-0:amd64 < none -> 140.8.0-4 @un uN > FU=0
+        previously satisfied important dependency on yaru-theme-gnome-shell:amd64
+        Installing yaru-theme-gnome-shell:amd64 as Recommends of gnome-shell-common:amd64
+          MarkInstall yaru-theme-gnome-shell:amd64 < 24.04.2-0ubuntu1 -> 26.04.5.1ubuntu @ii umU > FU=0
+          Upgrading yaru-theme-sound:amd64 < 24.04.2-0ubuntu1 | 26.04.5.1ubuntu @ii umH > due to yaru-theme-gnome-shell:amd64
+          Upgrading yaru-theme-icon:amd64 < 24.04.2-0ubuntu1 | 26.04.5.1ubuntu @ii umH > due to yaru-theme-gnome-shell:amd64
+          Upgrading yaru-theme-gtk:amd64 < 24.04.2-0ubuntu1 | 26.04.5.1ubuntu @ii umH > due to yaru-theme-gnome-shell:amd64
+    Installing iw:amd64 as Depends of ubuntu-desktop:amd64
+      MarkInstall iw:amd64 < none -> 6.17-1 @un uN > FU=0
+    Installing xdg-terminal-exec:amd64 as Depends of ubuntu-desktop:amd64
+      MarkInstall xdg-terminal-exec:amd64 < none -> 0.14.0-1 @un uN > FU=0
+    new important dependency: dracut:amd64
+    Installing dracut:amd64 as Recommends of ubuntu-desktop:amd64
+       Delayed Removing: initramfs-tools:amd64 as upgrade is not an option for dracut:amd64 (110-11)
+      MarkInstall dracut:amd64 < none -> 110-11 @un umN Ib > FU=0
+      Upgrading dracut-install:amd64 < 060+5-1ubuntu3.3 | 110-11 @ii umH > due to dracut:amd64
+        MarkInstall dracut-install:amd64 < 060+5-1ubuntu3.3 -> 110-11 @ii umU Ib > FU=0
+        Installing libkmod2:amd64 as Depends of dracut-install:amd64
+           Upgrading: kmod:amd64 < 31+20240202-2ubuntu7.2 | 34.2-2ubuntu2 @ii umH > due to kmod:amd64 Depends on libkmod2:amd64 < 31+20240202-2ubuntu7.2 | 34.2-2ubuntu2 @ii umH > (= 31+20240202-2ubuntu7.2)
+          MarkInstall libkmod2:amd64 < 31+20240202-2ubuntu7.2 -> 34.2-2ubuntu2 @ii umU > FU=0
+          Upgrading kmod:amd64 < 31+20240202-2ubuntu7.2 | 34.2-2ubuntu2 @ii umH Ib > due to libkmod2:amd64
+            MarkInstall kmod:amd64 < 31+20240202-2ubuntu7.2 -> 34.2-2ubuntu2 @ii umU Ib > FU=0
+              MarkInstall bash-completion:amd64 < 1:2.11-8 -> 1:2.16.0-8build1 @ii umU > FU=0
+      Installing dracut-core:amd64 as Depends of dracut:amd64
+        MarkInstall dracut-core:amd64 < none -> 110-11 @un uN > FU=0
+      MarkDelete initramfs-tools:amd64 < 0.142ubuntu25.8 | 0.151ubuntu1 @ii umH Ib > FU=0
+    new important dependency: gst-audio-thumbnailer:amd64
+    Installing gst-audio-thumbnailer:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall gst-audio-thumbnailer:amd64 < none -> 1.0.0-0ubuntu1 @un uN > FU=0
+    new important dependency: gst-video-thumbnailer:amd64
+    Installing gst-video-thumbnailer:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall gst-video-thumbnailer:amd64 < none -> 1.0.0-0ubuntu1 @un uN > FU=0
+    new important dependency: hwctl:amd64
+    Installing hwctl:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall hwctl:amd64 < none -> 0.11.0-0ubuntu1 @un uN > FU=0
+    new important dependency: kdump-tools:amd64
+    Installing kdump-tools:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall kdump-tools:amd64 < none -> 1:1.10.7ubuntu3 @un uN Ib > FU=0
+      Installing kexec-tools:amd64 as Depends of kdump-tools:amd64
+        MarkInstall kexec-tools:amd64 < none -> 1:2.0.32-3ubuntu1 @un uN > FU=0
+      Installing makedumpfile:amd64 as Recommends of kdump-tools:amd64
+        MarkInstall makedumpfile:amd64 < none -> 1:1.7.7-1 @un uN IPb > FU=0
+        Installing crash:amd64 as Recommends of makedumpfile:amd64
+          MarkInstall crash:amd64 < none -> 9.0.1+~16.3-1ubuntu1 @un uN > FU=0
+    new important dependency: loupe:amd64
+    Installing loupe:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall loupe:amd64 < none -> 50.0-0ubuntu2 @un uN > FU=0
+    new important dependency: ptyxis:amd64
+    Installing ptyxis:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall ptyxis:amd64 < none -> 50.1-1ubuntu2 @un uN Ib > FU=0
+      Installing libvte-2.91-gtk4-0:amd64 as Depends of ptyxis:amd64
+        MarkInstall libvte-2.91-gtk4-0:amd64 < none -> 0.84.0-2 @un uN Ib > FU=0
+        Upgrading libvte-2.91-common:amd64 < 0.76.0-1ubuntu0.1 | 0.84.0-2 @ii umH > due to libvte-2.91-gtk4-0:amd64
+        Upgrading libvte-2.91-0:amd64 < 0.76.0-1ubuntu0.1 | 0.84.0-2 @ii umH > due to libvte-2.91-gtk4-0:amd64
+        Upgrading gir1.2-vte-2.91:amd64 < 0.76.0-1ubuntu0.1 | 0.84.0-2 @ii umH > due to libvte-2.91-gtk4-0:amd64
+          MarkInstall libvte-2.91-0:amd64 < 0.76.0-1ubuntu0.1 -> 0.84.0-2 @ii umU Ib > FU=0
+          Installing libsimdutf31:amd64 as Depends of libvte-2.91-0:amd64
+            MarkInstall libsimdutf31:amd64 < none -> 8.0.0-1 @un uN > FU=0
+    new important dependency: resources:amd64
+    Installing resources:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall resources:amd64 < none -> 1.10.2-0ubuntu3 @un uN > FU=0
+    new important dependency: showtime:amd64
+    Installing showtime:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall showtime:amd64 < none -> 50.0-0ubuntu1 @un uN Ib > FU=0
+      Installing gstreamer1.0-gtk4:amd64 as Depends of showtime:amd64
+        MarkInstall gstreamer1.0-gtk4:amd64 < none -> 0.14.4-1ubuntu1 @un uN > FU=0
+    new important dependency: sysprof:amd64
+    Installing sysprof:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall sysprof:amd64 < none -> 50.0-1 @un uN Ib > FU=0
+      Installing libsysprof-6-6:amd64 as Depends of sysprof:amd64
+        MarkInstall libsysprof-6-6:amd64 < none -> 50.0-1 @un uN Ib > FU=0
+        Installing libsysprof-6-modules:amd64 as Depends of libsysprof-6-6:amd64
+          MarkInstall libsysprof-6-modules:amd64 < none -> 50.0-1 @un uN > FU=0
+        Installing libdex-1-1:amd64 as Depends of libsysprof-6-6:amd64
+          MarkInstall libdex-1-1:amd64 < none -> 1.1.0-1 @un uN > FU=0
+      Installing libpanel-1-1:amd64 as Depends of sysprof:amd64
+        MarkInstall libpanel-1-1:amd64 < none -> 1.10.3-1 @un uN Ib > FU=0
+        Installing libpanel-common:amd64 as Depends of libpanel-1-1:amd64
+          MarkInstall libpanel-common:amd64 < none -> 1.10.3-1 @un uN > FU=0
+    new important dependency: ubuntu-insights:amd64
+    Installing ubuntu-insights:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall ubuntu-insights:amd64 < none -> 0.9.3ubuntu @un uN > FU=0
+    new important dependency: wsdd:amd64
+    Installing wsdd:amd64 as Recommends of ubuntu-desktop:amd64
+      MarkInstall wsdd:amd64 < none -> 2:0.8-5ubuntu1 @un uN > FU=0
+    MarkInstall ubuntu-standard:amd64 < 1.539.2 -> 1.570 @ii umU NPb IPb > FU=0
+    ignore old unsatisfied important dependency on ntfs-3g:amd64
+  Installing sudo-rs:amd64 as Depends of ubuntu-minimal:amd64
+    MarkInstall sudo-rs:amd64 < none -> 0.2.13-0ubuntu1 @un uN Ib > FU=0
+    Installing sudo-common:amd64 as Depends of sudo-rs:amd64
+      MarkInstall sudo-common:amd64 < none -> 1.2ubuntu @un uN Ib > FU=0
+        MarkInstall sudo:amd64 < 1.9.15p5-3ubuntu5.24.04.2 -> 1.9.17p2-1ubuntu3 @ii umU > FU=0
+Starting pkgProblemResolver with broken count: 19
+Starting 2 pkgProblemResolver with broken count: 19
+Investigating (0) gvfs-backends:amd64 < 1.54.4-0ubuntu1~24.04.2 -> 1.60.0-1 @ii umU Ib >
+Broken gvfs-backends:amd64 Depends on gvfs:amd64 < 1.54.4-0ubuntu1~24.04.2 | 1.60.0-1 @ii umH > (= 1.60.0-1)
+  Considering gvfs:amd64 46 as a solution to gvfs-backends:amd64 22
+  MarkKeep gvfs-backends:amd64 < 1.54.4-0ubuntu1~24.04.2 -> 1.60.0-1 @ii umU Ib > FU=0
+  Re-Instated gvfs-common:amd64
+  Re-Instated gvfs-libs:amd64
+  Re-Instated gvfs-daemons:amd64
+  Re-Instated gvfs:amd64
+  Re-Instated libmsgraph-1-1:amd64
+  Re-Instated gvfs-backends:amd64
+Investigating (0) nautilus:amd64 < 1:46.4-0ubuntu0.2 -> 1:50.0-0ubuntu2 @ii umU Ib >
+Broken nautilus:amd64 Depends on libnautilus-extension4:amd64 < 1:46.4-0ubuntu0.2 | 1:50.0-0ubuntu2 @ii umH > (= 1:50.0-0ubuntu2)
+  Considering libnautilus-extension4:amd64 11 as a solution to nautilus:amd64 18
+  MarkKeep nautilus:amd64 < 1:46.4-0ubuntu0.2 -> 1:50.0-0ubuntu2 @ii umU Ib > FU=0
+  Re-Instated libnautilus-extension4:amd64
+  Re-Instated nautilus-data:amd64
+  Re-Instated libglycin-gtk4-2-0:amd64
+  Re-Instated nautilus:amd64
+Investigating (0) python3-pyqt6:amd64 < 6.6.1-2build4 -> 6.10.2-2build5 @ii umU Ib >
+Broken python3-pyqt6:amd64 Depends on libqt6openglwidgets6:amd64 < none | 6.10.2+dfsg-7 @un uH > (>= 6.6.0)
+  Considering libqt6openglwidgets6:amd64 0 as a solution to python3-pyqt6:amd64 13
+  MarkKeep python3-pyqt6:amd64 < 6.6.1-2build4 -> 6.10.2-2build5 @ii umU Ib > FU=0
+  Re-Instated libqt6openglwidgets6:amd64
+  Re-Instated libqt6test6:amd64
+  Re-Instated libqt6xml6:amd64
+  Re-Instated python3-pyqt6:amd64
+Investigating (0) gvfs-fuse:amd64 < 1.54.4-0ubuntu1~24.04.2 | 1.60.0-1 @ii umH Ib >
+Broken gvfs-fuse:amd64 Depends on gvfs:amd64 < 1.54.4-0ubuntu1~24.04.2 -> 1.60.0-1 @ii umU > (= 1.54.4-0ubuntu1~24.04.2)
+  Considering gvfs:amd64 46 as a solution to gvfs-fuse:amd64 11
+  Re-Instated gvfs-fuse:amd64
+Investigating (0) mutter-common:amd64 < 46.2-1ubuntu0.24.04.15 -> 50.1-0ubuntu2 @ii umU Ib >
+Broken mutter-common:amd64 Breaks on libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii gK Ib > (< 49~)
+  Considering libmutter-14-0:amd64 -2 as a solution to mutter-common:amd64 9
+  Added libmutter-14-0:amd64 to the remove list
+  MarkDelete libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii gK Ib > FU=0
+  Fixing mutter-common:amd64 via remove of libmutter-14-0:amd64
+Investigating (0) libkf5solid5:amd64 < 5.115.0-0ubuntu5 -> 5.116.0-1ubuntu2 @ii umU Ib >
+Broken libkf5solid5:amd64 Depends on libkf5solid5-data:amd64 < 5.115.0-0ubuntu5 | 5.116.0-1ubuntu2 @ii umH > (= 5.116.0-1ubuntu2)
+  Considering libkf5solid5-data:amd64 1 as a solution to libkf5solid5:amd64 3
+  MarkKeep libkf5solid5:amd64 < 5.115.0-0ubuntu5 -> 5.116.0-1ubuntu2 @ii umU Ib > FU=0
+  Re-Instated libkf5solid5-data:amd64
+  Re-Instated libkf5solid5:amd64
+Investigating (0) libpurple0t64:amd64 < 1:2.14.13-1ubuntu2 -> 1:2.14.14-1ubuntu3 @ii umU Ib >
+Broken libpurple0t64:amd64 Depends on pidgin-data:amd64 < 1:2.14.13-1ubuntu2 | 1:2.14.14-1ubuntu3 @ii umH > (>= 1:2.14.14)
+  Considering pidgin-data:amd64 7 as a solution to libpurple0t64:amd64 3
+  MarkKeep libpurple0t64:amd64 < 1:2.14.13-1ubuntu2 -> 1:2.14.14-1ubuntu3 @ii umU Ib > FU=0
+  Re-Instated pidgin-data:amd64
+  Re-Instated libpurple0t64:amd64
+Investigating (0) libgpod-common:amd64 < 0.8.3-19.1ubuntu4 -> 0.8.3-23 @ii umU Ib >
+Broken libgpod-common:amd64 Depends on libsgutils2-1.48:amd64 < none | 1.48-3ubuntu3 @un uH > (>= 1.27)
+  Considering libsgutils2-1.48:amd64 0 as a solution to libgpod-common:amd64 3
+  MarkKeep libgpod-common:amd64 < 0.8.3-19.1ubuntu4 -> 0.8.3-23 @ii umU Ib > FU=0
+  Re-Instated libsgutils2-1.48:amd64
+  Re-Instated libgpod-common:amd64
+Investigating (0) libxs-parse-keyword-perl:amd64 < 0.39-1build3 -> 0.49-1 @ii umU Ib >
+Broken libxs-parse-keyword-perl:amd64 Depends on libfile-sharedir-perl:amd64 < none | 1.118-3 @un uH >
+  Considering libfile-sharedir-perl:amd64 1 as a solution to libxs-parse-keyword-perl:amd64 2
+  MarkKeep libxs-parse-keyword-perl:amd64 < 0.39-1build3 -> 0.49-1 @ii umU Ib > FU=0
+  Re-Instated libclass-inspector-perl:amd64
+  Re-Instated libfile-sharedir-perl:amd64
+  Re-Instated libxs-parse-keyword-perl:amd64
+Investigating (0) brasero:amd64 < 3.12.3-2build4 -> 3.12.3-8 @ii umU Ib >
+Broken brasero:amd64 Depends on brasero-common:amd64 < 3.12.3-2build4 | 3.12.3-8 @ii umH > (= 3.12.3-8)
+  Considering brasero-common:amd64 3 as a solution to brasero:amd64 1
+  MarkKeep brasero:amd64 < 3.12.3-2build4 -> 3.12.3-8 @ii umU Ib > FU=0
+  Re-Instated brasero-common:amd64
+  Re-Instated libbrasero-media3-1:amd64
+  Re-Instated brasero:amd64
+Investigating (0) endeavour:amd64 < 43.0-1build3 -> 43.0-7build1 @ii umU Ib >
+Broken endeavour:amd64 Depends on endeavour-common:amd64 < 43.0-1build3 | 43.0-7build1 @ii umH > (>= 43.0-7build1)
+  Considering endeavour-common:amd64 0 as a solution to endeavour:amd64 1
+  MarkKeep endeavour:amd64 < 43.0-1build3 -> 43.0-7build1 @ii umU Ib > FU=0
+  Re-Instated endeavour-common:amd64
+  Re-Instated endeavour:amd64
+Investigating (0) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (0) brasero-cdrkit:amd64 < 3.12.3-2build4 | 3.12.3-8 @ii umH Ib >
+Broken brasero-cdrkit:amd64 Depends on libbrasero-media3-1:amd64 < 3.12.3-2build4 -> 3.12.3-8 @ii umU > (= 3.12.3-2build4)
+  Considering libbrasero-media3-1:amd64 4 as a solution to brasero-cdrkit:amd64 1
+  Re-Instated brasero-cdrkit:amd64
+Investigating (0) intel-media-va-driver:amd64 < 24.1.0+dfsg1-1ubuntu0.2 -> 26.1.2+dfsg1-1 @ii ugU Ib >
+Broken intel-media-va-driver:amd64 Depends on libigdgmm12:amd64 < 22.3.17+ds1-1ubuntu1 | 22.9.0+ds1-1 @ii ugH > (>= 22.9.0+ds1)
+  Considering libigdgmm12:amd64 0 as a solution to intel-media-va-driver:amd64 1
+  MarkKeep intel-media-va-driver:amd64 < 24.1.0+dfsg1-1ubuntu0.2 -> 26.1.2+dfsg1-1 @ii ugU Ib > FU=0
+  Re-Instated libigdgmm12:amd64
+  Re-Instated intel-media-va-driver:amd64
+Investigating (0) libqt6xml6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6xml6:amd64 Breaks on libqt6xml6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6xml6t64:amd64 -2 as a solution to libqt6xml6:amd64 0
+  Added libqt6xml6t64:amd64 to the remove list
+  MarkDelete libqt6xml6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6xml6:amd64 via remove of libqt6xml6t64:amd64
+Investigating (0) libqt6openglwidgets6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6openglwidgets6:amd64 Breaks on libqt6openglwidgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6openglwidgets6t64:amd64 -2 as a solution to libqt6openglwidgets6:amd64 0
+  Added libqt6openglwidgets6t64:amd64 to the remove list
+  MarkDelete libqt6openglwidgets6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6openglwidgets6:amd64 via remove of libqt6openglwidgets6t64:amd64
+Investigating (0) calibre-bin:amd64 < 7.6.0+ds-1build1 -> 9.2.1+ds+~0.10.5-2build1 @ii umU Ib >
+Broken calibre-bin:amd64 Depends on libavcodec62:amd64 < none | 7:8.0.1-3ubuntu2 @un uH > (>= 7:8.0.1)
+  Considering libavcodec62:amd64 0 as a solution to calibre-bin:amd64 0
+  MarkKeep calibre-bin:amd64 < 7.6.0+ds-1build1 -> 9.2.1+ds+~0.10.5-2build1 @ii umU Ib > FU=0
+  Re-Instated libvpl2:amd64
+  Re-Instated libavutil60:amd64
+  Re-Instated librav1e0.8:amd64
+  Re-Instated libswresample6:amd64
+  Re-Instated libx264-165:amd64
+  Re-Instated libavcodec62:amd64
+  Re-Instated libudfread3:amd64
+  Re-Instated libbluray3:amd64
+  Re-Instated libavformat62:amd64
+  Re-Instated libpcaudio0:amd64
+  Re-Instated espeak-ng-data:amd64
+  Re-Instated libespeak-ng1:amd64
+  Re-Instated calibre-bin:amd64
+Investigating (0) libqt6test6:amd64 < none -> 6.10.2+dfsg-7 @un uN Ib >
+Broken libqt6test6:amd64 Breaks on libqt6test6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > (< 6.10.2+dfsg-7)
+  Considering libqt6test6t64:amd64 -2 as a solution to libqt6test6:amd64 0
+  Added libqt6test6t64:amd64 to the remove list
+  MarkDelete libqt6test6t64:amd64 < 6.4.2+dfsg-21.1build5 @ii mK Ib > FU=0
+  Fixing libqt6test6:amd64 via remove of libqt6test6t64:amd64
+Investigating (0) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (0) gir1.2-mutter-14:amd64 < 46.2-1ubuntu0.24.04.15 @ii gK Ib >
+Broken gir1.2-mutter-14:amd64 Depends on libmutter-14-0:amd64 < 46.2-1ubuntu0.24.04.15 @ii gR > (= 46.2-1ubuntu0.24.04.15)
+  Considering libmutter-14-0:amd64 -2 as a solution to gir1.2-mutter-14:amd64 -2
+  Removing gir1.2-mutter-14:amd64 rather than change libmutter-14-0:amd64
+  MarkDelete gir1.2-mutter-14:amd64 < 46.2-1ubuntu0.24.04.15 @ii gK Ib > FU=0
+Investigating (0) libtepl-6-4:amd64 < 6.8.0-2build4 @ii gK Ib >
+Broken libtepl-6-4:amd64 Depends on libtepl-common:amd64 < 6.8.0-2build4 @ii gR > (>= 6.8.0-2build4)
+  Considering libtepl-common:amd64 0 as a solution to libtepl-6-4:amd64 -2
+  Removing libtepl-6-4:amd64 rather than change libtepl-common:amd64
+  MarkDelete libtepl-6-4:amd64 < 6.8.0-2build4 @ii gK Ib > FU=0
+Investigating (1) nautilus:amd64 < 1:46.4-0ubuntu0.2 -> 1:50.0-0ubuntu2 @ii umU Ib >
+Broken nautilus:amd64 Breaks on nautilus-extension-gnome-terminal:amd64 < 3.52.0-1ubuntu2 @ii mK > (< 3.56.0-1ubuntu2)
+  Considering nautilus-extension-gnome-terminal:amd64 10 as a solution to nautilus:amd64 18
+  Added nautilus-extension-gnome-terminal:amd64 to the remove list
+  MarkDelete nautilus-extension-gnome-terminal:amd64 < 3.52.0-1ubuntu2 @ii mK > FU=0
+  Fixing nautilus:amd64 via remove of nautilus-extension-gnome-terminal:amd64
+Investigating (1) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (1) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (2) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (2) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (3) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (3) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (4) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (4) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (5) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (5) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (6) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (6) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (7) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (7) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (8) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (8) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (9) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (9) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (10) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (10) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (11) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (11) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (12) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (12) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (13) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (13) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (14) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (14) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (15) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (15) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (16) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (16) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (17) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (17) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (18) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (18) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Investigating (19) libyaml-libyaml-perl:amd64 < 0.89+ds-1ubuntu0.24.04.1 -> 0.904.0+ds-1 @ii umU Ib >
+Broken libyaml-libyaml-perl:amd64 Breaks on lintian:amd64 < 2.117.0ubuntu1.4 | 2.129.0ubuntu2 @ii umH > (< 2.119.0~)
+  Considering lintian:amd64 -1 as a solution to libyaml-libyaml-perl:amd64 1
+  Upgrading lintian:amd64 due to Breaks field in libyaml-libyaml-perl:amd64
+Investigating (19) lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib >
+Broken lintian:amd64 Depends on libfile-libmagic-perl:amd64 < none | 1.23-2build2 @un uH >
+  Considering libfile-libmagic-perl:amd64 0 as a solution to lintian:amd64 -1
+  MarkKeep lintian:amd64 < 2.117.0ubuntu1.4 -> 2.129.0ubuntu2 @ii umU Ib > FU=0
+  Holding Back lintian:amd64 rather than change libfile-libmagic-perl:amd64
+Done
+Log time: 2026-05-03 14:10:51.914006
+

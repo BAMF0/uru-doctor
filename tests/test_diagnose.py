@@ -1,0 +1,441 @@
+"""Tests for :mod:`uru_doctor.diagnose`, the rule registry and livelock detection."""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from uru_doctor.apt.livelock import MIN_REVERSALS, detect_oscillations
+from uru_doctor.apt.sections import read_sections
+from uru_doctor.diagnose import (
+    CAVEAT_CAUSES,
+    MAX_FINDINGS,
+    PRECONDITION_CAUSES,
+    corroborated_causes,
+    diagnose,
+    rank_findings,
+)
+from uru_doctor.ingest import ingest_attachments
+from uru_doctor.intern import Interner
+from uru_doctor.models import Cause, Confidence, Finding, LogSource, Severity
+from uru_doctor.parsers.apportmeta import parse_apport_meta
+from uru_doctor.rules.registry import RULES, all_rules, rule
+
+from .conftest import FIXTURES, fixture_text
+
+
+def lp(bug_id: str, interner: Interner):
+    payload = json.loads((FIXTURES / "lp" / f"bug{bug_id}.json").read_text())
+    meta = parse_apport_meta(payload["description"], tags=payload["tags"])
+    run = ingest_attachments(
+        {
+            LogSource.APT: fixture_text(f"apt/lp{bug_id}-apt.log"),
+            LogSource.MAIN: fixture_text(f"logs/lp{bug_id}-main.log"),
+        },
+        interner,
+        meta=meta,
+        bug_id=int(bug_id),
+    )
+    return (run, diagnose(run, interner, meta=meta))
+
+
+def sectioned(name: str):
+    return read_sections(fixture_text(f"apt/{name}").splitlines())
+
+
+class TestGroundTruth:
+    """The whole point: does it get the three known bugs right?"""
+
+    @pytest.mark.parametrize(
+        ("bug_id", "cause", "package", "invalid"),
+        [
+            # Closed Invalid, thirteen duplicates, unsupported surface PPA.
+            ("2150245", Cause.THIRD_PARTY_PIN, "libwacom9-surface", True),
+            # Fixed by DistUpgradeQuirks._fix_lintian_resolver_deadlock, which
+            # marks exactly this package for install.
+            ("2150319", Cause.RESOLVER_LIVELOCK, "libfile-libmagic-perl", False),
+            ("2169028", Cause.RESOLVER_LIVELOCK, "libpeas-1.0-1", False),
+        ],
+    )
+    def test_primary_cause_matches(
+        self,
+        bug_id: str,
+        cause: Cause,
+        package: str,
+        invalid: bool,
+        interner: Interner,
+    ) -> None:
+        _, result = lp(bug_id, interner)
+        primary = result.primary
+        assert primary is not None
+        assert primary.cause is cause
+        assert interner.package_label(primary.root_pkgs[0]) == package
+        assert result.is_candidate_invalid is invalid
+
+    def test_the_summary_names_both_halves_of_the_deadlock(self, interner: Interner) -> None:
+        """Upstream's quirk docstring describes exactly this cycle."""
+        _, result = lp("2150319", interner)
+        summary = result.primary.summary
+        assert "libyaml-libyaml-perl" in summary
+        assert "lintian" in summary
+        assert "libfile-libmagic-perl" in summary
+
+
+class TestLivelockDetection:
+    """apt alternating between two contradictory decisions, for ever."""
+
+    def test_the_lintian_deadlock_is_found(self, interner: Interner) -> None:
+        found = detect_oscillations(sectioned("lp2150319-apt.log").primary, interner)
+        assert len(found) == 1
+        stuck = found[0]
+        assert interner.package_label(stuck.pkg_id) == "lintian"
+        assert interner.package_label(stuck.blocked_by) == "libfile-libmagic-perl"
+        assert interner.package_label(stuck.forced_by) == "libyaml-libyaml-perl"
+        assert stuck.reversals >= 20
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "local-apt3-success.log",
+            "local-apt3-gnome.log",
+            "local-apt3-devcascade.log",
+            "lp2150245-apt.log",
+        ],
+    )
+    def test_logs_that_converged_show_no_livelock(self, name: str, interner: Interner) -> None:
+        """Including one that failed for an unrelated reason.
+
+        LP#2150245 fails on a third-party conflict, not a livelock. An earlier
+        version of the detector reported thirty-six oscillating packages there
+        because it counted ``MarkInstall`` -- which apt emits for every package
+        it installs -- as a reversal.
+        """
+        assert detect_oscillations(sectioned(name).primary, interner) == ()
+
+    def test_the_threshold_sits_in_the_measured_gap(self, interner: Interner) -> None:
+        """Reversal counts are bimodal: 1-2 is noise, 17-20 is a livelock.
+
+        Nothing at all falls between 3 and 16 across the six real logs, so the
+        threshold is not fitted to them.
+        """
+        counts: list[int] = []
+        for name in ("lp2150319-apt.log", "lp2169028-apt.log", "lp2150245-apt.log"):
+            counts.extend(
+                o.reversals
+                for o in detect_oscillations(sectioned(name).primary, interner, min_reversals=1)
+            )
+        assert counts, "expected some oscillation in these logs"
+        assert not any(3 <= c < 16 for c in counts)
+        assert 3 <= MIN_REVERSALS <= 16
+
+    def test_a_single_reversal_is_not_a_livelock(self, interner: Interner) -> None:
+        """Keeping a package then upgrading it once is convergence."""
+        found = detect_oscillations(
+            sectioned("local-apt3-gnome.log").primary, interner, min_reversals=1
+        )
+        assert all(o.reversals <= 2 for o in found)
+
+    def test_blame_falls_on_the_package_apt_refused(self, interner: Interner) -> None:
+        """Installing it is what breaks the cycle; it is what the quirk marks."""
+        _, result = lp("2150319", interner)
+        livelock = next(f for f in result.findings if f.cause is Cause.RESOLVER_LIVELOCK)
+        assert interner.package_label(livelock.root_pkgs[0]) == "libfile-libmagic-perl"
+        assert livelock.detail["oscillating_package"] == "lintian"
+
+
+class TestAptErrorCorroboration:
+    """apt names a mechanism when it gives up, and that is checkable evidence."""
+
+    def test_held_broken_packages_implicates_holds(self, interner: Interner) -> None:
+        run, _ = lp("2150245", interner)
+        causes = corroborated_causes(run, interner)
+        assert Cause.HOLDBACK_BLOCKS_NEW_DEP in causes
+        assert Cause.THIRD_PARTY_PIN in causes
+        assert Cause.UNSATISFIABLE_VIRTUAL not in causes
+
+    def test_corroboration_beats_a_bigger_resolved_conflict(self, interner: Interner) -> None:
+        """LP#2150245's largest root is real, and is not the failure.
+
+        ``gir1.2-gio-2.0`` is unsatisfiable with ninety-eight victims, but apt
+        *resolved* it by removing the dependents and moved on. What it could
+        not resolve it reported as ``you have held broken packages``. Ranking
+        on blast radius alone led with the resolved conflict.
+        """
+        _, result = lp("2150245", interner)
+        assert result.primary.cause is Cause.THIRD_PARTY_PIN
+
+        biggest = max(result.findings, key=lambda f: f.cascade_size)
+        assert biggest.cause is Cause.UNSATISFIABLE_VIRTUAL
+        assert biggest.cascade_size > result.primary.cascade_size
+        assert result.findings.index(result.primary) < result.findings.index(biggest)
+
+    def test_no_apt_error_means_no_corroboration(self, interner: Interner) -> None:
+        run, result = lp("2169028", interner)
+        assert run.apt_error_entries == ()
+        assert corroborated_causes(run, interner) == frozenset()
+        assert result.corroborated == frozenset()
+
+
+class TestRanking:
+    def _finding(self, **kwargs: object) -> Finding:
+        base: dict[str, object] = {
+            "cause": Cause.EXACT_PIN_BROKEN_BY_UPGRADE,
+            "rule": "resolver.roots",
+            "severity": Severity.HIGH,
+            "confidence": Confidence.STRONG,
+        }
+        base.update(kwargs)
+        return Finding(**base)  # type: ignore[arg-type]
+
+    def test_blast_radius_beats_rule_priority_within_a_tier(self) -> None:
+        """Priority dominating put single-victim notes above a 39-package cascade."""
+        small = self._finding(rule="resolver.third-party-blocker", cascade_size=1)
+        large = self._finding(rule="resolver.roots", cascade_size=39)
+        assert rank_findings([small, large])[0] is large
+
+    def test_preconditions_outrank_everything(self) -> None:
+        """Nothing observed is trustworthy while dpkg is mid-transaction."""
+        big = self._finding(cascade_size=500)
+        precondition = self._finding(
+            cause=Cause.DPKG_INTERRUPTED, rule="dpkg.interrupted", cascade_size=0
+        )
+        assert rank_findings([big, precondition])[0] is precondition
+        assert Cause.DPKG_INTERRUPTED in PRECONDITION_CAUSES
+
+    def test_environment_outranks_packages(self) -> None:
+        """A full disk looks like a dependency problem."""
+        packages = self._finding(cascade_size=100)
+        disk = self._finding(
+            cause=Cause.NOT_ENOUGH_DISK_SPACE, rule="env.disk-space", cascade_size=0
+        )
+        assert rank_findings([packages, disk])[0] is disk
+
+    def test_a_livelock_outranks_a_bigger_root(self) -> None:
+        """It strands almost nothing, and it is still why apt gave up."""
+        big = self._finding(cascade_size=98)
+        livelock = self._finding(
+            cause=Cause.RESOLVER_LIVELOCK, rule="resolver.livelock", cascade_size=0
+        )
+        assert rank_findings([big, livelock])[0] is livelock
+
+    def test_advisories_never_take_the_title(self) -> None:
+        advisory = self._finding(
+            rule="resolver.fragile-decision", severity=Severity.INFO, cascade_size=0
+        )
+        real = self._finding(cascade_size=1)
+        assert rank_findings([advisory, real])[0] is real
+
+    def test_caveats_sort_last_but_are_never_truncated(self) -> None:
+        caveat = self._finding(
+            cause=Cause.NO_FAILURE_RECORDED,
+            rule="evidence.truncated",
+            severity=Severity.INFO,
+        )
+        bulk = [self._finding(cascade_size=n) for n in range(MAX_FINDINGS + 10)]
+        ranked = rank_findings([*bulk, caveat])
+        assert ranked[-1] is caveat
+        assert len(ranked) == MAX_FINDINGS + 1
+
+    def test_the_output_is_capped(self, interner: Interner) -> None:
+        """Thirty-nine findings is the log again, not a diagnosis."""
+        _, result = lp("2150245", interner)
+        non_caveat = [f for f in result.findings if f.cause not in CAVEAT_CAUSES]
+        assert len(non_caveat) <= MAX_FINDINGS
+
+    def test_ranking_is_stable(self, interner: Interner) -> None:
+        """An unstable order would make deduplication non-deterministic."""
+        _, first = lp("2150245", interner)
+        _, second = lp("2150245", interner)
+        assert [f.summary for f in first.findings] == [f.summary for f in second.findings]
+
+
+class TestAdvisoryGrouping:
+    """Fragility is a property of a finding, not a class of finding."""
+
+    def test_one_advisory_not_one_per_root(self, interner: Interner) -> None:
+        """A finding per fragile root buried a 39-package cascade under twelve."""
+        _, result = lp("2169028", interner)
+        advisories = [f for f in result.findings if f.rule == "resolver.fragile-decision"]
+        assert len(advisories) <= 1
+
+    def test_the_advisory_names_the_narrowest_margin(self, interner: Interner) -> None:
+        _, result = lp("2169028", interner)
+        advisory = next(
+            (f for f in result.findings if f.rule == "resolver.fragile-decision"),
+            None,
+        )
+        if advisory is not None:
+            assert advisory.fragile
+            assert "package set" in advisory.summary
+            assert advisory.severity is Severity.INFO
+
+
+class TestTruncatedEvidence:
+    def test_the_refusal_is_reported(self, interner: Interner) -> None:
+        _, result = lp("2169028", interner)
+        assert result.caveats
+        assert "no failure was recorded" in result.caveats[0].summary
+
+    def test_most_rules_are_withheld(self, interner: Interner) -> None:
+        _, result = lp("2169028", interner)
+        assert result.skipped_incomplete
+        assert "env.disk-space" in result.skipped_incomplete
+
+    def test_resolver_findings_still_appear(self, interner: Interner) -> None:
+        """The roots are the most useful thing on such a bug.
+
+        What is forbidden is claiming they are the cause, which the caveat
+        prevents.
+        """
+        _, result = lp("2169028", interner)
+        assert len(result.resolver_findings) > 0
+
+    def test_complete_evidence_produces_no_caveat(self, interner: Interner) -> None:
+        _, result = lp("2150319", interner)
+        assert result.caveats == ()
+        assert result.skipped_incomplete == ()
+
+
+class TestRegistry:
+    def test_every_rule_records_its_provenance(self) -> None:
+        """A pattern with no upstream origin is a pattern fitted to samples."""
+        for candidate in all_rules():
+            assert candidate.provenance, f"{candidate.name} has no provenance"
+
+    def test_rule_names_are_namespaced(self) -> None:
+        for candidate in all_rules():
+            assert "." in candidate.name, candidate.name
+
+    def test_firing_order_is_deterministic(self) -> None:
+        assert [r.name for r in all_rules()] == [r.name for r in all_rules()]
+
+    def test_duplicate_registration_is_rejected(self) -> None:
+        existing = next(iter(RULES))
+        with pytest.raises(ValueError, match="duplicate rule name"):
+            rule(existing, Cause.UNKNOWN, priority=1)(lambda _: ())
+
+    def test_rules_are_registered(self) -> None:
+        names = {r.name for r in all_rules()}
+        assert "resolver.roots" in names
+        assert "resolver.livelock" in names
+        assert "dpkg.interrupted" in names
+        assert "evidence.truncated" in names
+
+
+class TestDpkgRules:
+    def test_the_cascade_yields_one_finding_not_thirty_five(self, interner: Interner) -> None:
+        """``Errors were encountered while processing:`` lists all 35."""
+        from uru_doctor.parsers.aptterm import parse_apt_term
+
+        term = parse_apt_term(fixture_text("logs/local-aptterm-dpkgfail.log").splitlines())
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: "2026-03-30 13:45:00,000 INFO apt version: '3.2.0'\n",
+                LogSource.APT_TERM: fixture_text("logs/local-aptterm-dpkgfail.log"),
+            },
+            interner,
+        )
+        result = diagnose(run, interner, term=term)
+        dpkg = [f for f in result.findings if f.rule == "dpkg.failures"]
+        assert len(dpkg) == 1
+        assert dpkg[0].cause is Cause.DPKG_MAINTSCRIPT_FAILED
+
+    def test_blame_goes_to_the_hook_package(self, interner: Interner) -> None:
+        """``python3`` ran the hook; ``llvm-21-tools`` shipped the broken file."""
+        from uru_doctor.parsers.aptterm import parse_apt_term
+
+        term = parse_apt_term(fixture_text("logs/local-aptterm-dpkgfail.log").splitlines())
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: "2026-03-30 13:45:00,000 INFO apt version: '3.2.0'\n",
+                LogSource.APT_TERM: fixture_text("logs/local-aptterm-dpkgfail.log"),
+            },
+            interner,
+        )
+        result = diagnose(run, interner, term=term)
+        dpkg = next(f for f in result.findings if f.rule == "dpkg.failures")
+        assert interner.package_label(dpkg.root_pkgs[0]) == "llvm-21-tools"
+        assert dpkg.detail["named_by_hook"] == "llvm-21-tools"
+        assert dpkg.detail["failing_package"] == "python3"
+
+
+class TestUpgraderRules:
+    @pytest.mark.parametrize(
+        ("message", "cause"),
+        [
+            ("Not enough free space: ['/boot needs 200M']", Cause.NOT_ENOUGH_DISK_SPACE),
+            ("Not running as root!", Cause.FILESYSTEM_NOT_WRITABLE),
+            ("Cache can not be locked (dpkg busy)", Cause.CACHE_LOCK_FAILED),
+            ("upgrade over ssh not allowed", Cause.SSH_UPGRADE_BLOCKED),
+            (
+                "Unauthenticated packages found: 'foo'",
+                Cause.PACKAGE_AUTH_FAILED,
+            ),
+            ("doUpdate() failed completely", Cause.UPDATE_FAILED),
+            ("checkViewDepends() failed", Cause.VIEW_DEPENDS_MISSING),
+            (
+                "Packages to downgrade found: 'bar'",
+                Cause.UNSUPPORTED_UPGRADE_PATH,
+            ),
+        ],
+    )
+    def test_upstream_strings_are_recognised(
+        self, message: str, cause: Cause, interner: Interner
+    ) -> None:
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
+                    f"2026-01-01 10:00:01,000 ERROR {message}\n"
+                )
+            },
+            interner,
+        )
+        result = diagnose(run, interner)
+        assert cause in {f.cause for f in result.findings}, result.findings
+
+    def test_disk_space_reports_the_requirement(self, interner: Interner) -> None:
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
+                    "2026-01-01 10:00:01,000 ERROR Not enough free space:"
+                    " ['/boot needs 200M']\n"
+                )
+            },
+            interner,
+        )
+        result = diagnose(run, interner)
+        disk = next(f for f in result.findings if f.cause is Cause.NOT_ENOUGH_DISK_SPACE)
+        assert "/boot" in disk.summary
+
+    def test_dpkg_interrupted_is_recognised_from_the_apt_error(self, interner: Interner) -> None:
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
+                    "2026-01-01 10:00:01,000 ERROR Dist-upgrade failed: "
+                    "'E:dpkg was interrupted, you must manually run "
+                    "'dpkg --configure -a' to correct the problem.'\n"
+                )
+            },
+            interner,
+        )
+        result = diagnose(run, interner)
+        assert result.primary.cause is Cause.DPKG_INTERRUPTED
+        assert result.primary.detail["remedy_command"] == "sudo dpkg --configure -a"
+
+    def test_a_benign_error_fires_nothing(self, interner: Interner) -> None:
+        run = ingest_attachments(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
+                    "2026-01-01 10:00:01,000 ERROR failed to import AptClone\n"
+                )
+            },
+            interner,
+        )
+        result = diagnose(run, interner)
+        causes = {f.cause for f in result.findings}
+        assert causes <= CAVEAT_CAUSES

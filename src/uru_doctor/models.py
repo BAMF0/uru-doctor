@@ -441,6 +441,16 @@ class Cause(StrEnum):
     #: severity; present so that it is explicitly classified rather than
     #: falling through to UNKNOWN and demanding human attention.
     TRANSITIONAL_BREAKS = "transitional_breaks"
+    RESOLVER_LIVELOCK = "resolver_livelock"
+    """apt alternated between two contradictory decisions and never converged.
+
+    Needs its own class because a livelocked package is not the root of
+    anything: LP#2150319's ``lintian`` strands two packages and loses every
+    blast-radius comparison to roots explaining five or thirty-nine. What makes
+    it the cause is not how much it broke but that apt was still arguing with
+    itself about it when it gave up. Upstream fixed that bug with
+    ``DistUpgradeQuirks._fix_lintian_resolver_deadlock``.
+    """
 
     # -- environment and process -------------------------------------------
     NOT_ENOUGH_DISK_SPACE = "not_enough_disk_space"
@@ -1218,6 +1228,13 @@ class UpgradeRun(Frozen):
     to quote back at apt, and the observed set is the one to reason about.
     """
 
+    oscillations: tuple[tuple[PkgId, int, PkgId, PkgId], ...] = ()
+    """``(package, reversals, blocked_by, forced_by)`` per livelocked package.
+
+    A tuple rather than a model because it is small, fixed-shape and goes
+    straight into a finding. See :mod:`uru_doctor.apt.livelock`.
+    """
+
     third_party: tuple[PkgId, ...] = ()
     """Packages known to come from outside Ubuntu.
 
@@ -1301,6 +1318,13 @@ class UpgradeRun(Frozen):
         """``"noble→resolute"``, the prefix used by every generated title."""
         if self.from_series and self.to_series:
             return f"{self.from_series}\u2192{self.to_series}"
+        # Degrade one half at a time. A bug with only an apt.log still knows
+        # its source release from the apport metadata, and "noble->?" is more
+        # use in a bug list than "unknown->unknown".
+        if self.from_series:
+            return f"{self.from_series}\u2192?"
+        if self.to_series:
+            return f"?\u2192{self.to_series}"
         return "unknown\u2192unknown"
 
     def with_findings(self, findings: tuple[Finding, ...], signature: Signature) -> Self:
