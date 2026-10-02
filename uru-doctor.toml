@@ -23,7 +23,8 @@
 # `diagnose` and `title` never write here. Interning is a write, but a command
 # that only answers a question about a directory uses a throwaway store rather
 # than creating this one wherever you happened to be standing. `ingest`,
-# `fetch`, `dedup`, `show` and `stats` use it.
+# `fetch`, `sweep`, `dedup`, `related`, `history`, `coverage`, `show` and
+# `stats` use it.
 state_dir = ".uru-doctor"
 
 

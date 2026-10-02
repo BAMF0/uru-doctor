@@ -92,8 +92,13 @@ app = typer.Typer(
     help=(
         "Diagnose, deduplicate and retitle Ubuntu Release Upgrader bugs from their upgrade logs."
     ),
+    epilog=(
+        "Exit status: 0 success, 1 error, 2 bad usage, 3 imperfect parse under --strict.\n\n"
+        "Launchpad access is anonymous and read-only."
+    ),
+    context_settings={"help_option_names": ["-h", "--help"]},
     no_args_is_help=True,
-    add_completion=False,
+    add_completion=True,
 )
 
 out = Console()
@@ -723,20 +728,22 @@ def _corpus_coverage(store: Store, tracker: Tracker | None = None) -> CorpusCove
 
 ConfigOption = Annotated[
     Path | None,
-    typer.Option("--config", "-c", help="Path to uru-doctor.toml. Default: search upward."),
+    typer.Option(
+        "--config", "-c", metavar="FILE", help="Path to uru-doctor.toml. Default: search upward."
+    ),
 ]
 OutOption = Annotated[
     Path | None,
-    typer.Option("--out", "-o", help="Write to this file instead of stdout."),
+    typer.Option("--out", "-o", metavar="FILE", help="Write to this file instead of stdout."),
 ]
 
 
-@app.command("diagnose")
+@app.command("diagnose", rich_help_panel="Inspect one upgrade")
 def diagnose_cmd(
     path: Annotated[
         Path,
         typer.Argument(
-            metavar="DIRECTORY",
+            metavar="DIR",
             help="A dist-upgrade log directory, e.g. /var/log/dist-upgrade.",
         ),
     ],
@@ -759,9 +766,15 @@ def diagnose_cmd(
 ) -> None:
     """Diagnose an upgrade failure from its logs.
 
-    Reads the directory, leaves nothing behind, and says what stopped the
-    upgrade and which package to blame. Use --markdown for a page suitable for
-    pasting into a bug report.
+    Reads DIR, leaves nothing behind, and says what stopped the upgrade and
+    which package to blame. --markdown gives a page suitable for pasting
+    into a bug report.
+
+    \b
+    Examples:
+      uru-doctor diagnose /var/log/dist-upgrade
+      uru-doctor diagnose --markdown -o report.md /var/log/dist-upgrade
+      uru-doctor diagnose --json .
     """
     if markdown and as_json:
         _fail("choose one of --markdown or --json", EXIT_USAGE)
@@ -815,14 +828,18 @@ def diagnose_cmd(
     _finish_strict(_imperfect(diagnosed), strict=strict)
 
 
-@app.command()
+@app.command(rich_help_panel="Inspect one upgrade")
 def title(
-    path: Annotated[Path, typer.Argument(metavar="DIRECTORY")],
+    path: Annotated[Path, typer.Argument(metavar="DIR")],
     config_path: ConfigOption = None,
 ) -> None:
     """Print just the proposed bug title.
 
     One line on stdout and nothing else, so it can be piped.
+
+    \b
+    Example:
+      uru-doctor title /var/log/dist-upgrade
     """
     config = _config(config_path)
     with _scratch_store() as store:
@@ -836,11 +853,11 @@ def title(
         err.print("[yellow]low confidence: the logs do not clearly name a cause[/]")
 
 
-@app.command()
+@app.command(rich_help_panel="Collect the corpus")
 def ingest(
     paths: Annotated[
         list[Path],
-        typer.Argument(metavar="DIRECTORY...", help="One or more dist-upgrade directories."),
+        typer.Argument(metavar="DIR...", help="One or more dist-upgrade directories."),
     ],
     as_json: Annotated[
         bool, typer.Option("--json", help="Emit a machine-readable record per stored run.")
@@ -854,9 +871,13 @@ def ingest(
 ) -> None:
     """Add upgrade logs to the record store, for corpus-wide work.
 
-    Unlike diagnose, this persists: the store accumulates the template and
-    package vocabulary that duplicate detection needs, and holds the diagnosed
-    runs that dedup and show read back.
+    Unlike diagnose this persists: the store accumulates the vocabulary that
+    duplicate detection needs, and holds the diagnosed runs that dedup and
+    show read back.
+
+    \b
+    Example:
+      uru-doctor ingest /var/log/dist-upgrade ./unpacked-*/
     """
     config = _config(config_path)
     with _state_store(config) as store:
@@ -911,11 +932,11 @@ def ingest(
     _finish_strict(imperfect, strict=strict)
 
 
-@app.command()
+@app.command(rich_help_panel="Collect the corpus")
 def fetch(
     bugs: Annotated[
         list[int],
-        typer.Argument(metavar="BUG_ID...", help="Launchpad bug numbers."),
+        typer.Argument(metavar="BUG...", help="Launchpad bug numbers."),
     ],
     save: Annotated[
         bool, typer.Option("--save/--no-save", help="Add the runs to the record store.")
@@ -933,17 +954,14 @@ def fetch(
     """Fetch bugs from Launchpad and diagnose them.
 
     Anonymous and read-only: this cannot write to Launchpad, and no
-    credentials are ever used. Proposed titles and duplicate groupings are for
-    a human to apply.
+    credentials are ever used. Requests are paced (~3s apart) and
+    attachments cached; a bug costs about six requests, so expect a few
+    seconds each.
 
-    Launchpad answers 429 readily and takes about a minute to forgive one, so
-    requests are spaced rather than parallelised and ETags are cached. A bug
-    with four logs costs six requests; expect a few seconds each.
-
-    This is where a new apt version is met first, so it reports lexer coverage
-    and honours --strict: a bug whose resolver trace did not fully lex has been
-    diagnosed from partial evidence, and that is worth hearing about before the
-    verdict is believed.
+    \b
+    Examples:
+      uru-doctor fetch 2150339 2151847
+      uru-doctor fetch --no-save --json 2150339
     """
     config = _config(config_path)
     store_ctx = _state_store(config) if save else _scratch_store()
@@ -1005,7 +1023,7 @@ def fetch(
     _finish_strict(_imperfect(diagnosed), strict=strict)
 
 
-@app.command()
+@app.command(rich_help_panel="Examine the corpus")
 def dedup(
     out_path: OutOption = None,
     markdown: Annotated[
@@ -1018,10 +1036,13 @@ def dedup(
 ) -> None:
     """Group stored runs that report the same fault.
 
-    Grouping uses log-derived structure only -- the root-cause subgraph, the
-    causes, the phase -- and never titles, tags or descriptions. The tier is
-    always reported, because the tiers are not equally strong: root-graph means
-    an identical root-cause subgraph, while evidence-similarity is a score.
+    Grouping uses log-derived structure only -- never titles, tags or
+    descriptions -- and always reports the tier: root-graph is an identical
+    root-cause subgraph and safe to act on; evidence-similarity is a score.
+
+    \b
+    Example:
+      uru-doctor dedup
     """
     if markdown and as_json:
         _fail("choose one of --markdown or --json", EXIT_USAGE)
@@ -1148,11 +1169,358 @@ def dedup(
             )
 
 
-@app.command()
+@app.command(rich_help_panel="Examine the corpus")
+def related(
+    key: Annotated[
+        str,
+        typer.Argument(metavar="KEY", help="Run key, e.g. lp:2150245#0, or a bare bug number."),
+    ],
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable answer.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Show stored runs that report the same fault as this one.
+
+    The triager's second question -- "have we seen this before?" -- answered
+    in the same tiers dedup reports, strongest first: an identical root-cause
+    subgraph is safe to act on, a shared root package alone is a lead, not a
+    verdict. Matching is on log-derived structure only.
+
+    \b
+    Example:
+      uru-doctor related lp:2150339#0
+    """
+    config = _config(config_path)
+    with _state_store(config) as store:
+        run_key = _resolve_key(store, key)
+        subject = store.get_run(run_key)
+        if subject is None:  # pragma: no cover -- _resolve_key just found it
+            _fail(f"no stored run matches {key!r}")
+            return
+
+        same_graph = store.runs_with_signature(run_key, "root_graph")
+        same_tuple = [
+            k for k in store.runs_with_signature(run_key, "cause_tuple") if k not in set(same_graph)
+        ]
+        stronger = set(same_graph) | set(same_tuple)
+        shared = [
+            (k, n) for k, n in store.runs_sharing_roots(run_key) if k not in stronger
+        ]
+        # Only what is needed to label the rows; a full payload per neighbour
+        # would make this command cost the whole corpus.
+        labels = {
+            k: store.get_run(k) for k in [*same_graph, *same_tuple, *(k for k, _ in shared)]
+        }
+
+    def describe(neighbour_key: str) -> dict[str, object]:
+        neighbour = labels.get(neighbour_key)
+        return {
+            "key": neighbour_key,
+            "bug_id": neighbour.bug_id if neighbour else None,
+            "cause": (
+                neighbour.top_finding.cause.value
+                if neighbour and neighbour.top_finding
+                else None
+            ),
+            # Launchpad's own verdict, when known. Free ground truth -- and the
+            # reason this command is worth having: "these three are the same
+            # fault and one of them is already closed Invalid" is a decision.
+            "duplicate_of": neighbour.duplicate_of if neighbour else None,
+            "duplicate_count": neighbour.duplicate_count if neighbour else 0,
+        }
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "key": run_key,
+                    "cause": (
+                        subject.top_finding.cause.value if subject.top_finding else None
+                    ),
+                    "tiers": {
+                        Tier.ROOT_GRAPH: [describe(k) for k in same_graph],
+                        Tier.CAUSE_TUPLE: [describe(k) for k in same_tuple],
+                    },
+                    "shared_roots": [
+                        {**describe(k), "shared_roots": n} for k, n in shared
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="related runs",
+        )
+        return
+
+    out.print()
+    out.rule(f"[bold]related to {run_key}[/]")
+    if subject.top_finding is not None:
+        out.print(f"[dim]cause[/] {subject.top_finding.cause.value}")
+
+    def tier_table(entries: Sequence[tuple[str, str]]) -> Table:
+        table = Table(box=None, pad_edge=False, show_header=False)
+        table.add_column(style="dim", no_wrap=True)
+        table.add_column(overflow="fold")
+        table.add_column(style="dim", overflow="fold")
+        for neighbour_key, note in entries:
+            neighbour = labels.get(neighbour_key)
+            verdict = ""
+            if neighbour is not None and neighbour.duplicate_of:
+                verdict = f"already a duplicate of LP#{neighbour.duplicate_of}"
+            elif neighbour is not None and neighbour.duplicate_count:
+                verdict = f"{plural(neighbour.duplicate_count, 'duplicate')} already linked"
+            table.add_row(note, neighbour_key, verdict)
+        return table
+
+    if same_graph:
+        out.print("\n[bold]root-graph[/]  [dim]identical root-cause subgraph; safe to act on[/]")
+        out.print(tier_table([(k, "same subgraph") for k in same_graph]))
+    if same_tuple:
+        out.print("\n[bold]cause-tuple[/]  [dim]same causes and roots, same phase[/]")
+        out.print(tier_table([(k, "same cause tuple") for k in same_tuple]))
+    if shared:
+        out.print("\n[bold]shared roots[/]  [dim]a lead, not a verdict[/]")
+        out.print(
+            tier_table(
+                [
+                    (k, f"{plural(n, 'root')} in common")
+                    for k, n in shared[: config.report.max_clusters]
+                ]
+            )
+        )
+
+    if not (same_graph or same_tuple or shared):
+        out.print("\n[dim]no stored run shares a root package with this one[/]")
+
+
+@app.command(rich_help_panel="Examine the corpus")
+def history(
+    package: Annotated[
+        str,
+        typer.Argument(metavar="PKG", help="Package name, with or without :arch."),
+    ],
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable answer.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Show which stored runs implicate a package, and in what capacity.
+
+    Root and victim are reported separately and never summed: a package
+    implicated only as victim is evidence against blaming it, which is the
+    inversion this tool exists to correct. A bare name matches every
+    architecture; pass an explicit :arch to narrow.
+
+    \b
+    Example:
+      uru-doctor history libpeas-1.0-1
+    """
+    config = _config(config_path)
+    with _state_store(config) as store:
+        spellings = store.packages_matching(package)
+        if not spellings:
+            _fail(
+                f"no stored run mentions {package!r}\n"
+                "Package names come from the logs; try `uru-doctor stats` for the "
+                "ones the corpus knows."
+            )
+            return
+        pkg_ids = [pkg_id for pkg_id, _ in spellings]
+        by_role: dict[str, list[str]] = {}
+        for run_key, role in store.runs_with_package(pkg_ids):
+            by_role.setdefault(role, []).append(run_key)
+        details = {
+            k: store.get_run(k) for k in {k for keys in by_role.values() for k in keys}
+        }
+
+    def describe(run_key: str) -> dict[str, object]:
+        found = details.get(run_key)
+        return {
+            "key": run_key,
+            "bug_id": found.bug_id if found else None,
+            "cause": found.top_finding.cause.value if found and found.top_finding else None,
+            "release": found.release_pair if found else "",
+            "duplicate_of": found.duplicate_of if found else None,
+        }
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "package": package,
+                    "spellings": [name for _, name in spellings],
+                    # Roles kept apart on purpose; see the docstring.
+                    "roles": {
+                        role: [describe(k) for k in sorted(keys)]
+                        for role, keys in sorted(by_role.items())
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="history",
+        )
+        return
+
+    out.print()
+    out.rule(f"[bold]{package}[/]")
+    if len(spellings) > 1 or spellings[0][1] != package:
+        out.print(f"[dim]interned as[/] {', '.join(name for _, name in spellings)}")
+    if not by_role:
+        out.print("[dim]known to the corpus, but no run implicates it[/]")
+        return
+
+    # Root first: it is the only role that answers "is this the cause?".
+    for role in ("root", "victim", "failed", "held_back"):
+        keys = by_role.get(role)
+        if not keys:
+            continue
+        out.print(f"\n[bold]{role}[/] in {plural(len(keys), 'run')}")
+        table = Table(box=None, pad_edge=False, show_header=False)
+        table.add_column(overflow="fold")
+        table.add_column(style="dim", no_wrap=True)
+        table.add_column(no_wrap=True)
+        for run_key in sorted(keys)[: config.report.max_clusters]:
+            found = details.get(run_key)
+            table.add_row(
+                run_key,
+                found.release_pair if found else "",
+                found.top_finding.cause.value if found and found.top_finding else "-",
+            )
+        out.print(table)
+
+    if "root" not in by_role and "victim" in by_role:
+        # Worth saying out loud, because it is the inversion the tool exists
+        # to correct and a reader scanning a list will not notice an absence.
+        out.print(
+            "\n[dim]never a root in this corpus -- implicated only as a victim, "
+            "which is evidence against blaming it[/]"
+        )
+
+
+@app.command(rich_help_panel="Examine the corpus")
+def coverage(
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable coverage report.")
+    ] = False,
+    strict: Annotated[
+        bool,
+        typer.Option("--strict", help=f"Exit {EXIT_IMPERFECT} if the corpus has any gap."),
+    ] = False,
+    limit: Annotated[
+        int, typer.Option("--limit", "-n", metavar="N", help="Unrecognised shapes to list.")
+    ] = 20,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Report how much of the stored corpus the lexer actually recognised.
+
+    Names the runs with a grammar gap and lists the masked shapes that new
+    lexer patterns get written from. An unrecognised line is a silently
+    dropped fact, not a visible error, so this has to be cheap to ask.
+
+    \b
+    Example:
+      uru-doctor coverage --strict
+    """
+    config = _config(config_path)
+    with _state_store(config) as store, _progress(console=err if as_json else out) as tracker:
+        totals = _corpus_coverage(store, tracker)
+        offenders = store.imperfect_runs()
+        unexplained = store.unclassified_templates(limit=limit)
+        unmeasured = store.unmeasured_runs()
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    **totals,
+                    "imperfect": [
+                        {"key": key, "lines": lines, "unmatched": unmatched}
+                        for key, lines, unmatched in offenders
+                    ],
+                    # Stored before coverage was recorded. Not the same as
+                    # having no trace, and not folded into the ratio: "100% of
+                    # what I measured" over a mostly unmeasured corpus is the
+                    # kind of true-but-useless number that gets quoted.
+                    "unmeasured": unmeasured,
+                    # Distinct from unknown_shapes: these lexed fine but no
+                    # rule claimed them. A gap in the grammar and a gap in the
+                    # rules are different repairs.
+                    "unexplained_templates": [
+                        {"template": pattern, "runs": n} for _, pattern, n in unexplained
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="coverage",
+        )
+        _finish_strict([f"{k}: {u:,} unrecognised" for k, _, u in offenders], strict=strict)
+        return
+
+    if not totals["runs_with_trace"]:
+        if unmeasured:
+            out.print(
+                f"[yellow]{plural(len(unmeasured), 'run')} stored before coverage was "
+                f"recorded[/]; re-ingest to measure"
+            )
+        else:
+            out.print("[dim]no stored run has a resolver trace to lex[/]")
+        return
+
+    style = "green" if not totals["runs_imperfect"] else "yellow"
+    out.print(
+        f"[{style}]lexer coverage {totals['coverage']:.4%}[/] over "
+        f"{totals['lines']:,} lines in {plural(totals['runs_with_trace'], 'trace')}"
+    )
+    out.print(
+        f"{plural(totals['unmatched'], 'line')} unrecognised in "
+        f"{plural(totals['runs_imperfect'], 'run')}"
+    )
+
+    if offenders:
+        out.print("\n[bold]runs with a gap[/]  [dim](worst first)[/]")
+        for key, lines, unmatched in offenders[: config.report.max_clusters]:
+            out.print(f"  {unmatched:>6,} of {lines:<8,} {key}")
+
+    if unmeasured:
+        out.print(
+            f"\n[yellow]{plural(len(unmeasured), 'run')} stored before coverage was "
+            f"recorded[/] [dim]-- not counted above; re-ingest to measure[/]"
+        )
+
+    shapes = totals["unknown_shapes"][:limit]
+    if shapes:
+        out.print("\n[bold]unrecognised shapes[/]  [dim](masked; write patterns from these)[/]")
+        for shape in shapes:
+            out.print(f"  {shape['count']:>6,}x  [dim]{shape['template']}[/]")
+
+    if unexplained:
+        # Lexed but unexplained is a different repair from unlexed: the line
+        # was understood and no rule claimed it, which is a missing rule rather
+        # than a missing pattern.
+        out.print("\n[bold]lexed but unexplained[/]  [dim](no rule claimed these)[/]")
+        for _, pattern, count in unexplained:
+            out.print(f"  {count:>6,}  [dim]{pattern}[/]")
+
+    _finish_strict([f"{k}: {u:,} unrecognised" for k, _, u in offenders], strict=strict)
+
+
+@app.command(rich_help_panel="Examine the corpus")
 def show(
     key: Annotated[
         str,
-        typer.Argument(help="Run key, e.g. lp:2150245#0, or a bare bug number."),
+        typer.Argument(metavar="KEY", help="Run key, e.g. lp:2150245#0, or a bare bug number."),
     ],
     markdown: Annotated[
         bool, typer.Option("--markdown", "-m", help="Emit the full Markdown report.")
@@ -1163,7 +1531,13 @@ def show(
     out_path: OutOption = None,
     config_path: ConfigOption = None,
 ) -> None:
-    """Show a stored run's report."""
+    """Show a stored run's report.
+
+    \b
+    Examples:
+      uru-doctor show lp:2150245#0
+      uru-doctor show --json 2150245
+    """
     config = _config(config_path)
     with _state_store(config) as store:
         interner = Interner(store)
@@ -1212,7 +1586,7 @@ def show(
             _write(json.dumps(payload, indent=2) + "\n", out_path, label="record")
 
 
-@app.command()
+@app.command(rich_help_panel="Examine the corpus")
 def rules(
     rule_name: Annotated[
         str | None,
@@ -1221,8 +1595,12 @@ def rules(
 ) -> None:
     """List the diagnostic rules, or explain one.
 
-    Every finding names the rule that produced it, so this is how to find out
-    what a verdict was based on.
+    Every finding names the rule that produced it, so this is how to find
+    out what a verdict was based on.
+
+    \b
+    Example:
+      uru-doctor rules --explain resolver.roots
     """
     if rule_name is not None:
         found = explain(rule_name)
@@ -1257,7 +1635,7 @@ def rules(
     out.print(f"[dim]{len(all_rules())} rules. `--explain NAME` for detail.[/]")
 
 
-@app.command()
+@app.command(rich_help_panel="Examine the corpus")
 def stats(
     as_json: Annotated[
         bool, typer.Option("--json", help="Emit a machine-readable summary.")
@@ -1265,7 +1643,16 @@ def stats(
     out_path: OutOption = None,
     config_path: ConfigOption = None,
 ) -> None:
-    """Summarise the record store."""
+    """Summarise the record store.
+
+    Includes corpus-wide lexer coverage: a grammar gap in one of forty
+    stored runs is invisible in that run's own report once it has scrolled
+    away.
+
+    \b
+    Example:
+      uru-doctor stats
+    """
     config = _config(config_path)
     with _state_store(config) as store:
         interner = Interner(store)
@@ -1330,7 +1717,7 @@ def stats(
             out.print(f"  {count:>5,}  {name}")
 
 
-@app.command()
+@app.command(rich_help_panel="Collect the corpus")
 def sweep(
     since: Annotated[
         str | None,
@@ -1342,7 +1729,7 @@ def sweep(
     ] = None,
     limit: Annotated[
         int | None,
-        typer.Option("--limit", "-n", help="Cap how many new bugs to fetch logs for."),
+        typer.Option("--limit", "-n", metavar="N", help="Cap how many new bugs to fetch logs for."),
     ] = None,
     dry_run: Annotated[
         bool,
@@ -1360,24 +1747,16 @@ def sweep(
 ) -> None:
     """Collect newly reported release-upgrader bugs and diagnose them.
 
-    The entry point for triage. Without this, the bug list has to be curated by
-    hand, which means the tool only ever sees bugs somebody already decided
-    were interesting -- reintroducing exactly the selection bias the rest of
-    the design removes.
+    The entry point for triage. Resumable, because it has to be: the
+    watermark advances only over bugs actually stored and never moves
+    backward, so an interrupted pass loses nothing and the next one
+    continues. Read-only and anonymous, like every Launchpad path here.
 
-    Read-only and anonymous, like every other Launchpad path here.
-
-    Resumable, because it has to be: at roughly six requests per bug and three
-    seconds between them, a hundred bugs is half an hour, and Launchpad answers
-    429 readily. The watermark advances only over bugs actually handled and
-    never moves backward, so an interrupted sweep loses nothing and the next
-    run continues rather than starting over. Use --dry-run to see what a pass
-    would cost before spending it.
-
-    Closed bugs are included deliberately. Launchpad's search omits them by
-    default, and a bug's own resolution is the second-strongest ground truth
-    there is -- so taking the default would quietly exclude the best evidence
-    for whether this tool is right.
+    \b
+    Examples:
+      uru-doctor sweep --dry-run   # what would this pass cost?
+      uru-doctor sweep --since 2026-01-01
+      uru-doctor sweep -n 20
     """
     config = _config(config_path)
     watermark: datetime | None = None
@@ -1605,367 +1984,6 @@ def _report_dry_run(
         f"[dim]~{len(planned) * 6} requests, "
         f"~{len(planned) * 6 * 3 // 60} min at the configured pacing[/]"
     )
-
-
-@app.command()
-def coverage(
-    as_json: Annotated[
-        bool, typer.Option("--json", help="Emit a machine-readable coverage report.")
-    ] = False,
-    strict: Annotated[
-        bool,
-        typer.Option("--strict", help=f"Exit {EXIT_IMPERFECT} if the corpus has any gap."),
-    ] = False,
-    limit: Annotated[
-        int, typer.Option("--limit", "-n", help="Unrecognised shapes to list.")
-    ] = 20,
-    out_path: OutOption = None,
-    config_path: ConfigOption = None,
-) -> None:
-    """Report how much of the stored corpus the lexer actually recognised.
-
-    The grammar-gap loop, as a command. An unrecognised line is not a visible
-    error -- it is a verb the conflict graph cannot see, and the failure mode is
-    a confident diagnosis of partial evidence. So the question "is anything
-    going unread?" has to be cheap to ask and has to cover the whole corpus,
-    because a gap in one of forty stored runs is invisible in that run's own
-    report once it has scrolled past.
-
-    The masked shapes are the output worth having: they are what a new pattern
-    in apt/grammar.py gets written from. Ten thousand variants of one
-    unrecognised form appear as one entry with a count.
-    """
-    config = _config(config_path)
-    with _state_store(config) as store, _progress(console=err if as_json else out) as tracker:
-        totals = _corpus_coverage(store, tracker)
-        offenders = store.imperfect_runs()
-        unexplained = store.unclassified_templates(limit=limit)
-        unmeasured = store.unmeasured_runs()
-
-    if as_json:
-        _write(
-            json.dumps(
-                {
-                    "schema": JSON_SCHEMA_VERSION,
-                    **totals,
-                    "imperfect": [
-                        {"key": key, "lines": lines, "unmatched": unmatched}
-                        for key, lines, unmatched in offenders
-                    ],
-                    # Stored before coverage was recorded. Not the same as
-                    # having no trace, and not folded into the ratio: "100% of
-                    # what I measured" over a mostly unmeasured corpus is the
-                    # kind of true-but-useless number that gets quoted.
-                    "unmeasured": unmeasured,
-                    # Distinct from unknown_shapes: these lexed fine but no
-                    # rule claimed them. A gap in the grammar and a gap in the
-                    # rules are different repairs.
-                    "unexplained_templates": [
-                        {"template": pattern, "runs": n} for _, pattern, n in unexplained
-                    ],
-                },
-                indent=2,
-            )
-            + "\n",
-            out_path,
-            label="coverage",
-        )
-        _finish_strict([f"{k}: {u:,} unrecognised" for k, _, u in offenders], strict=strict)
-        return
-
-    if not totals["runs_with_trace"]:
-        if unmeasured:
-            out.print(
-                f"[yellow]{plural(len(unmeasured), 'run')} stored before coverage was "
-                f"recorded[/]; re-ingest to measure"
-            )
-        else:
-            out.print("[dim]no stored run has a resolver trace to lex[/]")
-        return
-
-    style = "green" if not totals["runs_imperfect"] else "yellow"
-    out.print(
-        f"[{style}]lexer coverage {totals['coverage']:.4%}[/] over "
-        f"{totals['lines']:,} lines in {plural(totals['runs_with_trace'], 'trace')}"
-    )
-    out.print(
-        f"{plural(totals['unmatched'], 'line')} unrecognised in "
-        f"{plural(totals['runs_imperfect'], 'run')}"
-    )
-
-    if offenders:
-        out.print("\n[bold]runs with a gap[/]  [dim](worst first)[/]")
-        for key, lines, unmatched in offenders[: config.report.max_clusters]:
-            out.print(f"  {unmatched:>6,} of {lines:<8,} {key}")
-
-    if unmeasured:
-        out.print(
-            f"\n[yellow]{plural(len(unmeasured), 'run')} stored before coverage was "
-            f"recorded[/] [dim]-- not counted above; re-ingest to measure[/]"
-        )
-
-    shapes = totals["unknown_shapes"][:limit]
-    if shapes:
-        out.print("\n[bold]unrecognised shapes[/]  [dim](masked; write patterns from these)[/]")
-        for shape in shapes:
-            out.print(f"  {shape['count']:>6,}x  [dim]{shape['template']}[/]")
-
-    if unexplained:
-        # Lexed but unexplained is a different repair from unlexed: the line
-        # was understood and no rule claimed it, which is a missing rule rather
-        # than a missing pattern.
-        out.print("\n[bold]lexed but unexplained[/]  [dim](no rule claimed these)[/]")
-        for _, pattern, count in unexplained:
-            out.print(f"  {count:>6,}  [dim]{pattern}[/]")
-
-    _finish_strict([f"{k}: {u:,} unrecognised" for k, _, u in offenders], strict=strict)
-
-
-@app.command()
-def related(
-    key: Annotated[
-        str,
-        typer.Argument(help="Run key, e.g. lp:2150245#0, or a bare bug number."),
-    ],
-    as_json: Annotated[
-        bool, typer.Option("--json", help="Emit a machine-readable answer.")
-    ] = False,
-    out_path: OutOption = None,
-    config_path: ConfigOption = None,
-) -> None:
-    """Show stored runs that report the same fault as this one.
-
-    The triager's second question. The first is "what broke this upgrade", which
-    `diagnose` answers; the second is "have we seen this before, and what
-    happened to those bugs" -- and until now the data sat in an indexed table
-    with no way to ask it.
-
-    Answered in the same tiers `dedup` uses, strongest first, because they are
-    not equally strong: an identical root-cause subgraph is safe to act on, the
-    same causes and roots at the same phase is weaker, and a shared root
-    package alone is a lead. Shared-root overlap is reported as a count rather
-    than a verdict -- one root in common out of eleven is a coincidence worth a
-    glance, all of them is the same fault, and the tool does not pretend to
-    know where the line is.
-
-    Matching is on log-derived structure only. Titles, tags and descriptions
-    are not consulted here any more than they are in `dedup`.
-    """
-    config = _config(config_path)
-    with _state_store(config) as store:
-        run_key = _resolve_key(store, key)
-        subject = store.get_run(run_key)
-        if subject is None:  # pragma: no cover -- _resolve_key just found it
-            _fail(f"no stored run matches {key!r}")
-            return
-
-        same_graph = store.runs_with_signature(run_key, "root_graph")
-        same_tuple = [
-            k for k in store.runs_with_signature(run_key, "cause_tuple") if k not in set(same_graph)
-        ]
-        stronger = set(same_graph) | set(same_tuple)
-        shared = [
-            (k, n) for k, n in store.runs_sharing_roots(run_key) if k not in stronger
-        ]
-        # Only what is needed to label the rows; a full payload per neighbour
-        # would make this command cost the whole corpus.
-        labels = {
-            k: store.get_run(k) for k in [*same_graph, *same_tuple, *(k for k, _ in shared)]
-        }
-
-    def describe(neighbour_key: str) -> dict[str, object]:
-        neighbour = labels.get(neighbour_key)
-        return {
-            "key": neighbour_key,
-            "bug_id": neighbour.bug_id if neighbour else None,
-            "cause": (
-                neighbour.top_finding.cause.value
-                if neighbour and neighbour.top_finding
-                else None
-            ),
-            # Launchpad's own verdict, when known. Free ground truth -- and the
-            # reason this command is worth having: "these three are the same
-            # fault and one of them is already closed Invalid" is a decision.
-            "duplicate_of": neighbour.duplicate_of if neighbour else None,
-            "duplicate_count": neighbour.duplicate_count if neighbour else 0,
-        }
-
-    if as_json:
-        _write(
-            json.dumps(
-                {
-                    "schema": JSON_SCHEMA_VERSION,
-                    "key": run_key,
-                    "cause": (
-                        subject.top_finding.cause.value if subject.top_finding else None
-                    ),
-                    "tiers": {
-                        Tier.ROOT_GRAPH: [describe(k) for k in same_graph],
-                        Tier.CAUSE_TUPLE: [describe(k) for k in same_tuple],
-                    },
-                    "shared_roots": [
-                        {**describe(k), "shared_roots": n} for k, n in shared
-                    ],
-                },
-                indent=2,
-            )
-            + "\n",
-            out_path,
-            label="related runs",
-        )
-        return
-
-    out.print()
-    out.rule(f"[bold]related to {run_key}[/]")
-    if subject.top_finding is not None:
-        out.print(f"[dim]cause[/] {subject.top_finding.cause.value}")
-
-    def tier_table(entries: Sequence[tuple[str, str]]) -> Table:
-        table = Table(box=None, pad_edge=False, show_header=False)
-        table.add_column(style="dim", no_wrap=True)
-        table.add_column(overflow="fold")
-        table.add_column(style="dim", overflow="fold")
-        for neighbour_key, note in entries:
-            neighbour = labels.get(neighbour_key)
-            verdict = ""
-            if neighbour is not None and neighbour.duplicate_of:
-                verdict = f"already a duplicate of LP#{neighbour.duplicate_of}"
-            elif neighbour is not None and neighbour.duplicate_count:
-                verdict = f"{plural(neighbour.duplicate_count, 'duplicate')} already linked"
-            table.add_row(note, neighbour_key, verdict)
-        return table
-
-    if same_graph:
-        out.print("\n[bold]root-graph[/]  [dim]identical root-cause subgraph; safe to act on[/]")
-        out.print(tier_table([(k, "same subgraph") for k in same_graph]))
-    if same_tuple:
-        out.print("\n[bold]cause-tuple[/]  [dim]same causes and roots, same phase[/]")
-        out.print(tier_table([(k, "same cause tuple") for k in same_tuple]))
-    if shared:
-        out.print("\n[bold]shared roots[/]  [dim]a lead, not a verdict[/]")
-        out.print(
-            tier_table(
-                [
-                    (k, f"{plural(n, 'root')} in common")
-                    for k, n in shared[: config.report.max_clusters]
-                ]
-            )
-        )
-
-    if not (same_graph or same_tuple or shared):
-        out.print("\n[dim]no stored run shares a root package with this one[/]")
-
-
-@app.command()
-def history(
-    package: Annotated[
-        str,
-        typer.Argument(help="Package name, with or without :arch."),
-    ],
-    as_json: Annotated[
-        bool, typer.Option("--json", help="Emit a machine-readable answer.")
-    ] = False,
-    out_path: OutOption = None,
-    config_path: ConfigOption = None,
-) -> None:
-    """Show which stored runs implicate a package, and in what capacity.
-
-    "Is this a recurring transition or a one-off?" -- asked every time a
-    package turns up as a root, and answerable only against a corpus.
-
-    Root and victim are reported separately and never summed. They are
-    opposite findings: the whole premise of this tool is that the packages a
-    reporter blames are usually the victims rather than the cause, so a
-    package that is a victim thirty times and a root never is evidence *for*
-    its innocence, and a single number would erase exactly that.
-
-    A bare name matches every architecture, because the upgrader's `Foreign`
-    list omits `:arch` for the native one while the resolver trace writes it
-    in full. Pass an explicit architecture to narrow.
-    """
-    config = _config(config_path)
-    with _state_store(config) as store:
-        spellings = store.packages_matching(package)
-        if not spellings:
-            _fail(
-                f"no stored run mentions {package!r}\n"
-                "Package names come from the logs; try `uru-doctor stats` for the "
-                "ones the corpus knows."
-            )
-            return
-        pkg_ids = [pkg_id for pkg_id, _ in spellings]
-        by_role: dict[str, list[str]] = {}
-        for run_key, role in store.runs_with_package(pkg_ids):
-            by_role.setdefault(role, []).append(run_key)
-        details = {
-            k: store.get_run(k) for k in {k for keys in by_role.values() for k in keys}
-        }
-
-    def describe(run_key: str) -> dict[str, object]:
-        found = details.get(run_key)
-        return {
-            "key": run_key,
-            "bug_id": found.bug_id if found else None,
-            "cause": found.top_finding.cause.value if found and found.top_finding else None,
-            "release": found.release_pair if found else "",
-            "duplicate_of": found.duplicate_of if found else None,
-        }
-
-    if as_json:
-        _write(
-            json.dumps(
-                {
-                    "schema": JSON_SCHEMA_VERSION,
-                    "package": package,
-                    "spellings": [name for _, name in spellings],
-                    # Roles kept apart on purpose; see the docstring.
-                    "roles": {
-                        role: [describe(k) for k in sorted(keys)]
-                        for role, keys in sorted(by_role.items())
-                    },
-                },
-                indent=2,
-            )
-            + "\n",
-            out_path,
-            label="history",
-        )
-        return
-
-    out.print()
-    out.rule(f"[bold]{package}[/]")
-    if len(spellings) > 1 or spellings[0][1] != package:
-        out.print(f"[dim]interned as[/] {', '.join(name for _, name in spellings)}")
-    if not by_role:
-        out.print("[dim]known to the corpus, but no run implicates it[/]")
-        return
-
-    # Root first: it is the only role that answers "is this the cause?".
-    for role in ("root", "victim", "failed", "held_back"):
-        keys = by_role.get(role)
-        if not keys:
-            continue
-        out.print(f"\n[bold]{role}[/] in {plural(len(keys), 'run')}")
-        table = Table(box=None, pad_edge=False, show_header=False)
-        table.add_column(overflow="fold")
-        table.add_column(style="dim", no_wrap=True)
-        table.add_column(no_wrap=True)
-        for run_key in sorted(keys)[: config.report.max_clusters]:
-            found = details.get(run_key)
-            table.add_row(
-                run_key,
-                found.release_pair if found else "",
-                found.top_finding.cause.value if found and found.top_finding else "-",
-            )
-        out.print(table)
-
-    if "root" not in by_role and "victim" in by_role:
-        # Worth saying out loud, because it is the inversion the tool exists
-        # to correct and a reader scanning a list will not notice an absence.
-        out.print(
-            "\n[dim]never a root in this corpus -- implicated only as a victim, "
-            "which is evidence against blaming it[/]"
-        )
 
 
 @app.callback(invoke_without_command=True)
