@@ -1,5 +1,8 @@
 # uru-doctor
 
+> [!NOTE]
+> `uru-doctor` is written largely in conjunction with Claude Opus 5.5 using OpenCode
+
 Diagnose, deduplicate and retitle Ubuntu Release Upgrader bugs from their
 upgrade logs.
 
@@ -232,9 +235,3 @@ helper. Matching deliberately: this tool reads that package's logs, quotes its
 message strings, and cites its functions as provenance, so code should be able
 to move in either direction — a diagnosis that turns out to belong in
 `DistUpgradeQuirks` should be contributable without a licence conversation.
-
-Every source file carries an `SPDX-License-Identifier` line. The copyright
-holder is **not** yet asserted anywhere: the author address is a Canonical one,
-which usually means the employer holds copyright, and that is not something to
-guess at. Add a `Copyright (C)` line to the files and a `debian/copyright` if
-this is ever packaged.
