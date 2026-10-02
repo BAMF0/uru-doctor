@@ -57,11 +57,19 @@ PAUSE = 3.0
 
 
 def get(url: str, *, attempts: int = 4) -> bytes:
-    """GET with backoff on 429 and 503."""
+    """GET with backoff on 429 and 503.
+
+    The scheme is checked because attachment URLs come from the API response
+    rather than from the caller, and :func:`urllib.request.urlopen` will
+    happily open ``file://``.
+    """
+    if not url.startswith("https://"):
+        msg = f"refusing non-https url: {url}"
+        raise ValueError(msg)
     delay = PAUSE
     for attempt in range(1, attempts + 1):
         try:
-            with urllib.request.urlopen(url, timeout=90) as response:  # noqa: S310
+            with urllib.request.urlopen(url, timeout=90) as response:
                 return bytes(response.read())
         except urllib.error.HTTPError as error:
             if error.code not in (429, 503) or attempt == attempts:

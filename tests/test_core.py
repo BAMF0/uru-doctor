@@ -87,9 +87,7 @@ class TestSectionFraming:
 
     def test_tokens_before_any_header_still_get_a_section(self) -> None:
         """Logs excerpted into a bug description start mid-stream."""
-        log = read_sections(
-            [broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mK"), "Done"]
-        )
+        log = read_sections([broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mK"), "Done"])
         assert len(log.sections) == 1
 
     def test_resolve_by_keep_without_starting(self) -> None:
@@ -101,9 +99,7 @@ class TestSectionFraming:
         assert not log.truncated
 
     def test_truncation_needs_a_started_resolve(self) -> None:
-        started = read_sections(
-            ["Log time: x", "Starting pkgProblemResolver with broken count: 3"]
-        )
+        started = read_sections(["Log time: x", "Starting pkgProblemResolver with broken count: 3"])
         assert started.truncated
 
     def test_complete_real_logs_are_not_truncated(self) -> None:
@@ -197,16 +193,12 @@ class TestCsrStructure:
         assert ids == sorted(ids)
 
     def test_index_of_round_trips(self, interner: Interner) -> None:
-        graph = graph_of(
-            apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mR")), interner
-        )
+        graph = graph_of(apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mR")), interner)
         for index, pkg_id in enumerate(graph.nodes.ids):
             assert graph.nodes.index_of(pkg_id) == index
 
     def test_index_of_missing_is_none(self, interner: Interner) -> None:
-        graph = graph_of(
-            apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mR")), interner
-        )
+        graph = graph_of(apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mR")), interner)
         assert graph.nodes.index_of(999_999) is None
 
     def test_parallel_arrays_have_equal_length(self, interner: Interner) -> None:
@@ -227,9 +219,7 @@ class TestCanonicalDigest:
         first = graph_of(text, interner)
         second = graph_of(text, interner)
         nodes = list(range(len(first.nodes)))
-        assert canonical_digest(first, interner, nodes) == canonical_digest(
-            second, interner, nodes
-        )
+        assert canonical_digest(first, interner, nodes) == canonical_digest(second, interner, nodes)
 
     def test_insensitive_to_unrelated_packages(self, interner: Interner) -> None:
         """The digest covers the subgraph given, not the whole transaction.
@@ -245,16 +235,13 @@ class TestCanonicalDigest:
         )
         bare_nodes = [bare.nodes.index_of(p) for p in bare.nodes.ids]
         noisy_subset = [
-            noisy.nodes.index_of(interner.package(name))
-            for name in ("a:amd64", "b:amd64")
+            noisy.nodes.index_of(interner.package(name)) for name in ("a:amd64", "b:amd64")
         ]
         assert canonical_digest(bare, interner, [n for n in bare_nodes if n is not None]) == (
             canonical_digest(noisy, interner, [n for n in noisy_subset if n is not None])
         )
 
-    def test_default_granularity_merges_differing_boundaries(
-        self, interner: Interner
-    ) -> None:
+    def test_default_granularity_merges_differing_boundaries(self, interner: Interner) -> None:
         """``(< 46.0.1~)`` and ``(< 46.0.7~)`` are one bug.
 
         Both appear in the corpus for the same underlying
@@ -269,9 +256,7 @@ class TestCanonicalDigest:
             apt_log(broken("a:amd64", "Breaks", "b:amd64", "1.0 @ii mK", "< 46.0.7~")), interner
         )
         nodes = list(range(len(first.nodes)))
-        assert canonical_digest(first, interner, nodes) == canonical_digest(
-            second, interner, nodes
-        )
+        assert canonical_digest(first, interner, nodes) == canonical_digest(second, interner, nodes)
 
     def test_exact_granularity_keeps_them_apart(self, interner: Interner) -> None:
         """The stricter setting is available and genuinely stricter."""
@@ -282,9 +267,9 @@ class TestCanonicalDigest:
             apt_log(broken("a:amd64", "Breaks", "b:amd64", "1.0 @ii mK", "< 46.0.7~")), interner
         )
         nodes = list(range(len(first.nodes)))
-        assert canonical_digest(
-            first, interner, nodes, granularity="exact"
-        ) != canonical_digest(second, interner, nodes, granularity="exact")
+        assert canonical_digest(first, interner, nodes, granularity="exact") != canonical_digest(
+            second, interner, nodes, granularity="exact"
+        )
 
     def test_operator_still_distinguishes(self, interner: Interner) -> None:
         """``(= v)`` and ``(< v)`` are different failures."""
@@ -295,9 +280,7 @@ class TestCanonicalDigest:
             apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mK", "< 2.0")), interner
         )
         nodes = list(range(len(equal.nodes)))
-        assert canonical_digest(equal, interner, nodes) != canonical_digest(
-            less, interner, nodes
-        )
+        assert canonical_digest(equal, interner, nodes) != canonical_digest(less, interner, nodes)
 
     def test_different_packages_differ(self, interner: Interner) -> None:
         one = graph_of(apt_log(broken("a:amd64", "Depends", "b:amd64", "1.0 @ii mK")), interner)
@@ -647,9 +630,7 @@ class TestRedaction:
 
         assert redact("/home/alice/.config/x") == "/home/redacted-user/.config/x"
 
-    @pytest.mark.parametrize(
-        "version", ["2.20.0.1", "6.14.0.37", "1.2.3.4", "255.255.255.255"]
-    )
+    @pytest.mark.parametrize("version", ["2.20.0.1", "6.14.0.37", "1.2.3.4", "255.255.255.255"])
     def test_four_part_versions_survive(self, version: str) -> None:
         """Versions are the evidence and must not be eaten as addresses.
 

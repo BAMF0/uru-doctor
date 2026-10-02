@@ -21,11 +21,11 @@ from collections.abc import Sequence
 
 from uru_doctor.apt.roots import Root
 from uru_doctor.models import (
-    BLAME_EDGES,
     Cause,
     Confidence,
     ConflictGraph,
     Decision,
+    DepType,
     Finding,
     Severity,
 )
@@ -150,8 +150,18 @@ def _findings_from_roots(
         detail = dict(root.detail)
         if root.constraint:
             detail.setdefault("constraint", root.constraint)
-        if root.dep in BLAME_EDGES:
-            detail.setdefault("relationship", str(root.dep.value))
+        if root.dep is not DepType.UNKNOWN:
+            # The name, not the number. This read ``root.dep in BLAME_EDGES``
+            # and stored ``str(root.dep.value)``, which was wrong twice over:
+            # ``root.dep`` is a :class:`DepType` while ``BLAME_EDGES`` holds
+            # :class:`EdgeKind` members, so comparing them by value selected
+            # ``RECOMMENDS`` and ``DEPENDS`` -- an arbitrary pair that happen
+            # to share the integers 1 and 6 with ``BREAKS`` and
+            # ``UNSATISFIABLE`` -- while dropping ``PRE_DEPENDS``, ``BREAKS``
+            # and ``CONFLICTS``. The surviving value then reached the report as
+            # the bare string "6". Two unrelated ``IntEnum``\\s comparing equal
+            # is the same trap as indices standing in for package ids.
+            detail.setdefault("relationship", root.dep.name.lower().replace("_", "-"))
         if root.cycle_broken:
             detail["cycle_broken"] = "true"
 

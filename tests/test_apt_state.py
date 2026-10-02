@@ -261,8 +261,7 @@ class TestMultipleStates:
         """
         skeleton = " ".join(strip_states(self.LINE).split())
         assert skeleton == (
-            "Upgrading: libfoo:amd64 due to libbar:amd64"
-            " Depends on libbaz:amd64 (= 4.0)"
+            "Upgrading: libfoo:amd64 due to libbar:amd64 Depends on libbaz:amd64 (= 4.0)"
         )
 
 

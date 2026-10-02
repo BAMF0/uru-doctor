@@ -100,6 +100,43 @@ _FOREIGN_RE: Final = re.compile(
     r"^Foreign \((?P<when>before|after) rewriting sources\):\s*(?P<pkgs>.*)$"
 )
 
+#: Line prefixes that introduce a bulk dump rather than a statement about one
+#: package.
+#:
+#: Every one is a ``logging.debug`` in ``DistUpgradeCache.py`` or
+#: ``DistUpgradeController.py`` that joins a whole package set onto a single
+#: line. On a full desktop upgrade ``Upgrade:`` alone runs to three thousand
+#: names and 45 kB.
+#:
+#: Exported because evidence selection needs it: these lines contain every
+#: package name in the upgrade, so a substring search for any one package
+#: matches all of them, and the match means only "this package was in the
+#: upgrade". See :meth:`~uru_doctor.rules.context.RuleContext.event_indices`.
+#:
+#: Kept as literal prefixes rather than derived from :data:`_LIST_MARKERS`
+#: because the two sets are not the same: the markers are the lists that become
+#: :class:`~uru_doctor.models.PackageDelta` fields, while these also include
+#: dumps nothing parses -- ``remove_candidates``, ``Unused dependencies``,
+#: ``fs_free contains`` -- which are just as useless to quote.
+#:
+#: These are upgrader debug strings and are not translated, so matching English
+#: is safe here in a way it is not for apt's error stack.
+BULK_LIST_PREFIXES: Final[tuple[str, ...]] = (
+    "Foreign (after rewriting sources):",
+    "Foreign (before rewriting sources):",
+    "Install:",
+    "Keep at same version:",
+    "MetaPkgs:",
+    "Obsolete:",
+    "Remove:",
+    "The following packages are marked for removal:",
+    "Unused dependencies:",
+    "Upgradable, but held- back:",
+    "Upgrade:",
+    "fs_free contains:",
+    "remove_candidates:",
+)
+
 #: ``Install: pkg (1.2-3)`` -- some lists annotate versions in parentheses.
 _PKG_TOKEN_RE: Final = re.compile(r"^(?P<name>[A-Za-z0-9][A-Za-z0-9+._-]*(?::\w+)?)")
 

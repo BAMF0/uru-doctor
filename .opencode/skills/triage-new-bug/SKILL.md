@@ -192,12 +192,14 @@ Record the fixture with provenance that explains **why it exists**:
 ```python
 # tests/record_fixtures.py  -> SOURCES / LP_SOURCES
 (
-    "apt/lp2169197-apt.log",
-    "/tmp/opencode/aptlogs/new2169197-apt.log",
-    "LP#2169197, locale ca_ES. apt prints dependency-type names through _(), "
-    "so 'Depends' arrives as 'Depèn' and coverage fell to 68.7% -- most of the "
-    "conflict graph simply absent.",
-),
+    (
+        "apt/lp2169197-apt.log",
+        "/tmp/opencode/aptlogs/new2169197-apt.log",
+        "LP#2169197, locale ca_ES. apt prints dependency-type names through _(), "
+        "so 'Depends' arrives as 'Depèn' and coverage fell to 68.7% -- most of the "
+        "conflict graph simply absent.",
+    ),
+)
 ```
 
 ```bash
@@ -248,6 +250,18 @@ changed an earlier bug's answer.
   type-checks, runs, and produces plausible-looking package names. `mypy` will
   not catch it: `PkgId` is an `int` alias. If a list of packages looks right
   but *oddly* right, resolve it through two different interners and compare.
+- **Unrelated `IntEnum`s compare equal by value.** `root.dep in BLAME_EDGES`
+  tests a `DepType` against a set of `EdgeKind` members; it type-checks, and it
+  silently selects `RECOMMENDS` and `DEPENDS` because they share the integers 1
+  and 6 with `BREAKS` and `UNSATISFIABLE`. Membership tests across two enums are
+  always a bug even when the result looks sensible. `Cause` and `LogSource` are
+  safe here only because they are `StrEnum`.
+- **A line that matches is not a line that is evidence.** The upgrader logs its
+  whole working set on single lines — `Upgrade:` and nine others listed in
+  `BULK_LIST_PREFIXES` — so a substring search for any package matches all of
+  them, and the match means only "this package was in the upgrade". Filtering
+  these by size does not work: real evidence reaches 53 tokens while a short
+  `Obsolete:` list is 21, so the bands overlap. Match the known prefixes.
 
 ## Where things live
 

@@ -36,6 +36,7 @@ from uru_doctor.models import (
 )
 from uru_doctor.parsers.apportmeta import ApportMeta
 from uru_doctor.parsers.aptterm import TermLog
+from uru_doctor.parsers.mainlog import BULK_LIST_PREFIXES
 
 __all__ = ["RuleContext"]
 
@@ -106,12 +107,32 @@ class RuleContext:
 
         These become :attr:`Finding.evidence`, so a reader can be pointed at
         the exact lines rather than being asked to take the verdict on trust.
+
+        Bulk enumerations are skipped. The upgrader logs its whole working set
+        on single lines -- ``Upgrade:`` followed by three thousand names, and
+        nine more like it -- so a substring match finds the needle in all of
+        them. Those lines are true but say nothing: a package appearing among
+        three thousand others is evidence that it was in the upgrade, which is
+        equally true of everything. Quoting one as the reason a package broke
+        is a 54 kB non-sequitur, and it crowded out the handful of lines that
+        did single the package out.
+
+        The list below is every bulk ``logging`` call in the upgrader that
+        joins a package set, taken from ``DistUpgradeCache.py`` and
+        ``DistUpgradeController.py``. Filtering on size instead was tried and
+        does not work: real evidence runs to 53 tokens
+        (``Can't mark 'ubuntu-unity-desktop' for upgrade (...)``) while a short
+        ``Obsolete:`` list can be 21, so the bands overlap and no threshold
+        separates them.
         """
         out: list[int] = []
         for index, event in enumerate(self.run.events):
             if level is not None and event.level is not level:
                 continue
-            if needle in self.interner.render(event.template_id, event.args):
+            text = self.interner.render(event.template_id, event.args)
+            if text.startswith(BULK_LIST_PREFIXES):
+                continue
+            if needle in text:
                 out.append(index)
         return tuple(out)
 

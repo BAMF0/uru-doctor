@@ -64,18 +64,30 @@ def load_fetched(bug_id: str) -> tuple[dict[LogSource, str], object | None]:
     return (attachments, meta)
 
 
-def load_fixture(bug_id: str) -> tuple[dict[LogSource, str], object | None]:
+def bug_of(run_id: str) -> str:
+    """The bug a run id belongs to.
+
+    One bug can carry more than one upgrade. On bug 2150319 a second reporter
+    attached their own logs in comment 19, recorded as ``2150319-c19``. Those
+    are a separate *run* -- separate apt log, separate graph, separate
+    signature -- sharing the bug's description and tags, so dedup should be
+    able to pair them the way it pairs two bugs.
+    """
+    return run_id.split("-", 1)[0]
+
+
+def load_fixture(run_id: str) -> tuple[dict[LogSource, str], object | None]:
     meta = None
-    path = FIXTURES / "lp" / f"bug{bug_id}.json"
+    path = FIXTURES / "lp" / f"bug{bug_of(run_id)}.json"
     if path.is_file():
         payload = json.loads(path.read_text())
         meta = parse_apport_meta(payload["description"], tags=payload["tags"])
     attachments: dict[LogSource, str] = {}
     for name, source in (
-        (f"apt/lp{bug_id}-apt.log", LogSource.APT),
-        (f"logs/lp{bug_id}-main.log", LogSource.MAIN),
-        (f"logs/lp{bug_id}-aptterm.log", LogSource.APT_TERM),
-        (f"logs/lp{bug_id}-history.log", LogSource.HISTORY),
+        (f"apt/lp{run_id}-apt.log", LogSource.APT),
+        (f"logs/lp{run_id}-main.log", LogSource.MAIN),
+        (f"logs/lp{run_id}-aptterm.log", LogSource.APT_TERM),
+        (f"logs/lp{run_id}-history.log", LogSource.HISTORY),
     ):
         candidate = FIXTURES / name
         if candidate.is_file():
@@ -85,7 +97,7 @@ def load_fixture(bug_id: str) -> tuple[dict[LogSource, str], object | None]:
 
 def report(bug_id: str, attachments: dict[LogSource, str], meta: object | None) -> dict:
     interner = Interner(Store.open(Path(tempfile.mkdtemp())))
-    run = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_id))
+    run = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_of(bug_id)))
     term = (
         parse_apt_term(attachments[LogSource.APT_TERM].splitlines(), locale=run.locale)
         if LogSource.APT_TERM in attachments
@@ -183,8 +195,15 @@ def report(bug_id: str, attachments: dict[LogSource, str], meta: object | None) 
 
 def main(argv: list[str]) -> int:
     if argv == ["--fixtures"]:
+        # Discover runs, not bugs: a bug with two reporters' logs has two.
+        # Bugs with no logs at all still need listing -- that is the
+        # no-evidence case, and 2161332 is in the corpus to cover it.
         ids = sorted(
-            p.stem.removeprefix("bug") for p in (FIXTURES / "lp").glob("bug*.json")
+            {p.stem.removeprefix("bug") for p in (FIXTURES / "lp").glob("bug*.json")}
+            | {
+                p.name.removeprefix("lp").removesuffix("-apt.log")
+                for p in (FIXTURES / "apt").glob("lp*-apt.log")
+            }
         )
         loader = load_fixture
     elif argv:
@@ -207,9 +226,7 @@ def main(argv: list[str]) -> int:
 
     if len(collected) > 1:
         print(f"\n{'=' * 92}\nCLUSTERS")
-        clusters = cluster_runs(
-            collected, config=DedupConfig(), oldest_first=sorted(collected)
-        )
+        clusters = cluster_runs(collected, config=DedupConfig(), oldest_first=sorted(collected))
         for cluster in clusters:
             print(f"  [{cluster.tier}] {sorted(cluster.members)}")
         print(f"  {summarise(clusters)}")

@@ -89,10 +89,7 @@ def apt_log(*lines: str, timestamp: str = "2026-04-25 10:49:55.123456") -> str:
     """
     body = "\n".join(lines)
     return (
-        f"Log time: {timestamp}\n"
-        f"Starting pkgProblemResolver with broken count: 1\n"
-        f"{body}\n"
-        f"Done\n"
+        f"Log time: {timestamp}\nStarting pkgProblemResolver with broken count: 1\n{body}\nDone\n"
     )
 
 
@@ -133,8 +130,7 @@ def holdback_block(
     """
     return apt_log(
         broken(dependent, "Depends", blocker, f"none | {candidate} @un uH"),
-        f"  Considering {blocker} {score_blocker} as a solution to"
-        f" {dependent} {score_dependent}",
+        f"  Considering {blocker} {score_blocker} as a solution to {dependent} {score_dependent}",
         f"  MarkKeep {dependent} < {dependent_from} -> {dependent_to} @ii umU Ib > FU=0",
         f"  Holding Back {dependent} rather than change {blocker}",
     )
