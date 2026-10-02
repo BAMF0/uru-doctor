@@ -488,23 +488,34 @@ def ingest_logs(
         if sectioned.primary is not None:
             graphs.append(build_graph(sectioned.primary, interner))
             apt_broken_count = sectioned.primary.broken_count or 0
+            # Only livelocks apt was still stuck in when it gave up. One it
+            # escaped is a detour it recovered from, not the reason the
+            # upgrade failed, and the livelock rule outranks blast radius --
+            # so letting a recovered oscillation through would let it displace
+            # a genuine hundred-package cascade.
             oscillations = tuple(
                 (o.pkg_id, o.reversals, o.blocked_by, o.forced_by)
                 for o in detect_oscillations(sectioned.primary, interner)
+                if o.is_terminal
             )
 
     # 4. Only now can the third-party set be resolved.
     third_party = resolve_third_party(main, interner)
 
+    # The locale must come from main.log, which is why this runs after it:
+    # dpkg's output is translated, and parsing an Italian apt-term.log as
+    # English yields zero counts and no failures.
+    locale = interner.text(main.meta["locale"]) if "locale" in main.meta else None
+
     term: TermLog | None = None
     if log_set.has(LogSource.APT_TERM):
-        term = parse_apt_term(log_set.lines(LogSource.APT_TERM))
+        term = parse_apt_term(log_set.lines(LogSource.APT_TERM), locale=locale)
 
     history: HistoryLog | None = None
     if log_set.has(LogSource.HISTORY):
         history = parse_history(log_set.lines(LogSource.HISTORY))
 
-    dpkg_wrote = _dpkg_wrote(log_set, term, meta)
+    dpkg_wrote = _dpkg_wrote(log_set, term, meta, main)
     fatal = terminal_errors(main)
     failed = bool(fatal) or main.aborted or bool(term and term.roots)
     evidence_complete = _evidence_complete(main, apt_truncated, term)
@@ -529,7 +540,7 @@ def ingest_logs(
             interner.text(main.meta["python_version"]) if "python_version" in main.meta else ""
         ),
         kernel=interner.text(main.meta["kernel"]) if "kernel" in main.meta else "",
-        locale=interner.text(main.meta["locale"]) if "locale" in main.meta else "",
+        locale=locale or "",
         frontend=_FRONTENDS.get(
             interner.text(main.meta["view"]) if "view" in main.meta else "", Frontend.UNKNOWN
         ),
@@ -552,7 +563,12 @@ def ingest_logs(
     )
 
 
-def _dpkg_wrote(log_set: LogSet, term: TermLog | None, meta: ApportMeta | None) -> bool | None:
+def _dpkg_wrote(
+    log_set: LogSet,
+    term: TermLog | None,
+    meta: ApportMeta | None,
+    main: MainLog,
+) -> bool | None:
     """Decide whether dpkg wrote packages, or admit to not knowing.
 
     Ordered by how directly each source answers the question.
@@ -563,10 +579,22 @@ def _dpkg_wrote(log_set: LogSet, term: TermLog | None, meta: ApportMeta | None) 
     # The description can report the file as having existed and been empty.
     if meta is not None and meta.dpkg_produced_no_output:
         return False
-    # Neither log present at all: apport would have attached them, so dpkg
-    # never ran. This is the only safe inference from absence.
+
+    # Absence of both dpkg logs only means dpkg never ran if the rest of the
+    # evidence agrees, and ``main.log`` is the arbiter. A run that reached
+    # COMMIT wrote packages whether or not the reporter attached the dpkg
+    # logs, and attaching only apt.log and main.log is common.
+    #
+    # Taking absence as proof marked LP#2169251 -- an upgrade that completed,
+    # installed 2881 packages and reached POST_INSTALL_SCRIPTS -- as never
+    # having run dpkg, which stopped the ranking from recognising it as a
+    # post-upgrade failure at all.
     if not log_set.has(LogSource.APT_TERM) and not log_set.has(LogSource.HISTORY):
-        return False
+        if main.terminal_phase >= Phase.COMMIT:
+            return True
+        if main.record_count:
+            return False
+        return None
     return None
 
 

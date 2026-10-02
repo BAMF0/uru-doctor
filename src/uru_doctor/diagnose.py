@@ -34,11 +34,13 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
+from uru_doctor.i18n import catalogue_for
 from uru_doctor.intern import Interner
 from uru_doctor.models import (
     Cause,
     Confidence,
     Finding,
+    Phase,
     Severity,
     Signature,
     UpgradeRun,
@@ -97,6 +99,33 @@ _ENVIRONMENT_CAUSES: frozenset[Cause] = frozenset(
     }
 )
 
+#: Causes that can only explain a failure *before* dpkg ran.
+#:
+#: If the upgrade reached the end and wrote its packages, the resolver did its
+#: job. Held-back packages are then a historical note about what apt decided,
+#: not the reason anything broke -- and they are present in every successful
+#: upgrade, so they must not be allowed to answer "why did this break".
+#:
+#: The case that forced this: LP#2169251 upgraded 2881 packages, reached
+#: ``POST_INSTALL_SCRIPTS``, and the reporter's complaint is that graphics
+#: stopped working on reboot. The log's only error is
+#: ``got error from PostInstallScript ./xorg_fix_proprietary.py`` -- a failure
+#: of the Xorg proprietary-driver fixup, which is precisely the symptom. Ranked
+#: on blast radius alone, a sixteen-package holdback from a successful resolve
+#: displaced it.
+_PRE_COMMIT_ONLY_CAUSES: frozenset[Cause] = RESOLVER_CAUSES | {Cause.RESOLVER_LIVELOCK}
+
+
+def _upgrade_completed(run: UpgradeRun) -> bool:
+    """Whether the upgrade ran to completion, whatever happened afterwards.
+
+    Deliberately strict: dpkg must have written packages *and* the upgrader
+    must have got past the post-upgrade stage. A run killed during ``COMMIT``
+    has written packages too, and its resolver findings remain relevant.
+    """
+    return run.reached_dpkg and run.terminal_phase >= Phase.POST_UPGRADE
+
+
 #: Findings that are commentary on the evidence, not candidate causes.
 CAVEAT_CAUSES: frozenset[Cause] = frozenset({Cause.NO_FAILURE_RECORDED})
 
@@ -114,9 +143,14 @@ CAVEAT_CAUSES: frozenset[Cause] = frozenset({Cause.NO_FAILURE_RECORDED})
 #: problems, you have held broken packages``, which implicates a hold -- the
 #: ``libwacom9`` holdback that the surface PPA causes. Ranking on blast radius
 #: alone put a resolved conflict above the unresolved one that mattered.
+#: Keyed by :data:`uru_doctor.i18n.APT_MESSAGES` identifier rather than by
+#: English text, because apt translates these. A Catalan log reports
+#: ``E:Error, pkgProblemResolver::Resolve ha trencat coses, potser a causa de
+#: paquets retinguts.`` and matching the English substring finds nothing, so
+#: every non-English report silently lost its corroboration.
 _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
     (
-        "you have held broken packages",
+        "held_broken",
         frozenset(
             {
                 Cause.HOLDBACK_BLOCKS_NEW_DEP,
@@ -126,7 +160,7 @@ _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
         ),
     ),
     (
-        "Resolve generated breaks",
+        "resolver_breaks",
         frozenset(
             {
                 Cause.RESOLVER_LIVELOCK,
@@ -137,7 +171,7 @@ _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
         ),
     ),
     (
-        "Unmet dependencies",
+        "unmet_deps",
         frozenset({Cause.UNSATISFIABLE_VIRTUAL, Cause.EXACT_PIN_BROKEN_BY_UPGRADE}),
     ),
 )
@@ -146,15 +180,18 @@ _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
 def corroborated_causes(run: UpgradeRun, interner: Interner) -> frozenset[Cause]:
     """Causes that apt's own terminal error implicates.
 
-    Empty when apt said nothing, in which case no finding is promoted and
-    ranking falls back to blast radius alone.
+    Matched through :mod:`uru_doctor.i18n` against the run's locale, so a
+    Catalan or Japanese log is recognised as readily as an English one. Empty
+    when apt said nothing, in which case no finding is promoted and ranking
+    falls back to blast radius alone.
     """
     messages = [interner.text(entry) for entry in run.apt_error_entries]
     if not messages:
         return frozenset()
+    catalogue = catalogue_for(run.locale or None)
     implicated: set[Cause] = set()
-    for needle, causes in _APT_ERROR_AFFINITY:
-        if any(needle in message for message in messages):
+    for key, causes in _APT_ERROR_AFFINITY:
+        if any(catalogue.matches(key, message) for message in messages):
             implicated |= causes
     return frozenset(implicated)
 
@@ -172,12 +209,19 @@ ADVISORY_RULES: frozenset[str] = frozenset({"resolver.fragile-decision"})
 MAX_FINDINGS: int = 12
 
 
-def _tier(finding: Finding) -> int:
-    """Which band a finding sits in. Lower is more authoritative."""
+def _tier(finding: Finding, *, completed: bool = False) -> int:
+    """Which band a finding sits in. Lower is more authoritative.
+
+    ``completed`` marks a run that upgraded successfully, which demotes every
+    resolver finding: they describe decisions apt made on its way to a working
+    system, so they cannot explain a failure that happened afterwards.
+    """
     if finding.cause in CAVEAT_CAUSES:
         return 99
     if finding.rule in ADVISORY_RULES:
         return 50
+    if completed and finding.cause in _PRE_COMMIT_ONLY_CAUSES:
+        return 40
     if finding.cause in PRECONDITION_CAUSES:
         return 0
     if finding.cause in _ENVIRONMENT_CAUSES:
@@ -191,6 +235,8 @@ def _rank_key(
     finding: Finding,
     rule: Rule | None,
     corroborated: frozenset[Cause] = frozenset(),
+    *,
+    completed: bool = False,
 ) -> tuple[int, int, int, int, int, int, str]:
     """Sort key for one finding. Lower sorts first.
 
@@ -212,7 +258,7 @@ def _rank_key(
     """
     priority = rule.priority if rule is not None else 500
     return (
-        _tier(finding),
+        _tier(finding, completed=completed),
         -int(finding.severity),
         0 if finding.cause in corroborated else 1,
         -finding.cascade_size,
@@ -227,13 +273,17 @@ def rank_findings(
     *,
     limit: int | None = MAX_FINDINGS,
     corroborated: frozenset[Cause] = frozenset(),
+    completed: bool = False,
 ) -> tuple[Finding, ...]:
     """Order findings so the first one belongs in the title.
 
     Caveats survive truncation unconditionally: a refusal to name a cause must
     never be the thing that falls off the end of the list.
     """
-    ordered = sorted(findings, key=lambda f: _rank_key(f, RULES.get(f.rule), corroborated))
+    ordered = sorted(
+        findings,
+        key=lambda f: _rank_key(f, RULES.get(f.rule), corroborated, completed=completed),
+    )
     if limit is None or len(ordered) <= limit:
         return tuple(ordered)
 
@@ -258,6 +308,13 @@ class DiagnosisResult:
 
     corroborated: frozenset[Cause] = frozenset()
     """Causes implicated by apt's own terminal error message."""
+
+    upgrade_completed: bool = False
+    """Whether the upgrade finished, so the failure is post-upgrade.
+
+    A materially different kind of bug: the machine is upgraded and broken,
+    rather than un-upgraded and intact.
+    """
 
     notes: list[str] = field(default_factory=list)
 
@@ -343,13 +400,18 @@ def diagnose(
     )
 
     corroborated = corroborated_causes(run, interner)
-    ranked = rank_findings(_deduplicate(collected), corroborated=corroborated)
+    ranked = rank_findings(
+        _deduplicate(collected),
+        corroborated=corroborated,
+        completed=_upgrade_completed(run),
+    )
     result = DiagnosisResult(
         findings=ranked,
         fired=tuple(fired),
         considered=len(eligible),
         skipped_incomplete=withheld,
         corroborated=corroborated,
+        upgrade_completed=_upgrade_completed(run),
     )
 
     if not ranked:

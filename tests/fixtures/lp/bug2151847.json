@@ -1,0 +1,23 @@
+{
+  "id": 2151847,
+  "title": "kubuntu-desktop package depdency resolution failed for 2026.04 upgrade",
+  "tags": [
+    "amd64",
+    "apport-bug",
+    "dist-upgrade",
+    "questing"
+  ],
+  "attachments": [
+    "CurrentDmesg.txt.txt",
+    "Dependencies.txt",
+    "JournalErrors.txt",
+    "ProcCpuinfoMinimal.txt",
+    "ProcEnviron.txt",
+    "VarLogDistupgradeAptclonesystemstate.tar.gz",
+    "VarLogDistupgradeAptlog.txt",
+    "VarLogDistupgradeLspcitxt.txt",
+    "VarLogDistupgradeMainlog.txt",
+    "VarLogDistupgradeScreenlog.txt"
+  ],
+  "description": "# do-release-upgrade -d\n...\nAn unresolvable problem occurred while calculating the upgrade.\n\n\n/var/log/dist-upgrade/main.log:\n\n2026-05-08 08:29:30,305 WARNING Can't mark 'kubuntu-desktop' for upgrade (E:Unable to correct problems, you have held broken packages.)\n\nProblemType: Bug\nDistroRelease: Ubuntu 25.10\nPackage: ubuntu-release-upgrader-core 1:25.10.10\nProcVersionSignature: Ubuntu 6.17.0-23.23-generic 6.17.13\nUname: Linux 6.17.0-23-generic x86_64\nApportVersion: 2.33.1-0ubuntu3\nArchitecture: amd64\nCasperMD5CheckResult: pass\nCrashDB: ubuntu\nCrashReports:\n 640:119:124:56756:2026-05-01 06:15:19.694166399 +0200:2026-05-01 06:14:35.892459575 +0200:/var/crash/_usr_bin_wireplumber.119.crash\n 640:44951:124:80104:2026-05-06 12:50:44.216383593 +0200:2026-05-06 12:50:44.215383588 +0200:/var/crash/_usr_bin_blueman-tray.44951.crash\n 640:44951:124:100938:2026-05-06 11:20:18.134937098 +0200:2026-05-06 11:20:18.133607962 +0200:/var/crash/_usr_bin_blueman-applet.44951.crash\nCurrentDesktop: KDE\nDate: Fri May  8 08:33:02 2026\nInstallationDate: Installed on 2022-02-02 (1556 days ago)\nInstallationMedia: Kubuntu 21.10 \"Impish Indri\" - Release amd64 (20211012)\nPackageArchitecture: all\nRebootRequiredPkgs: Error: path contained symlinks.\nSourcePackage: ubuntu-release-upgrader\nUpgradeStatus: Upgraded to questing on 2026-05-08 (0 days ago)\nVarLogDistupgradeAptHistorylog:\n Start-Date: 2026-05-08  08:29:14\n Requested-By: redacted-user (44951)\n End-Date: 2026-05-08  08:29:14\nVarLogDistupgradeApttermlog:\n Log started: 2026-05-08  08:29:14\n Log ended: 2026-05-08  08:29:14"
+}

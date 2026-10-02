@@ -636,10 +636,15 @@ def canonical_digest(
     ids = graph.nodes.ids
     digest = blake2b(digest_size=16)
 
-    for node in sorted(wanted):
-        if node >= len(ids):
-            continue
-        digest.update(interner.package_key(ids[node]).encode())
+    # Sort the *names*, not the node indices. Sorting indices emits the names
+    # in whatever order the packages happened to be interned, which makes the
+    # digest depend on the interner instance that produced it: the same two
+    # logs hashed to equal digests when ingested through one interner and
+    # unequal digests through two. Persisted signatures would then never match
+    # across sessions, which is the whole point of storing them.
+    names = sorted(interner.package_key(ids[node]) for node in wanted if node < len(ids))
+    for name in names:
+        digest.update(name.encode())
         digest.update(b"\x00")
     digest.update(b"\x02")
 

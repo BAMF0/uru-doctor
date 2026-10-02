@@ -24,6 +24,7 @@ from uru_doctor.models import (
     BLAME_EDGES,
     Cause,
     Confidence,
+    ConflictGraph,
     Decision,
     Finding,
     Severity,
@@ -99,6 +100,25 @@ def summarise_root(context: RuleContext, root: Root) -> str:
     return f"{name} could not be resolved{tail}"
 
 
+def _cascade_pkgs(graph: ConflictGraph, cascade: Sequence[int]) -> tuple[int, ...]:
+    """Convert a root's cascade from vertex indices to package ids.
+
+    :attr:`~uru_doctor.apt.roots.Root.cascade` holds *vertex indices*, as its
+    own docstring says, while :attr:`~uru_doctor.models.Finding.victim_pkgs`
+    holds interned package ids. Assigning one straight to the other -- which
+    this module did -- stores indices where ids are expected.
+
+    It stayed invisible for a long time because both are small integers and,
+    with one interner per run, a low vertex index resolves to *some* plausible
+    package from the same log. It only surfaced when a corpus shared an
+    interner and bug 2150245's victims came back as budgie packages belonging
+    to a different report. Every victim list was wrong, and so was every
+    signature computed from one.
+    """
+    ids = graph.nodes.ids
+    return tuple(ids[index] for index in cascade if index < len(ids))
+
+
 def _rank_key(root: Root) -> tuple[int, int, int, str]:
     """Sort key: most consequential first.
 
@@ -136,6 +156,7 @@ def _findings_from_roots(
             detail["cycle_broken"] = "true"
 
         name = context.label(root.pkg_id)
+        graph = context.run.graphs[graph_index]
         out.append(
             context.finding(
                 rule=rule_name,
@@ -144,7 +165,7 @@ def _findings_from_roots(
                 severity=severity,
                 confidence=root.confidence,
                 root_pkgs=(root.pkg_id,),
-                victim_pkgs=tuple(root.cascade),
+                victim_pkgs=_cascade_pkgs(graph, root.cascade),
                 cascade_size=len(root.cascade),
                 evidence=context.event_indices(name)[:8],
                 graph_index=graph_index,
@@ -304,10 +325,12 @@ def third_party_blocker(context: RuleContext) -> Sequence[Finding]:
         return ()
 
     blockers.sort(key=lambda r: -len(r.cascade))
+    graph = context.run.graphs[graph_index] if graph_index is not None else None
     victims: list[int] = []
     seen: set[int] = set()
     for root in blockers:
-        for victim in root.cascade:
+        resolved = _cascade_pkgs(graph, root.cascade) if graph is not None else ()
+        for victim in resolved:
             if victim not in seen:
                 seen.add(victim)
                 victims.append(victim)
@@ -380,41 +403,54 @@ def resolver_livelock(context: RuleContext) -> Sequence[Finding]:
     # back to the per-machine incidental roots instead.
     graph_index = 0 if context.run.graphs else None
 
-    out: list[Finding] = []
+    # Group by the package apt refused to install, not by the package that
+    # oscillated. Several packages livelocking at once are normally the same
+    # fault seen from several angles: in LP#2151847 both ``gir1.2-peas-1.0``
+    # and ``gedit`` are stuck on ``libpeas-1.0-1``, and in LP#2150339 so are
+    # ``gedit`` and ``gir1.2-peas-1.0``. Reporting one finding per oscillating
+    # package produced three findings for one libpeas transition and, worse,
+    # ranked them by reversal count -- so whether the primary cause came out as
+    # ``libpeas-1.0-1`` or ``budgie-core`` turned on the difference between 18
+    # reversals and 17, which is noise.
+    grouped: dict[int, list[tuple[int, int, int]]] = {}
     for pkg_id, reversals, blocked_by, forced_by in context.run.oscillations:
-        stuck = context.label(pkg_id)
-        blocker = context.label(blocked_by) if blocked_by else ""
-        forcer = context.label(forced_by) if forced_by else ""
+        grouped.setdefault(blocked_by or pkg_id, []).append((pkg_id, reversals, forced_by))
 
-        if blocker and forcer:
+    out: list[Finding] = []
+    ordered = sorted(
+        grouped.items(),
+        key=lambda item: (-len(item[1]), -max(r for _, r, _ in item[1]), item[0]),
+    )
+
+    for blocker, members in ordered:
+        stuck_names = context.labels(pkg for pkg, _, _ in members)
+        blocker_name = context.label(blocker)
+        worst_reversals = max(reversals for _, reversals, _ in members)
+        forcers = context.labels({f for _, _, f in members if f})
+
+        shown = ", ".join(stuck_names[:2]) + (
+            f" and {len(stuck_names) - 2} more" if len(stuck_names) > 2 else ""
+        )
+        if forcers:
             summary = (
-                f"apt could not converge: {forcer} requires a newer {stuck}, "
-                f"but upgrading {stuck} needs {blocker}, which apt refused to "
-                f"install -- it reversed this decision {reversals} times before "
-                f"giving up"
-            )
-        elif blocker:
-            summary = (
-                f"apt could not converge on {stuck} because it refused to "
-                f"install {blocker}, reversing the decision {reversals} times"
+                f"apt could not converge: {forcers[0]} requires a newer {shown}, "
+                f"but that needs {blocker_name}, which apt refused to install "
+                f"-- reversed {worst_reversals} times before giving up"
             )
         else:
             summary = (
-                f"apt could not converge on {stuck}, reversing its decision "
-                f"{reversals} times before giving up"
+                f"apt could not converge on {shown} because it refused to "
+                f"install {blocker_name}, reversing {worst_reversals} times"
             )
 
-        # Blame the package apt refused to install, not the one it oscillated
-        # on: installing the former is what breaks the cycle.
-        culprit = blocked_by or pkg_id
         detail = {
-            "oscillating_package": stuck,
-            "reversals": str(reversals),
+            "oscillating_package": stuck_names[0],
+            "oscillating_packages": ", ".join(stuck_names),
+            "reversals": str(worst_reversals),
+            "blocked_by": blocker_name,
         }
-        if blocker:
-            detail["blocked_by"] = blocker
-        if forcer:
-            detail["forced_by"] = forcer
+        if forcers:
+            detail["forced_by"] = forcers[0]
 
         out.append(
             context.finding(
@@ -423,12 +459,12 @@ def resolver_livelock(context: RuleContext) -> Sequence[Finding]:
                 summary=summary,
                 severity=Severity.HIGH,
                 confidence=Confidence.STRONG,
-                root_pkgs=(culprit,),
-                victim_pkgs=(pkg_id,) if culprit != pkg_id else (),
-                # Blast radius is not the point here and must not be used to
-                # rank this against ordinary roots; see the docstring.
+                root_pkgs=(blocker,),
+                victim_pkgs=tuple(pkg for pkg, _, _ in members),
+                # Blast radius is not the point here and must not rank this
+                # against ordinary roots; see the docstring.
                 cascade_size=0,
-                evidence=context.event_indices(stuck)[:6],
+                evidence=context.event_indices(blocker_name)[:6],
                 graph_index=graph_index,
                 detail=detail,
             )

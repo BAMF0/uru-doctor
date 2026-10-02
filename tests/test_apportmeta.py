@@ -312,15 +312,40 @@ class TestProblemTypeParsing:
 
 
 def test_every_lp_fixture_is_parseable() -> None:
-    """Guards the fixtures themselves against a bad regeneration."""
+    """Guards the fixtures themselves against a bad regeneration.
+
+    Asserts only what is true of all of them. An earlier version hardcoded
+    three fixtures all on 24.04, which broke the moment the corpus grew to
+    include questing reports and one bug that attached no logs at all.
+    """
     paths = sorted((FIXTURES / "lp").glob("*.json"))
-    assert len(paths) == 3
+    assert len(paths) >= 3
     for path in paths:
         payload = json.loads(path.read_text())
         got = parse_apport_meta(payload["description"], tags=payload["tags"])
-        assert got.problem_type is not ProblemType.UNKNOWN
-        assert got.source_package == "ubuntu-release-upgrader"
-        assert got.distro_release == "24.04"
+        assert got.preamble, f"{path.name} has no reporter text"
+        # Every bug filed by apport names a release and a source package. The
+        # one hand-filed report in the corpus (LP#2161332, two screenshots)
+        # has neither, which is itself the thing its fixture exercises.
+        if got.problem_type is not ProblemType.UNKNOWN:
+            assert got.source_package == "ubuntu-release-upgrader"
+            assert got.distro_release
+            assert got.architecture
+
+
+def test_the_release_spread_is_covered() -> None:
+    """The corpus must not silently narrow to one source release.
+
+    apt 2.8 (noble) and apt 3.x (questing) have different debug vocabularies,
+    so a corpus that drifted to one of them would stop testing the other.
+    """
+    releases = set()
+    for path in sorted((FIXTURES / "lp").glob("*.json")):
+        payload = json.loads(path.read_text())
+        got = parse_apport_meta(payload["description"], tags=payload["tags"])
+        if got.distro_release:
+            releases.add(got.distro_release)
+    assert {"24.04", "25.10"} <= releases
 
 
 def test_fixtures_contain_no_absolute_home_paths() -> None:

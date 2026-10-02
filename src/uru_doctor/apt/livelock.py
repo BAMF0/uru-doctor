@@ -55,6 +55,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "MIN_REVERSALS",
+    "TERMINAL_POSITION",
     "Oscillation",
     "detect_oscillations",
 ]
@@ -106,6 +107,10 @@ _UPGRADE_VERBS: Final[frozenset[Verb]] = frozenset(
 #: logs -- a package reversed five times is not converging.
 MIN_REVERSALS: Final[int] = 5
 
+#: How far through the section the final reversal must fall for a livelock to
+#: count as the reason apt gave up. See :attr:`Oscillation.is_terminal`.
+TERMINAL_POSITION: Final[float] = 0.8
+
 
 @dataclass(frozen=True, slots=True)
 class Oscillation:
@@ -130,20 +135,36 @@ class Oscillation:
     last_line: int = 0
     """Line of the final decision, for ordering and evidence."""
 
+    section_end: int = 0
+    """Last line of the section, so :attr:`position` can be computed."""
+
     @property
     def reversals(self) -> int:
         """The number of complete flip-flops, which is the weaker count."""
         return min(self.keeps, self.upgrades)
 
     @property
+    def position(self) -> float:
+        """How far through the section the last reversal occurred, 0.0 to 1.0."""
+        if self.section_end <= 0:
+            return 0.0
+        return min(1.0, self.last_line / self.section_end)
+
+    @property
     def is_terminal(self) -> bool:
         """Whether apt was still oscillating when the trace ended.
 
-        Not currently used for filtering -- an oscillation anywhere in a trace
-        that ends in failure is worth reporting -- but recorded because
-        "stuck at the end" is stronger evidence than "stuck in the middle".
+        The distinction that makes a livelock causal. An oscillation apt
+        escaped is a detour it recovered from; one still running at the end is
+        why it gave up.
+
+        Measured on five real logs, every genuine livelock's last reversal
+        falls between 99.1% and 100.0% of the way through its section -- apt
+        never escapes them. The threshold is set at the final 20% rather than
+        the final 1% so it rejects a mid-trace oscillation without being
+        brittle about exactly where the log stops.
         """
-        return self.last_line > 0
+        return self.position >= TERMINAL_POSITION
 
 
 def detect_oscillations(
@@ -180,6 +201,7 @@ def detect_oscillations(
             if token.object:
                 forced_by.setdefault(subject, interner.package(token.object))
 
+    section_end = max((token.line_no for token in section.tokens), default=0)
     found = [
         Oscillation(
             pkg_id=pkg_id,
@@ -188,6 +210,7 @@ def detect_oscillations(
             blocked_by=blocked_by.get(pkg_id, 0),
             forced_by=forced_by.get(pkg_id, 0),
             last_line=last_line.get(pkg_id, 0),
+            section_end=section_end,
         )
         for pkg_id, keep_count in keeps.items()
         if keep_count >= min_reversals and upgrades.get(pkg_id, 0) >= min_reversals

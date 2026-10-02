@@ -38,6 +38,7 @@ from __future__ import annotations
 import re
 from enum import StrEnum
 
+from uru_doctor.i18n import dep_type_aliases
 from uru_doctor.models import AptStream, DepType
 
 # ---------------------------------------------------------------------------
@@ -49,7 +50,21 @@ from uru_doctor.models import AptStream, DepType
 REF = r"[a-z0-9][a-z0-9+.~-]*(?::[a-z0-9]+(?::any)?)?"
 
 #: A Debian relationship name as it appears in resolver output.
-DEP = r"(?:Pre-?Depends|Depends|Breaks|Conflicts|Recommends|Suggests|Replaces|Enhances)"
+#: The dependency-type position in an apt debug line.
+#:
+#: Deliberately permissive rather than an alternation of the nine English
+#: names. apt prints this through ``_()``, so it is translated: Catalan writes
+#: ``Depèn``, Italian ``Dipende``, and Italian renders ``Conflicts`` as
+#: ``Va in conflitto`` -- with spaces, so no single-word pattern matches it.
+#: Enumerating the names cost 31% of lexer coverage on a Catalan log and 21%
+#: on an Italian one, taking most of the conflict graph with it.
+#:
+#: Safe because every use is bounded by surrounding literals -- ``as ... of``,
+#: ``Broken X ... on Y``, ``due to ...`` -- and because package names cannot
+#: contain whitespace, so the non-greedy match cannot run past the anchor. The
+#: word itself is resolved by :func:`dep_type`, which consults every
+#: translation installed on the system.
+DEP = r"[^<>()\s][^<>()]*?"
 
 #: apt's resolver scores, which go negative.
 SCORE = r"-?\d+"
@@ -70,10 +85,23 @@ DEP_TYPES: dict[str, DepType] = {
 
 
 def dep_type(name: str | None) -> DepType:
-    """Resolve a relationship name, tolerating case and the hyphen variant."""
+    """Resolve a relationship name in any language apt can print it in.
+
+    English first, because that is the overwhelmingly common case and needs no
+    filesystem access. Anything else is looked up in the translations
+    installed on this machine -- see
+    :func:`uru_doctor.i18n.dep_type_aliases`.
+    """
     if not name:
         return DepType.UNKNOWN
-    return DEP_TYPES.get(name.strip().lower(), DepType.UNKNOWN)
+    needle = name.strip().lower()
+    direct = DEP_TYPES.get(needle)
+    if direct is not None:
+        return direct
+    canonical = dep_type_aliases().get(needle)
+    if canonical is None:
+        return DepType.UNKNOWN
+    return DEP_TYPES.get(canonical.lower(), DepType.UNKNOWN)
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +186,12 @@ class Verb(StrEnum):
     REINST_FAILED = "reinst_failed"
     """``Reinst Failed because of A`` -- a re-instatement attempt that did not
     take, naming what blocked it."""
+
+    IGNORE_NOT_INSTVER = "ignore_not_instver"
+    """``Conflicts//Breaks against version V for P but that is not InstVer,
+    ignoring`` -- apt declining to apply a conflict because the version named
+    is not the installed one. Informational, and deliberately not an edge: it
+    records a conflict apt chose *not* to act on."""
 
     TRY_REINSTATE = "try_reinstate"
     REINSTATED = "reinstated"
@@ -256,6 +290,7 @@ VERB_STREAM: dict[Verb, AptStream] = {
     Verb.REINST_FAILED: AptStream.RESOLVER,
     Verb.TRY_REINSTATE: AptStream.RESOLVER,
     Verb.REINSTATED: AptStream.RESOLVER,
+    Verb.IGNORE_NOT_INSTVER: AptStream.RESOLVER,
     Verb.TRY_INSTALLING_BEFORE: AptStream.RESOLVER,
     Verb.IGNORE_MARK_KEEP_PROTECTED: AptStream.RESOLVER,
     Verb.OR_GROUP_KEEP: AptStream.RESOLVER,
@@ -366,8 +401,13 @@ PATTERNS: tuple[tuple[Verb, re.Pattern[str]], ...] = (
     (
         Verb.PACKAGE_DEP,
         re.compile(
+            # The trailing constraint is optional. Every English occurrence in
+            # the corpus is a versionless kernel-header dependency, so the
+            # anchored form matched them all and the gap went unnoticed until
+            # an Italian log supplied `(>= 2.7.4)`. The language was incidental.
             rf"^Package\s+(?P<subject>{REF})\s+(?P<echo>{REF})"
-            rf"\s+(?P<dep>{DEP})\s+on\s+(?P<object>{REF})$"
+            rf"\s+(?P<dep>{DEP})\s+on\s+(?P<object>{REF})"
+            r"(?:\s+\((?P<constraint>[^)]*)\))?$"
         ),
     ),
     (
@@ -401,7 +441,26 @@ PATTERNS: tuple[tuple[Verb, re.Pattern[str]], ...] = (
         Verb.TRY_REINSTATE,
         re.compile(rf"^Try\s+to\s+Re-?Instate\s+\((?P<pass>\d+)\)\s+(?P<subject>{REF})$"),
     ),
-    (Verb.REINSTATED, re.compile(rf"^Re-?Instated\s+(?P<subject>{REF})$")),
+    (
+        Verb.REINSTATED,
+        # The trailing score pair is optional. It appears on five of the 798
+        # Re-Instated lines across the corpus, so a pattern anchored without it
+        # matches 99.4% of them and silently drops the rest.
+        re.compile(
+            rf"^Re-?Instated\s+(?P<subject>{REF})"
+            r"(?:\s+\((?P<score>-?\d+)\s+vs\s+(?P<other_score>-?\d+)\))?$"
+        ),
+    ),
+    (
+        Verb.IGNORE_NOT_INSTVER,
+        # apt declining to act on a Conflicts/Breaks because the version it
+        # names is not the one installed. Informational: it records a conflict
+        # apt decided *not* to apply, so it must never be read as a conflict.
+        re.compile(
+            rf"^Conflicts//Breaks\s+against\s+version\s+(?P<constraint>\S+)\s+for\s+"
+            rf"(?P<subject>{REF})\s+but\s+that\s+is\s+not\s+InstVer,\s*ignoring$"
+        ),
+    ),
     (
         Verb.TRY_INSTALLING_BEFORE,
         re.compile(

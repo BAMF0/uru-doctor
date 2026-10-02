@@ -87,6 +87,106 @@ SOURCES: tuple[tuple[str, str, str], ...] = (
         "three commenters chasing Chrome for weeks.",
     ),
     (
+        "apt/lp2150339-apt.log",
+        "/tmp/opencode/aptlogs/new2150339-apt.log",
+        "LP#2150339 'Upgrade to 26.04 fails'; apt 3.1.6, questing->resolute. The "
+        "libpeas transition: python3-gi needs a newer gedit/eog, which need "
+        "libpeas-1.0-1, which Breaks the installed libpeas-1.0-0 that apt keeps -- "
+        "so apt oscillates nineteen times and gives up. Clusters with LP#2151847 "
+        "and LP#2169028 at tier 0; Launchpad has none of the three linked.",
+    ),
+    (
+        "logs/lp2150339-main.log",
+        "/tmp/opencode/aptlogs/new2150339-main.log",
+        "LP#2150339 main.log. Contains the apt 'Conflicts//Breaks against version "
+        "... but that is not InstVer, ignoring' shape, which no earlier fixture had.",
+    ),
+    (
+        "apt/lp2151847-apt.log",
+        "/tmp/opencode/aptlogs/new2151847-apt.log",
+        "LP#2151847 'kubuntu-desktop package depdency resolution failed'; apt 3.1.6. "
+        "TWO independent faults on one machine: the same libpeas-1.0-1 livelock as "
+        "LP#2150339, plus a libkirigami-data holdback stranding a hundred packages. "
+        "The livelock wins because apt was still oscillating at line 3801 of 3802 "
+        "-- it never converged, so it never resolved the holdback either. Also the "
+        "only fixture with the 'Re-Instated <pkg> (N vs N)' score variant.",
+    ),
+    (
+        "logs/lp2151847-main.log",
+        "/tmp/opencode/aptlogs/new2151847-main.log",
+        "LP#2151847 main.log; reports both apt errors at once -- 'you have held "
+        "broken packages' and 'Resolve generated breaks'.",
+    ),
+    (
+        "apt/lp2155743-apt.log",
+        "/tmp/opencode/aptlogs/new2155743-apt.log",
+        "LP#2155743 'Uprade to 26.04 fails due to failure to calculate'; apt 3.1.6, "
+        "KDE frontend. A KDE Frameworks holdback cascade: libkirigami-data held, "
+        "stranding ninety-four packages. The negative control for third-party "
+        "blame: a triager tagged this bug 'third-party-packages' and its Foreign "
+        "list has forty-six entries including systemd and udev, yet not one of "
+        "them is a root -- the PPAs upgrade cleanly and the KDE holdback is the "
+        "fault. Contains no livelock at all.",
+    ),
+    (
+        "logs/lp2155743-main.log",
+        "/tmp/opencode/aptlogs/new2155743-main.log",
+        "LP#2155743 main.log; Foreign list of forty-six core packages shadowed by "
+        "PPAs, none of which blocks the upgrade.",
+    ),
+    (
+        "apt/lp2169197-apt.log",
+        "/tmp/opencode/aptlogs/new2169197-apt.log",
+        "LP#2169197, locale ca_ES. The Catalan log, and the reason this corpus "
+        "needed i18n at all: apt prints dependency-type names through _(), so "
+        "'Depends' arrives as 'Depèn' and lexer coverage fell to 68.7% -- most of "
+        "the conflict graph simply absent. Enumerating the nine English names was "
+        "the mistake; the dep position is now permissive and the word resolved "
+        "against every translation installed on the system.",
+    ),
+    (
+        "logs/lp2169197-main.log",
+        "/tmp/opencode/aptlogs/new2169197-main.log",
+        "LP#2169197 main.log, ca_ES. Its apt error stack is Catalan: "
+        "'E:Error, pkgProblemResolver::Resolve ha trencat coses, potser a causa de "
+        "paquets retinguts.' Matching the English substring found nothing, so every "
+        "non-English report lost its corroboration signal.",
+    ),
+    (
+        "apt/lp2169251-apt.log",
+        "/tmp/opencode/aptlogs/new2169251-apt.log",
+        "LP#2169251, locale it_IT. Italian renders Conflicts as 'Va in conflitto' -- "
+        "with spaces, so no single-word pattern can match it. Also supplied the "
+        "'Package X X Depends on Y <state> (constraint)' shape: the trailing "
+        "constraint was missing from the grammar, and every English occurrence in "
+        "the corpus happened to be a versionless kernel-header dependency, so the "
+        "gap was invisible until a translated log carried '(>= 2.7.4)'.",
+    ),
+    (
+        "logs/lp2169251-main.log",
+        "/tmp/opencode/aptlogs/new2169251-main.log",
+        "LP#2169251 main.log, it_IT. A SUCCESSFUL upgrade -- 2881 packages, reached "
+        "POST_INSTALL_SCRIPTS -- whose reporter's machine lost its graphics on "
+        "reboot. The only error is 'got error from PostInstallScript "
+        "./xorg_fix_proprietary.py', the Xorg proprietary-driver fixup, which is "
+        "exactly the symptom. The post-upgrade failure class: resolver holdbacks "
+        "are present but cannot explain a fault that happened after dpkg finished.",
+    ),
+    (
+        "logs/lp2169251-aptterm.log",
+        "/tmp/opencode/aptlogs/new2169251-aptterm.log",
+        "LP#2169251 apt-term.log, it_IT. Fully translated dpkg output: "
+        "'Configurazione di' for 'Setting up', 'dpkg: attenzione:' for "
+        "'dpkg: warning:'. Parsed as English it yields zero counts and no failures; "
+        "parsed with the dpkg catalogue it yields 3453 configures and 3453 unpacks.",
+    ),
+    (
+        "logs/lp2169251-history.log",
+        "/tmp/opencode/aptlogs/new2169251-history.log",
+        "LP#2169251 history.log; the first real dpkg transaction log in the corpus "
+        "from a bug report rather than the development machine.",
+    ),
+    (
         "apt/local-apt3-success.log",
         "/var/log/dist-upgrade/apt.log",
         "Developer machine, apt 3.2.0, resolute->stonking, resolve succeeded. "
@@ -172,6 +272,48 @@ LP_SOURCES: tuple[tuple[str, str, str, str], ...] = (
         "unsupported PPA, available even when no apt log is attached.",
     ),
     (
+        "lp/bug2169197.json",
+        "/tmp/opencode/aptlogs/bug2169197.json",
+        "/tmp/opencode/aptlogs/att_2169197.json",
+        "LP#2169197 apport metadata; locale ca_ES, description in Catalan.",
+    ),
+    (
+        "lp/bug2169251.json",
+        "/tmp/opencode/aptlogs/bug2169251.json",
+        "/tmp/opencode/aptlogs/att_2169251.json",
+        "LP#2169251 apport metadata; locale it_IT, description in Italian. The only "
+        "bug in the corpus whose attachments include both apt-term.log and "
+        "history.log.",
+    ),
+    (
+        "lp/bug2161332.json",
+        "/tmp/opencode/aptlogs/bug2161332.json",
+        "/tmp/opencode/aptlogs/att_2161332.json",
+        "LP#2161332 'do-release-upgrade to 26.10 fails: Foreign Packages Installed'. "
+        "The no-evidence case: the only attachments are two PNG screenshots, so "
+        "there is nothing to diagnose and the honest output is to say so. Exercises "
+        "the attachment skip-list, which must recognise both without downloading.",
+    ),
+    (
+        "lp/bug2150339.json",
+        "/tmp/opencode/aptlogs/bug2150339.json",
+        "/tmp/opencode/aptlogs/att_2150339.json",
+        "LP#2150339 apport metadata; questing, generic kernel, no third-party kernel.",
+    ),
+    (
+        "lp/bug2151847.json",
+        "/tmp/opencode/aptlogs/bug2151847.json",
+        "/tmp/opencode/aptlogs/att_2151847.json",
+        "LP#2151847 apport metadata.",
+    ),
+    (
+        "lp/bug2155743.json",
+        "/tmp/opencode/aptlogs/bug2155743.json",
+        "/tmp/opencode/aptlogs/att_2155743.json",
+        "LP#2155743 apport metadata; tagged 'third-party-packages' by a triager, "
+        "which the log evidence does not support -- see the apt.log note.",
+    ),
+    (
         "lp/bug2150319.json",
         "/tmp/opencode/aptlogs/bug2150319.json",
         "",
@@ -209,8 +351,13 @@ def _record_lp(verbose: bool) -> tuple[int, list[str], list[str]]:
 
     for destination, bug_json, att_json, provenance in LP_SOURCES:
         src = Path(bug_json)
+        target = FIXTURES / destination
         if not src.is_file():
-            skipped.append(f"{destination} (missing source {bug_json})")
+            if target.is_file():
+                skipped.append(f"{destination} (source gone; kept existing fixture)")
+                manifest.extend([f"## `{destination}`", "", provenance, ""])
+            else:
+                skipped.append(f"{destination} (missing source {bug_json}, no fixture)")
             continue
         payload = json.loads(src.read_text())
         titles: list[str] = []
@@ -227,7 +374,6 @@ def _record_lp(verbose: bool) -> tuple[int, list[str], list[str]]:
             "attachments": titles,
             "description": _clean_text(payload.get("description", "")),
         }
-        target = FIXTURES / destination
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(trimmed, indent=2) + "\n", encoding="utf-8")
         written += 1
@@ -258,15 +404,26 @@ def record(*, verbose: bool = True) -> tuple[int, list[str]]:
     for destination, source, provenance in SOURCES:
         src = Path(source)
         target = FIXTURES / destination
-        if not src.is_file():
-            skipped.append(f"{destination} (missing source {source})")
+
+        # Document every declared fixture that exists, whether or not its
+        # source is available on this machine. An earlier version appended to
+        # the manifest only after a successful write, so re-running on a
+        # machine where the fetched sources had been cleaned out of /tmp left
+        # the committed fixtures in place and silently deleted eleven of their
+        # provenance notes.
+        if src.is_file():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            cleaned = read_log(src.read_bytes(), redacted=True)
+            target.write_text(cleaned + "\n", encoding="utf-8")
+            written += 1
+            if verbose:
+                print(f"wrote {destination}  ({len(cleaned):,} bytes)")
+        elif target.is_file():
+            skipped.append(f"{destination} (source gone; kept existing fixture)")
+        else:
+            skipped.append(f"{destination} (missing source {source}, no fixture)")
             continue
-        target.parent.mkdir(parents=True, exist_ok=True)
-        cleaned = read_log(src.read_bytes(), redacted=True)
-        target.write_text(cleaned + "\n", encoding="utf-8")
-        written += 1
-        if verbose:
-            print(f"wrote {destination}  ({len(cleaned):,} bytes)")
+
         manifest.append(f"## `{destination}`")
         manifest.append("")
         manifest.append(provenance)

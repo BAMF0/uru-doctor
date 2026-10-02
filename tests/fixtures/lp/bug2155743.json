@@ -1,0 +1,22 @@
+{
+  "id": 2155743,
+  "title": "Uprade to 26.04 fails due to failure to calculate",
+  "tags": [
+    "amd64",
+    "apport-bug",
+    "dist-upgrade",
+    "questing",
+    "third-party-packages"
+  ],
+  "attachments": [
+    "CurrentDmesg.txt.txt",
+    "Dependencies.txt",
+    "JournalErrors.txt",
+    "ProcCpuinfoMinimal.txt",
+    "ProcEnviron.txt",
+    "VarLogDistupgradeAptlog.txt",
+    "VarLogDistupgradeMainlog.txt",
+    "VarLogDistupgradeScreenlog.txt"
+  ],
+  "description": "Trying to upgrade from 25.10 to 26.04\nThrows error \"COuld not calculate the upgrade\"\nsimply stating an unresolvable error occurred\nThe Upgrade Failed screen has no following output, then upgrade closes\n\nProblemType: Bug\nDistroRelease: Ubuntu 25.10\nPackage: ubuntu-release-upgrader-core 1:25.10.10 [origin: unknown]\nProcVersionSignature: Ubuntu 6.17.0-35.35-generic 6.17.13\nUname: Linux 6.17.0-35-generic x86_64\nNonfreeKernelModules: nvidia_modeset nvidia\nApportVersion: 2.33.1-0ubuntu3\nArchitecture: amd64\nCasperMD5CheckResult: pass\nCrashDB: ubuntu\nCrashReports:\n 640:0:123:1556845:2026-06-05 14:21:58.232820806 -0400:2026-06-05 14:21:57.717420547 -0400:/var/crash/_usr_bin_wireplumber.123.crash\n 644:0:123:0:2026-06-05 15:33:32.669504262 -0400:2026-06-05 13:08:14.334995172 -0400:/var/crash/kdump_lock\n 640:1000:123:99050:2026-06-02 07:14:58.159586932 -0400:2026-06-02 07:14:58.158903998 -0400:/var/crash/_usr_bin_blueman-applet.1000.crash\nCurrentDesktop: KDE\nDate: Fri Jun  5 15:43:47 2026\nInstallationDate: Installed on 2024-10-26 (587 days ago)\nInstallationMedia: Xubuntu 24.04.1 LTS \"Noble Numbat\" - Release amd64 (20240827)\nPackageArchitecture: all\nSourcePackage: ubuntu-release-upgrader\nUpgradeStatus: Upgraded to questing on 2026-06-05 (0 days ago)\nVarLogDistupgradeTermlog:"
+}

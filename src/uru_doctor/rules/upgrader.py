@@ -19,6 +19,7 @@ import re
 from collections.abc import Sequence
 from typing import Final
 
+from uru_doctor.i18n import catalogue_for
 from uru_doctor.models import (
     Cause,
     Confidence,
@@ -348,6 +349,12 @@ _register_pattern_rules()
 # ---------------------------------------------------------------------------
 
 #: apt's own ``E:`` text for an interrupted dpkg, from libapt-pkg.
+#:
+#: Kept only as a fast path for English logs. The authoritative test is
+#: :meth:`uru_doctor.i18n.MessageCatalogue.matches`, because this message is
+#: translated -- in Catalan it reads ``El «dpkg» ha estat interromput`` -- and
+#: its one translation-independent anchor is the ``dpkg --configure -a``
+#: command substituted into it.
 _DPKG_INTERRUPTED_RE: Final = re.compile(
     r"dpkg was interrupted, you must manually run", re.IGNORECASE
 )
@@ -371,9 +378,10 @@ def dpkg_interrupted(context: RuleContext) -> Sequence[Finding]:
     dpkg is mid-transaction, and every dependency problem reported alongside is
     a consequence rather than a cause.
     """
+    catalogue = catalogue_for(context.run.locale or None)
     haystack = (*context.apt_errors, *context.error_messages)
     for message in haystack:
-        if _DPKG_INTERRUPTED_RE.search(message):
+        if _DPKG_INTERRUPTED_RE.search(message) or catalogue.matches("dpkg_interrupted", message):
             return (
                 context.finding(
                     rule="dpkg.interrupted",

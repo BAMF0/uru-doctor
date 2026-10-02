@@ -439,3 +439,170 @@ class TestUpgraderRules:
         result = diagnose(run, interner)
         causes = {f.cause for f in result.findings}
         assert causes <= CAVEAT_CAUSES
+
+
+class TestHeldOutBugs:
+    """Four bugs the tool had never seen when its rules were written.
+
+    Fetched after the diagnosis engine was complete, which makes them the only
+    unbiased check on it available. Three carry logs; the fourth carries two
+    screenshots and nothing else.
+    """
+
+    @pytest.mark.parametrize(
+        ("bug_id", "cause", "package"),
+        [
+            # The libpeas 1.0-0 -> 1.0-1 transition: python3-gi needs a newer
+            # gedit/eog, which need libpeas-1.0-1, which Breaks the installed
+            # libpeas-1.0-0 that apt keeps.
+            ("2150339", Cause.RESOLVER_LIVELOCK, "libpeas-1.0-1"),
+            ("2151847", Cause.RESOLVER_LIVELOCK, "libpeas-1.0-1"),
+            # KDE Frameworks holdback cascade, no livelock at all.
+            ("2155743", Cause.HELD_PACKAGE_BLOCKS_UPGRADE, "libkirigami-data"),
+        ],
+    )
+    def test_primary_cause(
+        self, bug_id: str, cause: Cause, package: str, interner: Interner
+    ) -> None:
+        _, result = lp(bug_id, interner)
+        primary = result.primary
+        assert primary is not None
+        assert primary.cause is cause
+        assert interner.package_label(primary.root_pkgs[0]) == package
+
+    def test_a_recovered_livelock_is_not_causal(self, interner: Interner) -> None:
+        """Only oscillations apt was still stuck in when it quit count.
+
+        Every genuine livelock in the corpus has its last reversal between
+        99.1% and 100% of the way through the section -- apt never escapes
+        them. One it escaped would be a detour, and because the livelock tier
+        outranks blast radius it would wrongly displace a real cascade.
+        """
+        from uru_doctor.apt.livelock import TERMINAL_POSITION, detect_oscillations
+
+        for name in ("lp2150339-apt.log", "lp2151847-apt.log", "lp2150319-apt.log"):
+            found = detect_oscillations(sectioned(name).primary, interner)
+            assert found
+            for oscillation in found:
+                assert oscillation.is_terminal
+                assert oscillation.position >= TERMINAL_POSITION
+
+    def test_livelocks_are_grouped_by_blocker(self, interner: Interner) -> None:
+        """Several packages stuck on one package is one fault, not several.
+
+        LP#2151847 has three oscillating packages; two are stuck on
+        ``libpeas-1.0-1``. Reporting one finding each ranked them by reversal
+        count, so the primary cause turned on 18 reversals versus 17 -- noise.
+        """
+        _, result = lp("2151847", interner)
+        livelocks = [f for f in result.findings if f.rule == "resolver.livelock"]
+        assert len(livelocks) == 2
+        assert interner.package_label(livelocks[0].root_pkgs[0]) == "libpeas-1.0-1"
+        assert len(livelocks[0].victim_pkgs) == 2
+
+    def test_a_livelock_outranks_a_larger_holdback(self, interner: Interner) -> None:
+        """LP#2151847 has two independent faults.
+
+        A ``libkirigami-data`` holdback strands a hundred packages, and the
+        libpeas livelock strands two. The livelock still wins: apt never
+        converged, so it never got as far as resolving the holdback.
+        """
+        _, result = lp("2151847", interner)
+        assert result.primary.cause is Cause.RESOLVER_LIVELOCK
+        holdback = next(f for f in result.findings if f.cause is Cause.HELD_PACKAGE_BLOCKS_UPGRADE)
+        assert holdback.cascade_size >= 100
+        assert result.findings.index(result.primary) < result.findings.index(holdback)
+
+    def test_third_party_packages_are_not_blamed_without_evidence(self, interner: Interner) -> None:
+        """LP#2155743 is the negative control for third-party blame.
+
+        A triager tagged it ``third-party-packages`` and its ``Foreign`` list
+        has forty-six entries including ``systemd`` and ``udev``. Not one of
+        them is a root: the PPAs upgrade cleanly and a KDE holdback is the
+        fault. Being third-party is not evidence of being the cause.
+        """
+        run, result = lp("2155743", interner)
+        assert len(run.third_party) >= 40
+        assert not result.is_candidate_invalid
+        assert result.primary.cause is Cause.HELD_PACKAGE_BLOCKS_UPGRADE
+        assert "resolver.third-party-blocker" not in result.fired
+
+    def test_a_bug_with_no_logs_says_so(self, interner: Interner) -> None:
+        """LP#2161332 attached two screenshots and nothing else."""
+        payload = json.loads((FIXTURES / "lp" / "bug2161332.json").read_text())
+        meta = parse_apport_meta(payload["description"], tags=payload["tags"])
+        run = ingest_attachments({}, interner, meta=meta, bug_id=2161332)
+        result = diagnose(run, interner, meta=meta)
+
+        assert not run.evidence_complete
+        assert result.primary is not None
+        assert result.primary.cause is Cause.NO_FAILURE_RECORDED
+        assert "logs not provided" in result.primary.summary
+
+    def test_screenshots_are_skipped_without_downloading(self) -> None:
+        """The LP API answers 429 under load, so every avoided fetch counts."""
+        from uru_doctor.parsers.apportmeta import (
+            attachment_source,
+            is_irrelevant_attachment,
+        )
+
+        payload = json.loads((FIXTURES / "lp" / "bug2161332.json").read_text())
+        assert payload["attachments"]
+        for title in payload["attachments"]:
+            assert is_irrelevant_attachment(title), title
+            assert attachment_source(title) is None
+
+
+class TestNewGrammarShapes:
+    """Shapes the held-out logs contained and the corpus did not."""
+
+    def test_full_coverage_including_the_new_logs(self) -> None:
+        """Any unlexed line is a verb the analysis cannot see."""
+        from uru_doctor.apt.lexer import LexStats, lex
+
+        total = matched = 0
+        for path in sorted((FIXTURES / "apt").glob("*.log")):
+            stats = LexStats()
+            list(lex(path.read_text().splitlines(), stats))
+            assert stats.coverage == 1.0, f"{path.name}: {stats.top_unknown(3)}"
+            total += stats.lines - stats.blank
+            matched += stats.matched
+        assert matched == total
+        # Guards against the corpus shrinking to the point of proving nothing.
+        assert total > 18_000
+
+    def test_the_reinstated_score_variant(self) -> None:
+        """``Re-Instated <pkg> (N vs N)``.
+
+        Five of the 798 ``Re-Instated`` lines in the corpus carry a score pair,
+        so a pattern anchored without it matched 99.4% and dropped the rest.
+        """
+        from uru_doctor.apt.grammar import Verb
+        from uru_doctor.apt.lexer import lex
+
+        tokens = list(
+            lex(
+                [
+                    "  Re-Instated libkirigami-data:amd64",
+                    "  Re-Instated libkirigami6:amd64 (3 vs 7)",
+                ]
+            )
+        )
+        assert [t.verb for t in tokens] == [Verb.REINSTATED, Verb.REINSTATED]
+        assert tokens[1].subject == "libkirigami6:amd64"
+
+    def test_the_ignored_conflict_shape(self) -> None:
+        """apt declining to apply a conflict must never read as a conflict."""
+        from uru_doctor.apt.grammar import Verb
+        from uru_doctor.apt.lexer import lex
+
+        tokens = list(
+            lex(
+                [
+                    "Conflicts//Breaks against version 1:17.0+dfsg1-2ubuntu3 for"
+                    " pulseaudio but that is not InstVer, ignoring"
+                ]
+            )
+        )
+        assert [t.verb for t in tokens] == [Verb.IGNORE_NOT_INSTVER]
+        assert tokens[0].subject == "pulseaudio"

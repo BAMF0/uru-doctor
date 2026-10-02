@@ -28,6 +28,13 @@ This is the same shape of trap as the ``W:``/``E:`` confusion in ``main.log``.
 Blame is therefore decided by the *reason line* that dpkg prints immediately
 after naming the package, never by what happens to be nearby.
 
+**The log may not be in English.** dpkg's output is fully translated: an
+Italian ``apt-term.log`` says ``Configurazione di`` for ``Setting up`` and
+``dpkg: attenzione:`` for ``dpkg: warning:``. Matching English alone returns
+zero counts and misses every failure, so :func:`parse_apt_term` takes a locale
+and consults the same ``dpkg`` message catalogue dpkg itself used. See
+:mod:`uru_doctor.i18n`.
+
 **The reason line separates roots from victims.** ``dependency problems -
 leaving unconfigured`` means this package is collateral damage; a maintainer
 script exit status or a file conflict means it is a cause. In the reference
@@ -43,6 +50,8 @@ from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Final
+
+from uru_doctor.i18n import dpkg_verb_patterns
 
 __all__ = [
     "DpkgFailure",
@@ -327,15 +336,27 @@ def _iter_blocks(lines: Sequence[str]) -> Iterator[tuple[int, list[str], str, st
         yield (origin, body, start, end)
 
 
-def parse_apt_term(lines: Sequence[str]) -> TermLog:
-    """Parse ``apt-term.log`` into blocks and failures."""
+def parse_apt_term(lines: Sequence[str], *, locale: str | None = None) -> TermLog:
+    """Parse ``apt-term.log`` into blocks and failures.
+
+    ``locale`` comes from ``main.log``'s ``locale:`` line. Without it the
+    parser assumes English, which silently produces zero counts and no
+    failures on a translated log rather than reporting a problem.
+    """
+    verbs = dpkg_verb_patterns(locale)
     log = TermLog()
     for line_no, body, start, end in _iter_blocks(lines):
-        log.blocks.append(_parse_block(line_no, body, start, end))
+        log.blocks.append(_parse_block(line_no, body, start, end, verbs))
     return log
 
 
-def _parse_block(line_no: int, body: list[str], start: str, end: str) -> TermBlock:
+def _parse_block(
+    line_no: int,
+    body: list[str],
+    start: str,
+    end: str,
+    verbs: dict[str, re.Pattern[str]] | None = None,
+) -> TermBlock:
     failures: list[DpkgFailure] = []
     summary: list[str] = []
     in_summary = False
@@ -365,7 +386,21 @@ def _parse_block(line_no: int, body: list[str], start: str, end: str) -> TermBlo
             index += 1
             continue
 
-        if stripped.startswith("Setting up "):
+        if verbs:
+            # Matched anywhere in the line, not anchored: German and Japanese
+            # put the package name before the verb.
+            if (pattern := verbs.get("setting_up")) and pattern.search(stripped):
+                configured += 1
+            elif (pattern := verbs.get("unpacking")) and pattern.search(stripped):
+                unpacked += 1
+            elif (
+                (pattern := verbs.get("removing"))
+                and pattern.search(stripped)
+                and "diversion" not in stripped
+                and "deviazione" not in stripped
+            ):
+                removed += 1
+        elif stripped.startswith("Setting up "):
             configured += 1
         elif stripped.startswith("Unpacking "):
             unpacked += 1

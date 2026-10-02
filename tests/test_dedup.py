@@ -489,3 +489,142 @@ def test_verdict_fields_are_all_populated(interner: Interner) -> None:
     for field in dataclass_fields(verdict):
         assert getattr(verdict, field.name) is not None
     assert verdict.reason
+
+
+class TestHeldOutClustering:
+    """Three bugs Launchpad has not linked, which share one root cause.
+
+    LP#2150339, LP#2151847 and LP#2169028 are all the libpeas 1.0-0 to 1.0-1
+    transition: ``python3-gi`` requires a newer ``gedit``/``eog``, which
+    require ``libpeas-1.0-1`` at version ``1.38.1-4ubuntu1``, which ``Breaks``
+    the installed ``libpeas-1.0-0`` that apt keeps. All three carry zero
+    duplicates on Launchpad.
+    """
+
+    def _corpus(self, interner: Interner) -> dict[str, Signature]:
+        out: dict[str, Signature] = {}
+        for bug_id in ("2150339", "2151847", "2169028", "2155743", "2150245"):
+            run, result = ingest(
+                interner,
+                apt=f"lp{bug_id}-apt.log",
+                main=f"lp{bug_id}-main.log",
+                bug_id=bug_id,
+            )
+            out[bug_id] = build_signature(run, result.findings, interner)
+        return out
+
+    def test_the_two_questing_reports_share_a_root_graph(self, interner: Interner) -> None:
+        """Tier 0: byte-identical blamed subgraph from different machines."""
+        signatures = self._corpus(interner)
+        assert signatures["2150339"].root_graph is not None
+        assert signatures["2150339"].root_graph == signatures["2151847"].root_graph
+
+    def test_all_three_libpeas_bugs_cluster(self, interner: Interner) -> None:
+        """Tier 1 must extend the tier-0 cluster, not form a rival.
+
+        An earlier version skipped runs already assigned, so bug 2169028 --
+        which matches the other two only at tier 1 -- was reported as a
+        singleton.
+        """
+        clusters = cluster_runs(
+            self._corpus(interner),
+            config=DedupConfig(),
+            oldest_first=["2150339", "2151847", "2155743", "2169028", "2150245"],
+        )
+        libpeas = next(c for c in clusters if "2150339" in c.members)
+        assert set(libpeas.members) == {"2150339", "2151847", "2169028"}
+        assert libpeas.representative == "2150339"
+
+    def test_the_unrelated_bugs_stay_out(self, interner: Interner) -> None:
+        clusters = cluster_runs(self._corpus(interner), config=DedupConfig())
+        clustered = {m for c in clusters for m in c.members}
+        assert "2155743" not in clustered
+        assert "2150245" not in clustered
+
+    def test_sharing_a_victim_is_not_sharing_a_cause(self, interner: Interner) -> None:
+        """LP#2151847 and LP#2155743 both have the libkirigami holdback.
+
+        They are still different bugs: 2151847 failed because apt never
+        converged on libpeas, 2155743 because of the holdback itself. Sharing
+        a root package is the gate for scoring, not a verdict.
+        """
+        left, left_result = ingest(interner, apt="lp2151847-apt.log", main="lp2151847-main.log")
+        right, right_result = ingest(interner, apt="lp2155743-apt.log", main="lp2155743-main.log")
+        verdict = score_pair(
+            left,
+            right,
+            left_result.findings,
+            right_result.findings,
+            interner,
+            DedupConfig(),
+        )
+        assert "libkirigami-data" in verdict.shared_roots
+        assert not verdict.duplicate
+
+    def test_the_cluster_title_names_the_shared_cause(self, interner: Interner) -> None:
+        titles = []
+        for bug_id in ("2150339", "2151847", "2169028"):
+            run, result = ingest(
+                interner,
+                apt=f"lp{bug_id}-apt.log",
+                main=f"lp{bug_id}-main.log",
+                bug_id=bug_id,
+            )
+            titles.append(propose_title(run, result, interner))
+        chosen = title_for_cluster(titles)
+        assert chosen is not None
+        assert "libpeas-1.0-1" in chosen.title
+
+
+class TestSignatureStability:
+    """A signature must not depend on how it was computed.
+
+    Signatures are persisted and compared across sessions, so anything that
+    varies with the ingest order of a corpus makes them worthless.
+    """
+
+    def _signature(self, bug_id: str, interner: Interner) -> bytes | None:
+        run, result = ingest(
+            interner,
+            apt=f"lp{bug_id}-apt.log",
+            main=f"lp{bug_id}-main.log",
+            bug_id=bug_id,
+        )
+        return build_signature(run, result.findings, interner).root_graph
+
+    def test_independent_of_the_interner_instance(self) -> None:
+        """Two logs of one bug must agree whether ingested together or apart.
+
+        ``canonical_digest`` sorted node *indices* and emitted the names in
+        that order, so the sequence followed interning order. The same pair
+        hashed equal through a shared interner and unequal through two -- so a
+        corpus built incrementally would never match anything.
+        """
+        import tempfile
+        from pathlib import Path
+
+        from uru_doctor.store import Store
+
+        def fresh() -> Interner:
+            return Interner(Store.open(Path(tempfile.mkdtemp())))
+
+        shared = fresh()
+        together = [self._signature(b, shared) for b in ("2150339", "2151847")]
+        apart = [self._signature(b, fresh()) for b in ("2150339", "2151847")]
+
+        assert together[0] == together[1]
+        assert apart[0] == apart[1]
+        assert together == apart
+
+    def test_independent_of_ingest_order(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        from uru_doctor.store import Store
+
+        forward = Interner(Store.open(Path(tempfile.mkdtemp())))
+        first = {b: self._signature(b, forward) for b in ("2150245", "2150339")}
+
+        backward = Interner(Store.open(Path(tempfile.mkdtemp())))
+        second = {b: self._signature(b, backward) for b in ("2150339", "2150245")}
+        assert first == second

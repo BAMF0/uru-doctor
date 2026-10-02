@@ -1,0 +1,25 @@
+{
+  "id": 2169251,
+  "title": "Linux Ubutu non funziona dopo l'avanzamento  alla versione",
+  "tags": [
+    "amd64",
+    "apport-bug",
+    "dist-upgrade",
+    "resolute",
+    "wayland-session"
+  ],
+  "attachments": [
+    "CrashReports.txt",
+    "CurrentDmesg.txt",
+    "Dependencies.txt",
+    "JournalErrors.txt",
+    "ProcCpuinfoMinimal.txt",
+    "VarLogDistupgradeAptHistorylog.txt",
+    "VarLogDistupgradeAptclonesystemstate.tar.gz",
+    "VarLogDistupgradeAptlog.txt",
+    "VarLogDistupgradeApttermlog.txt",
+    "VarLogDistupgradeLspcitxt.txt",
+    "VarLogDistupgradeMainlog.txt"
+  ],
+  "description": "Ho effettuato l'aggiornamento alla nuova versione e il computer al riavvio non riusciva piu' a mostrare la grafica. Il video o era scuro oppure pieno di caratteri strani. Durante l'avvio del sistema si vedeva a tratti il logo di ubuntu che poi sistematicamente spariva. Sono riuscito a far ripartire il computer usando il recovey mode con il kernel 6.8.0-146-generic. Come uso il kernel 7 il sistema va in crash.\nInoltre ho perso tutti gli account di posta elettronica che avevo con il programma thunderbird.\nquesti sono i dati del mio computer:\n-Computer-\n         Processor : Intel Core i7 920\n                     1 physical processor; 4 cores; 8 threads\n            Memory : 11714MB (3726MB used)\n      Machine Type : Desktop\n  Operating System : Ubuntu Desktop 26.04 - Debian GNU/Linux forky/sid\n\n-Display-\n              Resolution : 1920x1080 pixels\n         Display Adapter : AMD/ATI Cape Verde PRO\n         OpenGL Renderer : (radeonsi, verde, ACO, DRM 2.50, 6.8.0-146-generic)\n  Session Display Server : Wayland\n-Audio Devices-\n  Audio Adapter : HDA-Intel - HDA Intel\n  Audio Adapter : USB-Audio - GENERAL WEBCAM\n  Audio Adapter : HDA-Intel - HDA ATI HDMI\n\nProblemType: Bug\nDistroRelease: Ubuntu 26.04\nPackage: ubuntu-release-upgrader-core 1:26.04.25\nProcVersionSignature: Ubuntu 6.8.0-146.146-generic 6.8.12\nUname: Linux 6.8.0-146-generic x86_64\nApportVersion: 2.34.1-0ubuntu0.1\nArchitecture: amd64\nCasperMD5CheckResult: unknown\nCrashDB: ubuntu\nCurrentDesktop: ubuntu:GNOME\nDate: Fri Oct  2 08:47:31 2026\nInstallationDate: Installed on 2020-02-15 (2421 days ago)\nInstallationMedia: Ubuntu 19.10 \"Eoan Ermine\" - Release amd64 (20191017)\nPackageArchitecture: all\nProcEnviron:\n LANG=it_IT.UTF-8\n PATH=(custom, no user)\n SHELL=/bin/bash\n XDG_RUNTIME_DIR=<set>\nSourcePackage: ubuntu-release-upgrader\nSymptom: release-upgrade\nUpgradeStatus: Upgraded to resolute on 2026-10-01 (1 days ago)\nVarLogDistupgradeTermlog:"
+}

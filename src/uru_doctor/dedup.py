@@ -456,51 +456,67 @@ def cluster_runs(
     config: DedupConfig,
     oldest_first: Sequence[str] = (),
 ) -> list[Cluster]:
-    """Group runs by exact signature, tier 0 then tier 1.
+    """Group runs by exact signature: tier 0 first, then tier 1 extends it.
 
     ``oldest_first`` orders representative selection. The earliest report is
-    kept as the representative because that is the one Launchpad convention
-    treats as the master, and the later ones are marked its duplicates.
+    kept as the representative because that is what Launchpad convention treats
+    as the master, and the later ones become its duplicates.
+
+    Tier 1 **extends** tier-0 clusters rather than only forming new ones. An
+    earlier version skipped any run already assigned, which quietly lost
+    transitive duplicates: bugs 2151847 and 2150339 match at tier 0, and bug
+    2169028 matches both at tier 1, but because the first two were already
+    assigned, 2169028 came out a singleton. All three are the same
+    ``libpeas-1.0-1`` transition and Launchpad has none of them linked.
 
     Tier 2 scoring is deliberately not done here. It is quadratic and only
     meaningful within a tier-1 bucket, so callers run it per bucket.
     """
     rank = {key: index for index, key in enumerate(oldest_first)}
 
-    def representative(members: Sequence[str]) -> str:
+    def representative(members: Iterable[str]) -> str:
         return min(members, key=lambda key: (rank.get(key, len(rank)), key))
 
     clusters: list[Cluster] = []
-    assigned: set[str] = set()
+    owner: dict[str, Cluster] = {}
 
-    for tier, column in ((Tier.ROOT_GRAPH, "root_graph"), (Tier.CAUSE_TUPLE, "cause_tuple")):
+    for tier, column in (
+        (Tier.ROOT_GRAPH, "root_graph"),
+        (Tier.CAUSE_TUPLE, "cause_tuple"),
+    ):
         buckets: dict[bytes, list[str]] = {}
         for run_key, signature in signatures.items():
-            if run_key in assigned:
-                continue
             value = getattr(signature, column)
-            if value is None:
-                continue
-            buckets.setdefault(value, []).append(run_key)
+            if value is not None:
+                buckets.setdefault(value, []).append(run_key)
 
         for digest, members in buckets.items():
             if len(members) < 2:
                 continue
-            if len(members) > config.max_cluster_size:
-                # An implausibly large cluster means the fingerprint lost its
-                # discriminating power, not that five hundred people hit one
-                # bug. Refusing to emit it is better than merging the corpus.
-                continue
-            clusters.append(
-                Cluster(
-                    key=digest,
-                    tier=tier,
-                    members=sorted(members),
-                    representative=representative(members),
-                )
-            )
-            assigned.update(members)
 
+            existing = {id(owner[k]): owner[k] for k in members if k in owner}
+            if len(existing) > 1:
+                # A tier-1 bucket spanning two tier-0 clusters means the coarse
+                # key has merged faults that the precise key told apart. The
+                # precise key is the one to trust, so this bucket is dropped.
+                continue
+
+            target = next(iter(existing.values()), None)
+            if target is None:
+                target = Cluster(key=digest, tier=tier, members=[])
+                clusters.append(target)
+
+            for key in members:
+                if key not in owner:
+                    target.members.append(key)
+                    owner[key] = target
+
+            target.members.sort()
+            target.representative = representative(target.members)
+
+    # A cluster grown implausibly large means the fingerprint lost its
+    # discriminating power, not that hundreds of people hit one bug.
+    clusters = [c for c in clusters if 2 <= c.size <= config.max_cluster_size]
     clusters.sort(key=lambda c: (-c.size, c.tier, c.representative))
     return clusters
 

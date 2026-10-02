@@ -217,9 +217,16 @@ def render_detail(finding: Finding, interner: Interner, *, run: UpgradeRun | Non
             return f"{_count(victims)} left broken after the upgrade"
 
         case Cause.NO_FAILURE_RECORDED:
+            # Missing and truncated logs are different problems with different
+            # next actions -- ask for the logs, or read the ones provided more
+            # carefully. Saying "logs end during UNKNOWN" for a bug that
+            # attached nothing but two screenshots is both wrong and useless.
+            if not finding.detail.get("logs_present", ""):
+                return "no upgrade logs were attached"
             phase = finding.detail.get("terminal_phase", "")
-            where = f" during {phase}" if phase else ""
-            return f"logs end{where} with no failure recorded"
+            if phase in ("", "UNKNOWN"):
+                return "the attached logs record no failure"
+            return f"logs end during {phase} with no failure recorded"
 
         case _:
             tail = f", affecting {_count(victims)}" if victims else ""

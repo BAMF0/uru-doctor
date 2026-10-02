@@ -1,0 +1,23 @@
+{
+  "id": 2169197,
+  "title": "Don't upgrade from ubuntu 24.04.5 to 26.04.1",
+  "tags": [
+    "amd64",
+    "apport-bug",
+    "dist-upgrade",
+    "noble",
+    "wayland-session"
+  ],
+  "attachments": [
+    "CurrentDmesg.txt",
+    "Dependencies.txt",
+    "JournalErrors.txt",
+    "ProcCpuinfoMinimal.txt",
+    "ProcEnviron.txt",
+    "VarLogDistupgradeAptclonesystemstate.tar.gz",
+    "VarLogDistupgradeAptlog.txt",
+    "VarLogDistupgradeLspcitxt.txt",
+    "VarLogDistupgradeMainlog.txt"
+  ],
+  "description": "S'ha produ\u00eft un problema irresoluble mentre es calculava l'actualitzaci\u00f3.\n\n Si cap d'aquests suggeriments \u00e9s v\u00e0lid, informeu d'aquest error utilitzant l'ordre \u00abubuntu-bug update-manager\u00bb en un terminal. Si ho voleu investigar, els fitxers de registre a \u00ab/var/log/dist-upgrade\u00bb contenen els detalls de l'actualitzaci\u00f3. Concretament, consulteu \u00abmain.log\u00bb i \u00abapt.log\u00bb.\n\nProblemType: Bug\nDistroRelease: Ubuntu 24.04\nPackage: ubuntu-release-upgrader-core 1:24.04.29\nProcVersionSignature: Ubuntu 6.8.0-146.146-generic 6.8.12\nUname: Linux 6.8.0-146-generic x86_64\nApportVersion: 2.28.3-0ubuntu0.1\nArchitecture: amd64\nCasperMD5CheckResult: unknown\nCrashDB: ubuntu\nCurrentDesktop: GNOME\nDate: Thu Oct  1 20:03:46 2026\nInstallationDate: Installed on 2015-03-04 (4229 days ago)\nInstallationMedia: Ubuntu 14.04.2 LTS \"Trusty Tahr\" - Release amd64 (20150218.1)\nPackageArchitecture: all\nSourcePackage: ubuntu-release-upgrader\nSymptom: ubuntu-release-upgrader\nUpgradeStatus: Upgraded to noble on 2026-10-01 (0 days ago)\nVarLogDistupgradeTermlog:"
+}
