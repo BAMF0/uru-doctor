@@ -37,6 +37,17 @@ Facts the script encodes, worth knowing if you work around it:
 
 ### Finding bugs to fetch
 
+`uru-doctor sweep` does this now, and is the normal way in:
+
+```bash
+uru-doctor sweep --dry-run        # what would a pass cost?
+uru-doctor sweep --limit 5        # fetch, diagnose, store
+```
+
+It keeps a watermark, includes closed bugs, records each bug's status, and is
+resumable. Prefer it to driving `searchTasks` by hand. What follows is the API
+detail behind it, which still matters if you are debugging the sweep itself.
+
 `searchTasks` on the source package lists them, and is a plain read-only GET:
 
 ```
@@ -49,21 +60,27 @@ last path segment), `status`, `date_created` and an `http_etag`;
 `next_collection_link` paginates and `total_size` comes back `null`, so count
 the entries rather than trusting a total.
 
-Two findings worth having before anyone automates this:
+Three findings worth having:
 
 - **`status` is in the task entry**, so a sweep gets the bug's own resolution
   without a second request per bug. That matters because the resolution is
   ground-truth rank 2 below, and a per-bug request for it would cost another
-  three seconds each.
+  three seconds each. `fetch` therefore leaves `bug_status` empty and `sweep`
+  fills it in — tolerable only because the field is used to *check* a
+  diagnosis, never to produce one.
 - **The default omits closed bugs.** With no `status` parameter the API returns
   only open ones. Over one sample week that hid two `Won't Fix` bugs — and
   closed bugs are exactly where ground truth lives, so a sweep that takes the
-  default systematically excludes its own best evidence. Pass the statuses
-  explicitly, including `Invalid`, `Won't Fix`, `Fix Released`, `Fix Committed`
-  and `Expired`.
+  default systematically excludes its own best evidence. `ALL_STATUSES` passes
+  all eleven explicitly.
+- **Results come back newest-first**, which is the wrong order for a watermark.
+  A mark can only advance over bugs already handled, so `search_tasks` sorts
+  oldest-first before yielding; processing in arrival order and storing the
+  newest timestamp seen would skip everything older on the next run.
 
 At ~3s per request and ~6 requests per bug, a hundred-bug sweep is half an
-hour. That is a watermark-and-resume job, not a one-shot command.
+hour. That is why the watermark is monotonic and advances only over bugs
+actually stored: being interrupted is the normal case, not the exceptional one.
 
 Also record, from the bug page: status, `number_of_duplicates`,
 `duplicate_of_link`, triager tags, and whether a comment or linked upstream
@@ -119,9 +136,63 @@ This gate has caught every grammar gap so far:
 | 5 unmatched of 798 | `Re-Instated <pkg> (N vs N)` — the score-pair variant |
 | 7 unmatched | `Package X X Depends on Y <state> (>= V)` — missing optional trailing constraint. Every English occurrence in the corpus happened to be versionless, so the gap was invisible for ten logs |
 | 82.9% | `Setting <PKG> NOT as auto-installed (...)`, `Ignore MarkGarbage`, `Removing: ... not an option for ...` |
+| 99.9527% on LP#2168863 | `Or group remove for <PKG>`. `Or group keep for` was enumerated and its sibling was not — the two strings sit adjacent in `libapt-pkg`. Found by the first live `sweep`, which is the point of putting coverage on the collecting path |
+| 99.7534% on LP#2168919 | German renders `PreDepends` as `Hängt ab von (vorher)`. The dependency position had been widened for *spaces* when Italian `Va in conflitto` appeared, and not for the next punctuation class along. The alias table already resolved the name; the pattern could not reach it, so a unit test on `dep_type` passed throughout |
+
+### Known open gap: upgrader prose inside `apt.log`
+
+Four lines of LP#2168919 still do not lex, and they are **not** a grammar bug
+to be fixed the same way:
+
+```
+»kubuntu-desktop« kann nicht installiert werden
+Es war nicht möglich, ein erforderliches Paket zu installieren. Bitte
+melden Sie diesen Fehler, indem Sie im Terminal den Befehl
+»ubuntu-bug ubuntu-release-upgrader-core« eingeben.
+```
+
+That is the upgrader's own user-facing error, from
+`DistUpgradeCache.py:897` (`_("Can't install '%s'")` plus
+`_("It was impossible to install a required package. ...")`), interleaved into
+`apt.log` because `_stopAptResolverLog()` restores stdout before `view.error`.
+
+Why it is not a one-line fix:
+
+- It is **upgrader prose, not an apt verb**, so it belongs to a different
+  grammar than the one the lexer implements.
+- The `ubuntu-release-upgrader` gettext domain is **not installed** on a
+  machine that merely has `apt`, so the forward-translation trick that handles
+  apt and dpkg messages does not apply. Only one of the four lines carries a
+  translation-surviving anchor (`ubuntu-bug ubuntu-release-upgrader-core`); the
+  rest are pure prose, and enumerating prose in ninety languages is the mistake
+  this codebase already refuses to make.
+- There is a **real diagnosis** hiding in it — a required meta-package could
+  not be installed, and the message names it — so the tempting fix is a new
+  rule. That needs ground truth first (§4). LP#2168919 is `Won't Fix`, which
+  says nothing about whether `kubuntu-desktop` was the cause.
+
+The honest intermediate position: classify an interleaved upgrader block as
+*not a resolver verb* rather than parse its contents, so coverage stops
+reporting a grammar gap that is not one. Do not do this by matching prose.
 
 Fix by adding the pattern to `apt/grammar.py`, then re-check **every** fixture —
 a widened pattern can swallow lines another pattern was matching.
+
+**Check the whole upstream family, not the line you saw.** `strings` on
+`libapt-pkg` is the fastest way:
+
+```bash
+strings /usr/lib/*/libapt-pkg.so.* | grep -i "or group"
+#   Or group remove for
+#   Or group keep for
+```
+
+Two of the gaps above were one half of an upstream pair. Adding only the half
+that appeared leaves the other invisible until some future log contains it, and
+there is no reason to pay for that twice. A verb enum and a pattern table that
+cover the pair are also what keeps keep-vs-remove distinguishable downstream:
+one shared token would make "apt kept this" and "apt deleted this" the same
+fact.
 
 `lex_lines == 0` is **not** a gap. A bug that attached only `main.log`, or two
 screenshots like LP#2161332, has nothing to lex, and reporting that as
@@ -353,6 +424,30 @@ changed an earlier bug's answer.
   validation failures as locations and reasons only, and
   `test_rejected_values_are_not_echoed` checks the traceback too, because
   `raise ... from exc` would put the original straight back.
+- **A watermark that advances past unhandled work.** `sweep` must move the mark
+  only over bugs it actually stored, and only to *that bug's* creation date.
+  Advancing to the newest task in the listing is the obvious implementation and
+  it silently skips every bug between the last one handled and the newest one
+  seen — permanently, because once the mark is past a bug's creation date the
+  search never offers it again. Also monotonic: a pass cut short by a 429 must
+  not rewind a mark a further-reaching pass had already set.
+  `test_the_watermark_does_not_pass_unhandled_bugs` fails loudly on both.
+- **Launchpad's search defaults exclude closed bugs.** See §1. The ones it hides
+  are the ones whose resolution is the ground truth.
+- **A progress bar on the wrong console corrupts the output.** Rich moves a live
+  region out of the way of `Console.print` only for *its own* console. A bar on
+  stderr while verdicts print to stdout is two programs drawing on one
+  terminal, and the bar lands in the middle of a report. `_progress()` therefore
+  takes the console: stderr when `--json`/`--markdown` is writing a document to
+  stdout, otherwise stdout alongside the verdicts. Also off entirely when the
+  target is not a terminal, so `2>log` gets no control codes.
+- **`total=None` does not clear a Rich task's total.** Both `Progress.reset` and
+  `Progress.update` read it as "leave the total alone", so re-purposing a task
+  from a counted phase to an uncountable one drew `clustering 0/7` — a bar
+  measuring seven of something no longer being counted. Remove and re-add the
+  task instead. One task per command, too: adding a second leaves the first
+  drawing itself, which stuck `searching Launchpad 0/?` above the real bar for
+  a whole sweep.
 - **`jaccard([], []) == 1.0`.** A bug with only `apt.log` has no log *events*,
   so two unrelated reports scored a perfect match. Absence of evidence is not
   evidence of similarity.

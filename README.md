@@ -93,16 +93,28 @@ uru-doctor diagnose /var/log/dist-upgrade --json
 ```
 
 Every command that answers a question can answer it to a script: `diagnose`,
-`fetch`, `ingest`, `dedup`, `related`, `history`, `coverage`, `show` and `stats`
-all take `--json`. The record carries a `schema` number so a consumer can refuse
-one it predates, and it reports lexer coverage alongside the verdict — because
-"I could not read a tenth of this log" qualifies a diagnosis, and a consumer
-that cannot see it cannot apply the check the tool applies to itself.
+`fetch`, `sweep`, `ingest`, `dedup`, `related`, `history`, `coverage`, `show`
+and `stats` all take `--json`. The record carries a `schema` number so a
+consumer can refuse one it predates, and it reports lexer coverage alongside
+the verdict — because "I could not read a tenth of this log" qualifies a
+diagnosis, and a consumer that cannot see it cannot apply the check the tool
+applies to itself.
 
 `--strict` exits `3` when a log parsed imperfectly, on `diagnose`, `fetch`,
-`ingest` and `coverage`. It is on the collecting commands deliberately: a new
-apt version turns up in a corpus pass long before anyone points `diagnose` at
-it.
+`sweep`, `ingest` and `coverage`. It is on the collecting commands
+deliberately: a new apt version turns up in a sweep long before anyone points
+`diagnose` at it — which is exactly how the `Or group remove` gap was found.
+
+Anything that takes time shows progress: `sweep`, `fetch`, `ingest`, `dedup`,
+`coverage`, `stats` and `diagnose`. Launchpad is paced at three seconds a
+request, so a bug costing six requests spends eighteen seconds waiting, and the
+bar names what it is waiting on — `LP#2169035 pacing 2.2s`, `GET
+6003872/data`, `HTTP 429, waiting 42s (attempt 2 of 6)`.
+
+The bar is drawn on whichever stream is not carrying the document, and is
+switched off entirely when that stream is not a terminal. So
+`uru-doctor sweep --json > runs.json` still writes nothing but JSON, and
+`uru-doctor title DIR` still prints one line fit for a pipe.
 
 Fetch bugs from Launchpad, anonymously, and build a corpus:
 
@@ -110,7 +122,6 @@ Fetch bugs from Launchpad, anonymously, and build a corpus:
 uru-doctor fetch 2150339 2151847 2169028
 uru-doctor dedup
 ```
-
 ```
 3 runs: 1 cluster covering 2 candidate duplicates
 tier        master      duplicates
@@ -120,6 +131,46 @@ root-graph  LP#2150339  LP#2151847, LP#2169028
 Those three were filed separately, by three reporters, describing three
 different packages. They are one `libpeas-1.0-1` transition, and nobody had
 linked them.
+
+Or let it find the bugs itself, which is the usual way in:
+
+```sh
+uru-doctor sweep --dry-run     # what would this cost?
+uru-doctor sweep
+```
+
+```
+25 tasks since 2026-09-28; 25 new bugs
+bug         status       reported
+LP#2168855  Incomplete   2026-09-29
+LP#2168863  New          2026-09-29
+LP#2168919  Won't Fix    2026-09-29
+...
+~48 requests, ~2 min at the configured pacing
+```
+
+Without this the queue is curated by hand, which means the tool only ever sees
+bugs somebody already decided were interesting — reintroducing exactly the
+selection bias the rest of the design removes.
+
+`sweep` keeps a watermark and is resumable, because it has to be: six requests
+per bug at three seconds each makes a hundred bugs half an hour, and Launchpad
+answers 429 readily. The mark advances only over bugs actually stored and never
+moves backward, so an interrupted pass loses nothing and the next one continues.
+It reports how many remain.
+
+Closed bugs are included deliberately. Launchpad's search omits them by
+default — measured, that hid two `Won't Fix` bugs in one sample week — and a
+bug's own resolution is the second-strongest ground truth there is, so taking
+the default would quietly exclude the best evidence for whether this tool is
+right. `sweep` also records each bug's status, which `searchTasks` returns for
+free.
+
+The first live sweep found a grammar gap on its first run: two lines of
+`Or group remove for teamviewer:amd64` in LP#2168863, dropping coverage to
+99.9527%. `Or group keep for` had been enumerated and its sibling had not —
+both sit adjacent to each other in `libapt-pkg`. That is what the coverage
+gate is for.
 
 Ask the corpus about a fault, or about a package:
 
@@ -165,7 +216,8 @@ that lexed and no rule claimed, because those are different repairs.
 | `diagnose DIR` | Diagnose a log directory. Leaves no state behind. |
 | `title DIR` | Print only the proposed title. |
 | `ingest DIR...` | Add runs to the record store, for corpus work. |
-| `fetch BUG_ID...` | Fetch bugs from Launchpad and diagnose them. |
+| `sweep` | Collect newly reported bugs from Launchpad. Resumable. |
+| `fetch BUG_ID...` | Fetch named bugs from Launchpad and diagnose them. |
 | `dedup` | Group stored runs that report the same fault. |
 | `related KEY` | Stored runs reporting the same fault as this one, in tiers. |
 | `history PKG` | Which runs implicate a package, as root or as victim. |

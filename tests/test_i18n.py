@@ -216,6 +216,44 @@ class TestDepTypeAliases:
         """
         assert dep_type("Va in conflitto") is DepType.CONFLICTS
 
+    def test_a_parenthesised_translation_resolves(self) -> None:
+        """German renders ``PreDepends`` as ``Hängt ab von (vorher)``.
+
+        With parentheses, which the grammar's dependency position used to
+        exclude outright -- it had been widened for spaces when Italian
+        ``Va in conflitto`` turned up, and not for the next punctuation class
+        along. Five lines of LP#2168919 went unread as a result, found by the
+        first live ``sweep``.
+        """
+        assert dep_type("Hängt ab von (vorher)") is DepType.PRE_DEPENDS
+
+    def test_a_parenthesised_name_lexes_in_context(self) -> None:
+        """The alias table already knew it; the pattern could not reach it.
+
+        Worth asserting through the lexer rather than through ``dep_type``
+        alone, because the gap was in the grammar and a unit test on the alias
+        table passed throughout.
+        """
+        from uru_doctor.apt.grammar import Verb
+        from uru_doctor.apt.lexer import lex
+
+        tokens = list(
+            lex(["Installing libfoo:amd64 as Hängt ab von (vorher) of libbar:amd64"])
+        )
+        assert [tok.verb for tok in tokens] == [Verb.INSTALLING_AS]
+        assert tokens[0].dep is DepType.PRE_DEPENDS
+        assert tokens[0].subject == "libfoo:amd64"
+        assert tokens[0].object == "libbar:amd64"
+
+    def test_a_dependency_name_cannot_swallow_the_state_blob(self) -> None:
+        """``<`` and ``>`` stay excluded from the dependency position.
+
+        Those bracket the state blob, and letting a name absorb it would turn
+        a line into confident nonsense rather than into a visible miss -- the
+        worse of the two failures.
+        """
+        assert "<" in DEP or "[^<>" in DEP
+
     def test_english_still_resolves_without_a_lookup(self) -> None:
         assert dep_type("Depends") is DepType.DEPENDS
         assert dep_type("Pre-Depends") is DepType.PRE_DEPENDS

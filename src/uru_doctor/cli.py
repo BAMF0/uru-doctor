@@ -35,13 +35,24 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
-from collections.abc import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Final, TypedDict
 
 import typer
 from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TaskID,
+    TextColumn,
+    TimeElapsedColumn,
+)
 from rich.table import Table
 
 import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
@@ -51,8 +62,8 @@ from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summa
 from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
 from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
 from uru_doctor.intern import Interner
-from uru_doctor.lp.read import Launchpad, LaunchpadError, RateLimited
-from uru_doctor.models import Signature, UpgradeRun
+from uru_doctor.lp.read import BugRecord, BugRef, Launchpad, LaunchpadError, RateLimited
+from uru_doctor.models import LogSource, Signature, UpgradeRun
 from uru_doctor.parsers.apportmeta import parse_apport_meta
 from uru_doctor.report import RunEntry, plural, render_corpus, render_run
 from uru_doctor.rules.registry import all_rules, rules_digest
@@ -87,6 +98,142 @@ app = typer.Typer(
 
 out = Console()
 err = Console(stderr=True)
+
+
+# -- progress ----------------------------------------------------------------
+#
+# Which console the bar draws on is load-bearing.
+#
+# Rich moves a live region out of the way of ``Console.print`` only for *its
+# own* console. A bar on stderr while verdicts print to stdout means two
+# programs drawing on one terminal, and the result is a bar stamped through the
+# middle of a report.
+#
+# So the bar goes wherever the document is not:
+#
+# - ``--json`` and ``--markdown`` write a document to stdout that is meant to
+#   be redirected. The bar must be on stderr, and nothing else prints to stdout
+#   during the run, so there is nothing to collide with.
+# - In human mode the verdicts *are* the stdout output, so the bar shares that
+#   console and Rich interleaves them correctly.
+#
+# Either way it is disabled when the target is not a terminal, so a cron job or
+# a `2>log` capture gets no control codes. Rich decides that from the console,
+# which is why the console is asked rather than ``sys.stderr``.
+
+
+@contextmanager
+def _progress(*, console: Console | None = None) -> Iterator[Tracker]:
+    """A live progress display, or a silent stand-in.
+
+    Worth having rather than printing per-item lines because this tool spends
+    most of its wall-clock *waiting*: Launchpad is paced at three seconds a
+    request, so a bug costing six requests is eighteen seconds during which
+    nothing at all used to be printed. A sweep of fifty bugs looked hung for a
+    quarter of an hour.
+
+    The returned tracker is a no-op when disabled, so a caller never has to ask
+    whether progress is on.
+    """
+    target = console if console is not None else err
+    if not target.is_terminal:
+        yield Tracker(None, None)
+        return
+    display = Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(bar_width=24),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+        console=target,
+        # Leaves the terminal as it was found: the summary the command prints
+        # afterwards is the record, and a leftover bar competing with it is
+        # just noise.
+        transient=True,
+    )
+    with display:
+        yield Tracker(display, None)
+
+
+@dataclass(slots=True)
+class Tracker:
+    """A single-line progress bar that may not exist.
+
+    Collapses the "is progress enabled?" question into one place. Every method
+    is a no-op when ``display`` is ``None``, which is the case under ``--json``
+    with stderr redirected, in a cron job, and in tests.
+
+    Deliberately **one** task for the whole command, re-described and re-totalled
+    as the work changes phase. Adding a second task leaves the first alive and
+    unfinished -- a sweep showed ``searching Launchpad 0/?`` stuck above the
+    real bar for its entire run, because a phase that has moved on still had a
+    row drawing itself.
+    """
+
+    display: Progress | None
+    task: TaskID | None
+    prefix: str = ""
+    """Stable context the per-request messages hang off, e.g. ``LP#2169028``.
+
+    Without it the label is whatever the client last said -- ``GET
+    6003872/data`` -- which tells you the tool is alive but not what it is
+    working on, and an opaque attachment id is the least useful half of the
+    answer.
+    """
+
+    def start(self, description: str, total: int | None) -> None:
+        """Begin, or re-purpose, the single task.
+
+        ``total=None`` is a spinner with no bar, which is the honest rendering
+        when the amount of work is not yet known -- the Launchpad search is
+        several paced requests and the page count only emerges as it goes, and
+        pair scoring short-circuits so its work cannot be counted up front.
+
+        The task is removed and re-added rather than reset, because Rich reads
+        ``total=None`` on both ``reset`` and ``update`` as "leave the total
+        alone". Resetting therefore kept the previous phase's total and drew
+        ``clustering 0/7`` -- a bar measuring seven of something that was no
+        longer being counted.
+        """
+        if self.display is None:
+            return
+        self.prefix = ""
+        if self.task is not None:
+            self.display.remove_task(self.task)
+        self.task = self.display.add_task(description, total=total)
+
+    def context(self, prefix: str) -> None:
+        """Set the stable part of the label and show it immediately."""
+        self.prefix = prefix
+        self.note("")
+
+    def advance(self, description: str | None = None) -> None:
+        """Count one item done, optionally relabelling first."""
+        if self.display is None or self.task is None:
+            return
+        if description is not None:
+            self.display.update(self.task, description=self._label(description))
+        self.display.advance(self.task)
+
+    def note(self, description: str) -> None:
+        """Change the label without counting progress.
+
+        This is what the Launchpad client's callback drives: "pacing 2.8s",
+        "GET bugs/2168863". The item is not finished, but the tool is visibly
+        doing something, which is the whole point.
+        """
+        if self.display is not None and self.task is not None:
+            self.display.update(self.task, description=self._label(description))
+
+    def _label(self, description: str) -> str:
+        if not self.prefix:
+            return description
+        return f"{self.prefix} {description}".rstrip()
+
+    @property
+    def callback(self) -> Callable[[str], None]:
+        """A ``progress`` callable for :class:`~uru_doctor.lp.read.Launchpad`."""
+        return self.note
 
 
 # -- shared plumbing ---------------------------------------------------------
@@ -464,6 +611,43 @@ class CorpusCoverage(TypedDict):
     unknown_shapes: list[dict[str, object]]
 
 
+def _run_from_bug(
+    attachments: dict[LogSource, str],
+    record: BugRecord,
+    interner: Interner,
+    config: Config,
+    *,
+    bug_id: int,
+    status: str,
+) -> UpgradeRun:
+    """Build a run from a fetched bug, carrying its Launchpad metadata.
+
+    Shared by ``fetch`` and ``sweep`` so the two cannot disagree about which
+    fields reach the record. They would: ``duplicate_count`` and ``reported_at``
+    were already fetched and silently dropped once, and a second copy of this
+    block is how a third field goes the same way.
+
+    Every Launchpad field set here is prior triage or prose, and none of it
+    reaches a diagnosis or a signature --
+    :data:`~uru_doctor.dedup.EXCLUDED_FROM_SIGNATURES` enforces that, and
+    ``tests/test_dedup.py`` asserts it.
+    """
+    meta = parse_apport_meta(record.description, tags=record.tags)
+    ingested = ingest_attachments(attachments, interner, meta=meta, bug_id=bug_id)
+    return ingested.only().model_copy(
+        update={
+            "current_title": record.title,
+            "tags": record.tags,
+            "duplicate_of": record.duplicate_of,
+            "duplicate_count": record.duplicate_count,
+            "reported_at": record.created,
+            # ``sweep`` knows this from the search response; ``fetch`` does
+            # not, and an empty string means "not known" rather than "not set".
+            "bug_status": status or record.status,
+        }
+    )
+
+
 def _resolve_key(store: Store, key: str) -> str:
     """Turn a user-supplied key or bug number into one stored run key.
 
@@ -496,7 +680,7 @@ def _resolve_key(store: Store, key: str) -> str:
     raise AssertionError("unreachable")
 
 
-def _corpus_coverage(store: Store) -> CorpusCoverage:
+def _corpus_coverage(store: Store, tracker: Tracker | None = None) -> CorpusCoverage:
     """Aggregate lexer coverage across every stored run.
 
     A grammar gap in one of forty stored runs is invisible in that run's own
@@ -505,14 +689,20 @@ def _corpus_coverage(store: Store) -> CorpusCoverage:
 
     The totals come from an indexed query; the unrecognised shapes need the
     payloads, so they are only gathered when something actually failed to lex.
-    On a healthy corpus this costs one aggregate row.
+    On a healthy corpus this costs one aggregate row -- which is why the
+    optional tracker only starts counting inside that branch.
     """
     traces, imperfect, lines, unmatched = store.coverage_totals()
     shapes: dict[str, int] = {}
     if imperfect:
+        if tracker is not None:
+            total = len(store.run_keys(primary_only=False))
+            tracker.start(f"scanning {plural(total, 'run')} for unread shapes", total=total)
         for run in store.iter_runs(primary_only=False):
             for template, count in run.lex.unknown_shapes:
                 shapes[template] = shapes.get(template, 0) + count
+            if tracker is not None:
+                tracker.advance()
     return CorpusCoverage(
         runs_with_trace=traces,
         runs_imperfect=imperfect,
@@ -579,7 +769,13 @@ def diagnose_cmd(
 
     with _scratch_store() as store:
         interner = Interner(store)
-        result = _ingest(path, interner, config)
+        # The lexing happens inside _ingest, before anything is printed, and a
+        # 30,000-line resolver trace is seconds rather than milliseconds. The
+        # loop below is comparatively instant, so the spinner belongs here.
+        document = markdown or as_json
+        with _progress(console=err if document else out) as tracker:
+            tracker.start(f"reading {Path(path).name or path}", total=None)
+            result = _ingest(path, interner, config)
         runs = result.runs if all_attempts else [r for r in result.runs if r.is_primary]
         store.commit()
 
@@ -667,18 +863,30 @@ def ingest(
         interner = Interner(store)
         records: list[dict[str, object]] = []
         diagnosed: list[UpgradeRun] = []
-        for path in paths:
-            result = _ingest(path, interner, config)
-            for run in result.runs:
-                stamped, diagnosis, proposed, signature = _diagnose_run(run, interner, config)
-                store.put_run(stamped.with_findings(diagnosis.findings, signature))
-                diagnosed.append(stamped)
-                if as_json:
-                    records.append(
-                        _json_record(stamped, diagnosis, proposed, signature, interner)
+        # Nothing prints to stdout per directory, so the bar can live there in
+        # human mode and must not under --json.
+        with _progress(console=err if as_json else out) as tracker:
+            tracker.start(f"ingesting {plural(len(paths), 'directory', 'directories')}",
+                          total=len(paths))
+            for path in paths:
+                # Lexing is the slow part -- 30,000 lines of resolver trace per
+                # bug is seconds, not milliseconds -- and a corpus pass over
+                # forty directories was silent until it finished.
+                tracker.note(Path(path).name or str(path))
+                result = _ingest(path, interner, config)
+                for run in result.runs:
+                    stamped, diagnosis, proposed, signature = _diagnose_run(
+                        run, interner, config
                     )
-            for skipped in result.skipped:
-                err.print(f"[dim]skipped {skipped}[/]")
+                    store.put_run(stamped.with_findings(diagnosis.findings, signature))
+                    diagnosed.append(stamped)
+                    if as_json:
+                        records.append(
+                            _json_record(stamped, diagnosis, proposed, signature, interner)
+                        )
+                for skipped in result.skipped:
+                    err.print(f"[dim]skipped {skipped}[/]")
+                tracker.advance()
         store.commit()
         totals = store.stats()
 
@@ -744,8 +952,18 @@ def fetch(
         cache = config.paths.state_dir / "attachments" if save else None
         records: list[dict[str, object]] = []
         diagnosed: list[UpgradeRun] = []
-        with Launchpad(config=config.launchpad, store=store, cache_dir=cache) as client:
+        with (
+            _progress(console=err if as_json else out) as tracker,
+            Launchpad(
+                config=config.launchpad,
+                store=store,
+                cache_dir=cache,
+                progress=tracker.callback,
+            ) as client,
+        ):
+            tracker.start(f"fetching {plural(len(bugs), 'bug')}", total=len(bugs))
             for bug_id in bugs:
+                tracker.context(f"LP#{bug_id}")
                 try:
                     attachments, record = client.logs(bug_id)
                 except RateLimited as exc:
@@ -754,21 +972,11 @@ def fetch(
                     _fail(f"{exc}\nWait a minute and retry.")
                 except LaunchpadError as exc:
                     err.print(f"[yellow]skipped LP#{bug_id}:[/] {exc}")
+                    tracker.advance()
                     continue
 
-                meta = parse_apport_meta(record.description, tags=record.tags)
-                ingested = ingest_attachments(attachments, interner, meta=meta, bug_id=bug_id)
-                run = ingested.only().model_copy(
-                    update={
-                        "current_title": record.title,
-                        "tags": record.tags,
-                        "duplicate_of": record.duplicate_of,
-                        # Fetched and then dropped until now. Both describe how
-                        # the bug was triaged, never what the logs say, and
-                        # neither reaches a diagnosis or a signature.
-                        "duplicate_count": record.duplicate_count,
-                        "reported_at": record.created,
-                    }
+                run = _run_from_bug(
+                    attachments, record, interner, config, bug_id=bug_id, status=""
                 )
                 stamped, diagnosis, proposed, signature = _diagnose_run(run, interner, config)
                 if save:
@@ -782,6 +990,7 @@ def fetch(
                     )
                 else:
                     _print_run(stamped, diagnosis, proposed)
+                tracker.advance()
         store.commit()
 
     # Individual failures are warnings, because one unreachable bug should not
@@ -821,28 +1030,41 @@ def dedup(
         interner = Interner(store)
         entries: list[RunEntry] = []
         signatures: dict[str, Signature] = {}
-        for run in store.iter_runs(primary_only=True):
-            # Findings are on the stored run; re-diagnosing would be wasteful
-            # and could drift from what was recorded.
-            result = DiagnosisResult(findings=run.findings)
-            entries.append(
-                RunEntry(
-                    key=_key_for(run),
-                    run=run,
-                    result=result,
-                    title=propose_title(run, result, interner, max_length=config.title.max_length),
+        document = as_json or markdown
+        with _progress(console=err if document else out) as tracker:
+            # Every payload is deserialised here, so this is linear in corpus
+            # size and the clustering after it is worse than linear. A total is
+            # available cheaply from the key list, so the bar is a real one.
+            total = len(store.run_keys(primary_only=True))
+            tracker.start(f"loading {plural(total, 'run')}", total=total)
+            for run in store.iter_runs(primary_only=True):
+                # Findings are on the stored run; re-diagnosing would be
+                # wasteful and could drift from what was recorded.
+                result = DiagnosisResult(findings=run.findings)
+                entries.append(
+                    RunEntry(
+                        key=_key_for(run),
+                        run=run,
+                        result=result,
+                        title=propose_title(
+                            run, result, interner, max_length=config.title.max_length
+                        ),
+                    )
                 )
+                signatures[_key_for(run)] = run.signature
+                tracker.advance()
+
+            if not entries:
+                _fail("the store is empty; run `uru-doctor ingest` first")
+
+            # Pair scoring is quadratic in the worst case, and unlike the load
+            # above it cannot be counted in advance -- the tiers short-circuit.
+            tracker.start("clustering", total=None)
+            clusters = cluster_runs(
+                signatures,
+                config=config.dedup,
+                oldest_first=sorted(signatures),
             )
-            signatures[_key_for(run)] = run.signature
-
-        if not entries:
-            _fail("the store is empty; run `uru-doctor ingest` first")
-
-        clusters = cluster_runs(
-            signatures,
-            config=config.dedup,
-            oldest_first=sorted(signatures),
-        )
         store.replace_clusters(
             (
                 cluster.tier,
@@ -1056,7 +1278,8 @@ def stats(
             (interner.package_label(pkg_id), count)
             for pkg_id, _, count in store.top_blaming_packages(limit=config.report.top_packages)
         ]
-        coverage = _corpus_coverage(store)
+        with _progress(console=err if as_json else out) as tracker:
+            coverage = _corpus_coverage(store, tracker)
 
     if as_json:
         _write(
@@ -1108,6 +1331,283 @@ def stats(
 
 
 @app.command()
+def sweep(
+    since: Annotated[
+        str | None,
+        typer.Option(
+            "--since",
+            metavar="YYYY-MM-DD",
+            help="Override the stored watermark. Use --since 2026-01-01 for a first pass.",
+        ),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", "-n", help="Cap how many new bugs to fetch logs for."),
+    ] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="List what would be fetched and stop. One request."),
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable record per bug.")
+    ] = False,
+    strict: Annotated[
+        bool,
+        typer.Option("--strict", help=f"Exit {EXIT_IMPERFECT} if any log parsed imperfectly."),
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Collect newly reported release-upgrader bugs and diagnose them.
+
+    The entry point for triage. Without this, the bug list has to be curated by
+    hand, which means the tool only ever sees bugs somebody already decided
+    were interesting -- reintroducing exactly the selection bias the rest of
+    the design removes.
+
+    Read-only and anonymous, like every other Launchpad path here.
+
+    Resumable, because it has to be: at roughly six requests per bug and three
+    seconds between them, a hundred bugs is half an hour, and Launchpad answers
+    429 readily. The watermark advances only over bugs actually handled and
+    never moves backward, so an interrupted sweep loses nothing and the next
+    run continues rather than starting over. Use --dry-run to see what a pass
+    would cost before spending it.
+
+    Closed bugs are included deliberately. Launchpad's search omits them by
+    default, and a bug's own resolution is the second-strongest ground truth
+    there is -- so taking the default would quietly exclude the best evidence
+    for whether this tool is right.
+    """
+    config = _config(config_path)
+    watermark: datetime | None = None
+    if since is not None:
+        try:
+            watermark = datetime.fromisoformat(since).replace(tzinfo=UTC)
+        except ValueError:
+            _fail(f"--since must be an ISO date like 2026-01-01, not {since!r}", EXIT_USAGE)
+
+    cap = limit if limit is not None else config.launchpad.sweep_max_bugs
+
+    with _state_store(config) as store:
+        interner = Interner(store)
+        if watermark is None:
+            watermark = store.sweep_watermark()
+        known = store.known_bug_ids()
+        cache = config.paths.state_dir / "attachments"
+
+        records: list[dict[str, object]] = []
+        diagnosed: list[UpgradeRun] = []
+        no_logs: list[int] = []
+        failed: list[str] = []
+        seen = 0
+        reached: datetime | None = None
+
+        # Document to stdout under --json, so the bar goes to stderr; otherwise
+        # the verdicts are the stdout output and the bar shares that console.
+        with (
+            _progress(console=err if as_json else out) as tracker,
+            Launchpad(
+                config=config.launchpad,
+                store=store,
+                cache_dir=cache,
+                progress=tracker.callback,
+            ) as client,
+        ):
+            # The search is itself several paced requests, so it gets a task of
+            # its own with no total -- the page count is not known in advance,
+            # and a bar that cannot fill is worse than a spinner.
+            tracker.start("searching Launchpad", total=None)
+            try:
+                found = list(
+                    client.search_tasks(
+                        created_since=watermark,
+                        page_size=config.launchpad.sweep_page_size,
+                    )
+                )
+            except RateLimited as exc:
+                _fail(f"{exc}\nWait a minute and retry; the watermark is unchanged.")
+                return
+            except LaunchpadError as exc:
+                _fail(f"could not search Launchpad: {exc}")
+                return
+
+            fresh = [ref for ref in found if ref.bug_id not in known]
+            if dry_run:
+                _report_dry_run(found, fresh, watermark, cap, as_json, out_path)
+                return
+
+            planned = fresh[:cap]
+            tracker.start(f"fetching {plural(len(planned), 'bug')}", total=len(planned))
+
+            for ref in planned:
+                tracker.context(f"LP#{ref.bug_id}")
+                try:
+                    attachments, record = client.logs(ref.bug_id)
+                except RateLimited as exc:
+                    # Stop, keep what is already stored, and leave the
+                    # watermark where the last handled bug put it. Marching on
+                    # would collect the same refusal and burn the recovery
+                    # window; rewinding would strand the bugs in between.
+                    err.print(f"[yellow]rate limited after {plural(seen, 'bug')}:[/] {exc}")
+                    break
+                except LaunchpadError as exc:
+                    # A single unreachable bug must not abandon the pass, but
+                    # the watermark must not move past it either -- it has not
+                    # been handled, and it will not be offered again once the
+                    # mark is beyond its creation date.
+                    failed.append(f"LP#{ref.bug_id}: {exc}")
+                    err.print(f"[yellow]skipped LP#{ref.bug_id}:[/] {exc}")
+                    continue
+
+                run = _run_from_bug(
+                    attachments,
+                    record,
+                    interner,
+                    config,
+                    bug_id=ref.bug_id,
+                    status=ref.status,
+                )
+                stamped, diagnosis, proposed, signature = _diagnose_run(run, interner, config)
+                store.put_run(stamped.with_findings(diagnosis.findings, signature))
+                diagnosed.append(stamped)
+                seen += 1
+                if not attachments:
+                    # Not a failure. LP#2161332 attached two screenshots, and
+                    # "no upgrade logs were attached" is the correct, useful
+                    # answer -- it is also the commonest reason a report cannot
+                    # be triaged, so it is counted rather than buried.
+                    no_logs.append(ref.bug_id)
+
+                # Advance only over a bug that is now stored, and only to its
+                # own creation date. Anything newer has not been handled yet.
+                if ref.created is not None:
+                    reached = ref.created if reached is None else max(reached, ref.created)
+
+                if as_json:
+                    records.append(
+                        _json_record(stamped, diagnosis, proposed, signature, interner)
+                    )
+                else:
+                    _print_run(stamped, diagnosis, proposed)
+                tracker.advance()
+
+            if reached is not None:
+                store.advance_watermark(reached)
+            store.commit()
+
+        remaining = max(0, len(fresh) - seen)
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "since": watermark.isoformat() if watermark else None,
+                    "tasks_found": len(found),
+                    "new_bugs": len(fresh),
+                    "fetched": seen,
+                    "remaining": remaining,
+                    "watermark": reached.isoformat() if reached else None,
+                    "no_logs": no_logs,
+                    "failed": failed,
+                    "runs": records,
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="sweep",
+        )
+    else:
+        out.print()
+        out.print(
+            f"[green]swept {plural(seen, 'new bug')}[/] "
+            f"of {len(fresh)} new in {plural(len(found), 'task')}"
+        )
+        if no_logs:
+            out.print(
+                f"[yellow]{plural(len(no_logs), 'bug')} with no usable logs:[/] "
+                + ", ".join(f"LP#{b}" for b in no_logs)
+            )
+        if remaining:
+            out.print(f"[dim]{remaining} still to do -- run sweep again[/]")
+        if reached is not None:
+            out.print(f"[dim]watermark now {reached.date().isoformat()}[/]")
+        # Not under --strict as well, which would say the same thing twice.
+        if not strict:
+            for line in _imperfect(diagnosed):
+                err.print(f"[yellow]imperfect parse:[/] {line}")
+
+    _finish_strict(_imperfect(diagnosed), strict=strict)
+
+
+def _report_dry_run(
+    found: Sequence[BugRef],
+    fresh: Sequence[BugRef],
+    watermark: datetime | None,
+    cap: int,
+    as_json: bool,
+    out_path: Path | None,
+) -> None:
+    """Say what a sweep would cost, having spent only the search requests.
+
+    Worth its own path because the expensive part is the logs, and deciding
+    whether to spend half an hour is a question the listing alone can answer.
+    """
+    planned = list(fresh[:cap])
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "since": watermark.isoformat() if watermark else None,
+                    "tasks_found": len(found),
+                    "new_bugs": len(fresh),
+                    "would_fetch": [
+                        {
+                            "bug_id": ref.bug_id,
+                            "status": ref.status,
+                            "created": ref.created.isoformat() if ref.created else None,
+                        }
+                        for ref in planned
+                    ],
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="plan",
+        )
+        return
+
+    out.print(
+        f"{plural(len(found), 'task')} since "
+        f"{watermark.date().isoformat() if watermark else 'the beginning'}; "
+        f"{plural(len(fresh), 'new bug')}"
+    )
+    if not planned:
+        out.print("[dim]nothing to do[/]")
+        return
+    table = Table(box=None, pad_edge=False)
+    table.add_column("bug")
+    table.add_column("status", style="dim")
+    table.add_column("reported", style="dim")
+    for ref in planned:
+        table.add_row(
+            f"LP#{ref.bug_id}",
+            ref.status,
+            ref.created.date().isoformat() if ref.created else "?",
+        )
+    out.print(table)
+    # The cost, because this is the number the decision turns on.
+    out.print(
+        f"[dim]~{len(planned) * 6} requests, "
+        f"~{len(planned) * 6 * 3 // 60} min at the configured pacing[/]"
+    )
+
+
+@app.command()
 def coverage(
     as_json: Annotated[
         bool, typer.Option("--json", help="Emit a machine-readable coverage report.")
@@ -1136,8 +1636,8 @@ def coverage(
     unrecognised form appear as one entry with a count.
     """
     config = _config(config_path)
-    with _state_store(config) as store:
-        totals = _corpus_coverage(store)
+    with _state_store(config) as store, _progress(console=err if as_json else out) as tracker:
+        totals = _corpus_coverage(store, tracker)
         offenders = store.imperfect_runs()
         unexplained = store.unclassified_templates(limit=limit)
         unmeasured = store.unmeasured_runs()

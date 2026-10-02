@@ -10,6 +10,7 @@ fixture carries no personal data.
 from __future__ import annotations
 
 import sqlite3
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -1041,3 +1042,57 @@ class TestCorpusLookups:
         """The column name is interpolated into SQL, so it is allowlisted."""
         with pytest.raises(ValueError, match="not a signature column"):
             store.runs_with_signature("lp:1#0", "payload")
+
+
+class TestSweepWatermark:
+    """Where the last sweep reached. The property that makes a sweep resumable.
+
+    At roughly six requests per bug and three seconds between them, a hundred
+    bugs is half an hour and Launchpad answers 429 readily -- so being
+    interrupted is the normal case, not the exceptional one.
+    """
+
+    def test_absent_by_default(self, store: Store) -> None:
+        assert store.sweep_watermark() is None
+
+    def test_round_trips(self, store: Store) -> None:
+        when = datetime(2026, 9, 29, 12, 0, tzinfo=UTC)
+        store.advance_watermark(when)
+        store.commit()
+        assert store.sweep_watermark() == when
+
+    def test_never_moves_backward(self, store: Store) -> None:
+        """A sweep that stops early must not rewind a further-reaching one.
+
+        The gap between the two marks would never be swept again. Re-fetching a
+        bug is cheap and idempotent; silently never fetching one is not.
+        """
+        far = datetime(2026, 9, 30, tzinfo=UTC)
+        store.advance_watermark(far)
+        store.advance_watermark(datetime(2026, 9, 1, tzinfo=UTC))
+        store.commit()
+        assert store.sweep_watermark() == far
+
+    def test_equal_is_not_an_advance(self, store: Store) -> None:
+        when = datetime(2026, 9, 29, tzinfo=UTC)
+        store.advance_watermark(when)
+        store.advance_watermark(when)
+        store.commit()
+        assert store.sweep_watermark() == when
+
+    def test_a_corrupt_watermark_does_not_wedge_the_sweep(self, store: Store) -> None:
+        """Losing it costs a re-fetch, which the ETag cache makes nearly free.
+
+        Raising instead would make the sweep permanently unrunnable, fixable
+        only by someone who knows the meta table exists.
+        """
+        store.meta_put("sweep_watermark", "last tuesday")
+        store.commit()
+        assert store.sweep_watermark() is None
+
+    def test_known_bug_ids_excludes_local_runs(self, store: Store) -> None:
+        """Directory-ingested runs have no bug id, and NULL is not a member."""
+        store.put_run(UpgradeRun(bug_id=2150245))
+        store.put_run(UpgradeRun(bug_id=None, source_dir="/var/log/dist-upgrade"))
+        store.commit()
+        assert store.known_bug_ids() == {2150245}

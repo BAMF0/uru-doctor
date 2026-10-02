@@ -148,25 +148,38 @@ def rules_for(run: UpgradeRun) -> Iterator[Rule]:
 
 
 def rules_digest() -> str:
-    """A short digest over the registered rules and their ranking inputs.
+    """A short digest over the policy that turns a log into a verdict.
 
     Recorded on every diagnosed run so that a verdict can be attributed to a
     policy rather than only to a release. A release number is too coarse: the
-    changes that move a verdict are overwhelmingly rule changes between
-    releases, and the question "did the tool change or did the logs?" is
-    unanswerable without this.
+    changes that move a verdict are overwhelmingly rule and grammar changes
+    between releases, and the question "did the tool change or did the logs?"
+    is unanswerable without this.
 
-    What goes in is exactly what can change a ranking without changing a log:
-    the rule's name, the cause it attributes, its priority, severity,
-    confidence, and whether it may fire on truncated evidence. Deliberately
-    excluded are ``provenance``, ``remedy`` and ``phase_hint``, which are
-    documentation -- rewording a remedy must not look like a policy change, or
-    the digest becomes noise and gets ignored.
+    Two things go in, because two things decide a verdict.
+
+    **The rule table** -- each rule's name, cause, priority, severity,
+    confidence, and whether it may fire on truncated evidence. That is exactly
+    what can re-rank findings without any log changing. Deliberately excluded
+    are ``provenance``, ``remedy`` and ``phase_hint``, which are documentation:
+    rewording a remedy must not look like a policy change, or the digest
+    becomes noise and gets ignored.
+
+    **The apt grammar's verb set** -- because a line the lexer could not read
+    is a verb the conflict graph could not see, so adding a pattern changes the
+    graph, the coverage figure and potentially the ranking. Omitting this was a
+    real gap: after the ``Or group remove`` and parenthesised-``PreDepends``
+    patterns landed, stored runs held coverage numbers the current build would
+    no longer produce, and nothing said so. The verb *names* rather than the
+    expressions, so that tightening a pattern without changing what it can
+    recognise stays quiet.
 
     Not a hash of the source. That would change on a comment, and the point is
     to be quiet when nothing a verdict depends on has moved.
     """
-    material = "\n".join(
+    from uru_doctor.apt.grammar import PATTERNS
+
+    rules_material = "\n".join(
         "\t".join(
             (
                 item.name,
@@ -181,6 +194,11 @@ def rules_digest() -> str:
         # across interpreter runs and import orders.
         for item in all_rules()
     )
+    # Pattern order is load-bearing in the grammar -- longest-first, so that
+    # `Removing B rather than change A` precedes bare `Removing B` -- so the
+    # sequence is hashed as given rather than sorted.
+    grammar_material = "\n".join(verb.value for verb, _ in PATTERNS)
+    material = f"{rules_material}\n--\n{grammar_material}"
     return hashlib.blake2b(material.encode("utf-8"), digest_size=8).hexdigest()
 
 

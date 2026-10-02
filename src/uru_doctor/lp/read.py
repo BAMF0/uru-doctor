@@ -29,10 +29,12 @@ makes a re-fetch nearly free.
 from __future__ import annotations
 
 import time
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
+from urllib.parse import urlencode
 
 import httpx
 
@@ -47,12 +49,22 @@ from uru_doctor.parsers.sanitize import read_log
 from uru_doctor.store import Store
 
 __all__ = [
+    "ALL_STATUSES",
+    "DEFAULT_TARGET",
     "AttachmentRef",
     "BugRecord",
+    "BugRef",
     "Launchpad",
     "LaunchpadError",
     "RateLimited",
 ]
+
+_EPOCH: Final = datetime(1970, 1, 1, tzinfo=UTC)
+"""Sort key for a task with no parseable creation date.
+
+Sorts it oldest, which is the safe direction: a bug whose date cannot be read
+is handled before the watermark advances past it rather than after.
+"""
 
 _RETRY_STATUS: Final[frozenset[int]] = frozenset({429, 500, 502, 503, 504})
 
@@ -74,6 +86,53 @@ class RateLimited(LaunchpadError):
     Separate from :class:`LaunchpadError` so a corpus fetch can stop entirely
     rather than march through the remaining bugs collecting the same failure.
     """
+
+
+@dataclass(frozen=True, slots=True)
+class BugRef:
+    """One bug task from a search, before any of its logs are fetched.
+
+    Everything here arrives in the search response, so a sweep knows what it is
+    about to spend requests on -- and knows each bug's status without asking
+    for it separately.
+    """
+
+    bug_id: int
+    status: str = ""
+    """Launchpad's status, e.g. ``New``, ``Invalid``, ``Won't Fix``."""
+
+    created: datetime | None = None
+    title: str = ""
+    """The task title, which embeds the bug's. Display only, never an input."""
+
+
+#: Statuses a sweep asks for explicitly.
+#:
+#: Launchpad's ``searchTasks`` defaults to **open** bugs only. Measured against
+#: the live API over one week of ``ubuntu-release-upgrader`` reports, the
+#: default returned 23 tasks and hid two ``Won't Fix`` ones.
+#:
+#: That default is the wrong one here. A bug's own resolution is the
+#: second-strongest ground truth available for checking this tool -- LP#2150245
+#: closing Invalid with thirteen duplicates is what confirms its verdict -- so
+#: a sweep that accepted the default would systematically exclude its own best
+#: evidence, and would do so silently.
+ALL_STATUSES: Final[tuple[str, ...]] = (
+    "New",
+    "Incomplete",
+    "Opinion",
+    "Invalid",
+    "Won't Fix",
+    "Expired",
+    "Confirmed",
+    "Triaged",
+    "In Progress",
+    "Fix Committed",
+    "Fix Released",
+)
+
+#: The source package whose bugs this tool is about.
+DEFAULT_TARGET: Final = "/ubuntu/+source/ubuntu-release-upgrader"
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +172,16 @@ class BugRecord:
     created: datetime | None = None
     attachments: tuple[AttachmentRef, ...] = ()
 
+    status: str = ""
+    """Launchpad's status, when the caller already knows it.
+
+    Not fetched by :meth:`Launchpad.bug`: status lives on the bug's *tasks*,
+    which is a third request per bug at three seconds each. ``searchTasks``
+    returns it for free, so ``sweep`` supplies it here and ``fetch`` leaves it
+    empty. Safe to differ because this is ground truth for *checking* a
+    diagnosis and is excluded from every signature.
+    """
+
     @property
     def log_attachments(self) -> tuple[AttachmentRef, ...]:
         return tuple(a for a in self.attachments if a.worth_fetching)
@@ -135,6 +204,18 @@ def _parse_created(raw: str | None) -> datetime | None:
         return None
 
 
+def _short_url(url: str) -> str:
+    """The tail of an API URL, for a one-line progress message.
+
+    A full Launchpad API URL is 90 characters of which the last two segments
+    are the only informative part, and a progress line that wraps is worse
+    than no progress line.
+    """
+    without_query = url.split("?", 1)[0].rstrip("/")
+    parts = without_query.rsplit("/", 2)
+    return "/".join(parts[-2:]) if len(parts) >= 2 else without_query
+
+
 @dataclass(slots=True)
 class Launchpad:
     """A rate-limited, anonymous Launchpad reader.
@@ -153,8 +234,24 @@ class Launchpad:
     sleep: Any = time.sleep
     """Injectable so tests do not actually wait out the backoff."""
 
+    progress: Callable[[str], None] | None = None
+    """Called with a short description of whatever is about to take time.
+
+    Exists because this client is mostly *waiting*: at a three-second minimum
+    interval, a bug costing six requests spends eighteen seconds asleep, and a
+    caller that reports nothing until a bug completes looks hung. The messages
+    are deliberately phrased for a human watching a terminal rather than for a
+    log.
+
+    ``None`` means silent, which is what a library caller and every test want.
+    """
+
     _last_request: float = 0.0
     _owns_client: bool = False
+
+    def _say(self, message: str) -> None:
+        if self.progress is not None:
+            self.progress(message)
 
     def __post_init__(self) -> None:
         if self.client is None:
@@ -180,9 +277,16 @@ class Launchpad:
     # -- transport ----------------------------------------------------------
 
     def _pace(self) -> None:
-        """Wait out the minimum interval since the last request."""
+        """Wait out the minimum interval since the last request.
+
+        Announced, because this is where the time goes. Spacing requests is
+        cheaper than recovering from a 429, but it means most of a sweep's
+        wall-clock is spent here and a caller that says nothing during it
+        appears to have stopped.
+        """
         gap = self.config.min_interval_s - (time.monotonic() - self._last_request)
         if self._last_request and gap > 0:
+            self._say(f"pacing {gap:.1f}s")
             self.sleep(gap)
 
     def _request(self, url: str, *, headers: dict[str, str] | None = None) -> httpx.Response:
@@ -191,13 +295,16 @@ class Launchpad:
         attempts = self.config.max_retries + 1
         for attempt in range(1, attempts + 1):
             self._pace()
+            self._say(f"GET {_short_url(url)}")
             self._last_request = time.monotonic()
             try:
                 response = self.client.get(url, headers=headers)
             except httpx.HTTPError as exc:
                 if attempt == attempts:
                     raise LaunchpadError(f"{url}: {exc}") from exc
-                self.sleep(self.config.backoff_base_s * 2**attempt)
+                wait = self.config.backoff_base_s * 2**attempt
+                self._say(f"retrying in {wait:.0f}s after {type(exc).__name__}")
+                self.sleep(wait)
                 continue
 
             if response.status_code in _RETRY_STATUS and attempt < attempts:
@@ -205,6 +312,12 @@ class Launchpad:
                 # its 429s need tens of seconds rather than the milliseconds a
                 # naive backoff would start with.
                 wait = _retry_after(response) or self.config.backoff_base_s * 2**attempt
+                # Said out loud because a 429 wait is tens of seconds, and a
+                # silent one is indistinguishable from a hang.
+                self._say(
+                    f"HTTP {response.status_code}, waiting {wait:.0f}s "
+                    f"(attempt {attempt} of {attempts})"
+                )
                 self.sleep(wait)
                 continue
 
@@ -229,6 +342,79 @@ class Launchpad:
         return payload
 
     # -- bugs ---------------------------------------------------------------
+
+    def search_tasks(
+        self,
+        *,
+        created_since: datetime | None = None,
+        statuses: Sequence[str] = ALL_STATUSES,
+        target: str = DEFAULT_TARGET,
+        page_size: int = 50,
+        max_pages: int = 40,
+    ) -> Iterator[BugRef]:
+        """Yield bug tasks for the target package, oldest first.
+
+        One request per page. Yields lazily so that a caller can persist a
+        watermark as it goes: a sweep interrupted by a 429 halfway through page
+        six should keep the five pages it already processed, and that is only
+        possible if the pages arrive one at a time.
+
+        ``statuses`` defaults to :data:`ALL_STATUSES` rather than to
+        Launchpad's own default, which silently omits closed bugs -- see that
+        constant for the measurement and why it matters.
+
+        Ordered oldest-first on the way out, because a watermark can only
+        advance safely over bugs that have actually been handled. The API's own
+        order is newest-first, so processing in arrival order and then storing
+        the newest timestamp seen would skip everything older on the next run.
+
+        ``max_pages`` is a stop, not a target. At three seconds a request a
+        runaway pagination loop is a slow one, and a sweep that silently walks
+        four thousand bugs is not what anyone asked for.
+        """
+        base = self.config.api_base.rstrip("/")
+        params: list[tuple[str, str]] = [
+            ("ws.op", "searchTasks"),
+            ("ws.size", str(page_size)),
+            *(("status", status) for status in statuses),
+        ]
+        if created_since is not None:
+            # Date only: the API accepts a full timestamp but compares
+            # inclusively, so re-running a sweep within the same day would
+            # otherwise re-fetch the boundary bug on every pass.
+            params.append(("created_since", created_since.date().isoformat()))
+        url = f"{base}{target}?{urlencode(params)}"
+
+        collected: list[BugRef] = []
+        for page in range(max_pages):
+            self._say(f"searching, page {page + 1}")
+            payload = self._json(url)
+            entries = payload.get("entries")
+            if not isinstance(entries, list):
+                raise LaunchpadError(f"searchTasks returned no entries list: {url}")
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                bug_id = _bug_id_from_link(entry.get("bug_link"))
+                if bug_id is None:
+                    continue
+                collected.append(
+                    BugRef(
+                        bug_id=bug_id,
+                        status=str(entry.get("status") or ""),
+                        created=_parse_created(entry.get("date_created")),
+                        title=str(entry.get("title") or ""),
+                    )
+                )
+            next_link = payload.get("next_collection_link")
+            if not isinstance(next_link, str) or not next_link:
+                break
+            url = next_link
+
+        # ``total_size`` comes back null on this collection, so there is
+        # nothing to cross-check the count against; the entries are the answer.
+        collected.sort(key=lambda ref: (ref.created or _EPOCH, ref.bug_id))
+        yield from collected
 
     def bug(self, bug_id: int) -> BugRecord:
         """Fetch a bug and its attachment listing. Two requests."""
@@ -327,7 +513,9 @@ class Launchpad:
         record = self.bug(bug_id)
         out: dict[LogSource, str] = {}
 
-        for ref in sorted(record.log_attachments, key=lambda r: r.source is None):
+        wanted = sorted(record.log_attachments, key=lambda r: r.source is None)
+        for index, ref in enumerate(wanted, start=1):
+            self._say(f"LP#{bug_id} attachment {index}/{len(wanted)}: {ref.title}")
             if ref.source is not None and ref.source in out:
                 continue
             data = self._download(ref, bug_id)

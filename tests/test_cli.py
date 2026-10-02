@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 
+import httpx
 import pytest
 from typer.testing import CliRunner
 
@@ -1023,3 +1024,478 @@ class TestHistoryCommand:
             app, ["history", "libpeas-1.0-1:i386", "--config", _conf(tmp_path, ingested)]
         )
         assert result.exit_code == EXIT_FAIL
+
+
+class TestSweep:
+    """Collection, which is the entry point for triage.
+
+    Driven through a mock transport: the suite must not touch the network.
+    Launchpad is a shared service, it rate-limits, and a test that depends on a
+    live bug fails for reasons unrelated to the code.
+    """
+
+    API = "https://api.launchpad.net/devel"
+
+    def _task(self, bug_id: int, status: str = "New", day: int = 29) -> dict[str, object]:
+        return {
+            "bug_link": f"{self.API}/bugs/{bug_id}",
+            "status": status,
+            "date_created": f"2026-09-{day:02d}T10:00:00+00:00",
+            "title": f"Bug #{bug_id} in ubuntu-release-upgrader (Ubuntu)",
+        }
+
+    def _transport(
+        self,
+        tasks: list[dict[str, object]],
+        *,
+        logs_for: set[int] | None = None,
+        rate_limit_after: int | None = None,
+    ) -> tuple[httpx.MockTransport, list[int]]:
+        """Serve a search page plus each bug's logs. Records bugs fetched."""
+        apt = fixture_text("apt/lp2150339-apt.log")
+        main = fixture_text("logs/lp2150339-main.log")
+        fetched: list[int] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            url = str(request.url)
+            if "searchTasks" in url:
+                return httpx.Response(200, json={"entries": tasks})
+            if "+attachment" in url:
+                body = main if url.endswith("/1/data") else apt
+                return httpx.Response(200, content=body.encode())
+            if url.endswith("/attachments"):
+                bug_id = int(url.rsplit("/", 2)[-2])
+                if logs_for is not None and bug_id not in logs_for:
+                    return httpx.Response(200, json={"entries": []})
+                return httpx.Response(
+                    200,
+                    json={
+                        "entries": [
+                            {
+                                "title": "VarLogDistupgradeAptlog.txt",
+                                "data_link": f"{self.API}/bugs/{bug_id}/+attachment/0/data",
+                            },
+                            {
+                                "title": "VarLogDistupgradeMainlog.txt",
+                                "data_link": f"{self.API}/bugs/{bug_id}/+attachment/1/data",
+                            },
+                        ]
+                    },
+                )
+            if "/bugs/" in url:
+                bug_id = int(url.rsplit("/", 1)[-1])
+                if rate_limit_after is not None and len(fetched) >= rate_limit_after:
+                    return httpx.Response(429, text="slow down")
+                fetched.append(bug_id)
+                return httpx.Response(
+                    200,
+                    json={
+                        "id": bug_id,
+                        "title": "upgrade failed",
+                        "description": "ProblemType: Bug\n",
+                        "tags": [],
+                        "number_of_duplicates": 0,
+                        "date_created": "2026-09-29T10:00:00+00:00",
+                    },
+                )
+            return httpx.Response(404)
+
+        return (httpx.MockTransport(handler), fetched)
+
+    def _patch(self, monkeypatch: pytest.MonkeyPatch, transport: httpx.MockTransport) -> None:
+        """Make every Launchpad client in the CLI use the mock transport."""
+        import uru_doctor.lp.read as lp
+
+        original = lp.Launchpad.__post_init__
+
+        def post_init(self: lp.Launchpad) -> None:
+            original(self)
+            self.client = httpx.Client(transport=transport, follow_redirects=True)
+            self.sleep = lambda _s: None
+            object.__setattr__(
+                self, "config", self.config.model_copy(update={"min_interval_s": 0.0})
+            )
+
+        monkeypatch.setattr(lp.Launchpad, "__post_init__", post_init)
+
+    def test_dry_run_spends_no_log_requests(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Deciding whether to spend half an hour is a listing-only question."""
+        transport, fetched = self._transport([self._task(1), self._task(2)])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(
+            app,
+            ["sweep", "--dry-run", "--config", _conf(tmp_path, tmp_path / "state")],
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert fetched == []
+        assert "LP#1" in result.output
+
+    def test_dry_run_shows_the_cost(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, _ = self._transport([self._task(1), self._task(2)])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(
+            app, ["sweep", "--dry-run", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert "requests" in result.output
+
+    def test_fetches_diagnoses_and_stores(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, fetched = self._transport([self._task(1), self._task(2)])
+        self._patch(monkeypatch, transport)
+        state = tmp_path / "state"
+        config = _conf(tmp_path, state)
+        result = runner.invoke(app, ["sweep", "--config", config])
+        assert result.exit_code == EXIT_OK, result.output
+        assert sorted(fetched) == [1, 2]
+        stats = json.loads(runner.invoke(app, ["stats", "--json", "--config", config]).stdout)
+        assert stats["totals"]["bugs"] == 2
+
+    def test_bug_status_is_recorded(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """It comes free in the search response, and it is ground truth.
+
+        The bug's own resolution is the second-strongest evidence for whether
+        this tool is right. ``fetch`` cannot get it without a third request per
+        bug; ``sweep`` gets it for nothing.
+        """
+        transport, _ = self._transport([self._task(1, "Invalid"), self._task(2, "Won't Fix")])
+        self._patch(monkeypatch, transport)
+        config = _conf(tmp_path, tmp_path / "state")
+        payload = json.loads(
+            runner.invoke(app, ["sweep", "--json", "--config", config]).stdout
+        )
+        assert payload["fetched"] == 2
+        with Store.open(tmp_path / "state") as store:
+            statuses = {r.bug_id: r.bug_status for r in store.iter_runs()}
+        assert statuses == {1: "Invalid", 2: "Won't Fix"}
+
+    def test_closed_bugs_are_not_skipped(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A sweep must collect the bugs whose resolution is the evidence."""
+        transport, fetched = self._transport(
+            [self._task(1, "Won't Fix"), self._task(2, "Fix Released")]
+        )
+        self._patch(monkeypatch, transport)
+        runner.invoke(app, ["sweep", "--config", _conf(tmp_path, tmp_path / "state")])
+        assert sorted(fetched) == [1, 2]
+
+    def test_already_known_bugs_are_not_refetched(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, fetched = self._transport([self._task(1), self._task(2)])
+        self._patch(monkeypatch, transport)
+        config = _conf(tmp_path, tmp_path / "state")
+        runner.invoke(app, ["sweep", "--config", config])
+        fetched.clear()
+        second = runner.invoke(app, ["sweep", "--config", config])
+        assert second.exit_code == EXIT_OK, second.output
+        assert fetched == []
+
+    def test_the_limit_leaves_the_rest_for_next_time(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The cap is a stop, not a filter: the remainder must not be skipped."""
+        tasks = [self._task(i, day=20 + i) for i in range(1, 6)]
+        transport, fetched = self._transport(tasks)
+        self._patch(monkeypatch, transport)
+        config = _conf(tmp_path, tmp_path / "state")
+
+        first = runner.invoke(app, ["sweep", "--limit", "2", "--json", "--config", config])
+        payload = json.loads(first.stdout)
+        assert payload["fetched"] == 2
+        assert payload["remaining"] == 3
+        assert fetched == [1, 2], "oldest first, so the watermark can advance safely"
+
+        second = json.loads(
+            runner.invoke(app, ["sweep", "--limit", "2", "--json", "--config", config]).stdout
+        )
+        assert second["fetched"] == 2
+        assert sorted(fetched) == [1, 2, 3, 4]
+
+    def test_rate_limiting_keeps_what_it_already_stored(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A 429 partway through must not discard the bugs already handled.
+
+        Marching on would collect the same refusal and burn the recovery
+        window; rolling back would mean a sweep interrupted near the end of a
+        half-hour pass achieved nothing.
+        """
+        tasks = [self._task(i, day=20 + i) for i in range(1, 5)]
+        transport, _fetched = self._transport(tasks, rate_limit_after=2)
+        self._patch(monkeypatch, transport)
+        config = _conf(tmp_path, tmp_path / "state")
+        result = runner.invoke(app, ["sweep", "--config", config])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "rate limited" in result.output
+        stats = json.loads(runner.invoke(app, ["stats", "--json", "--config", config]).stdout)
+        assert stats["totals"]["bugs"] == 2, "the two it managed must survive"
+
+    def test_the_watermark_does_not_pass_unhandled_bugs(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The property that makes interruption safe rather than lossy.
+
+        After a 429 at bug 2 of 4, the mark must sit at bug 2's date -- not at
+        bug 4's. Anything beyond it has not been stored, and once the mark is
+        past a bug's creation date the search will never offer it again.
+        """
+        tasks = [self._task(i, day=20 + i) for i in range(1, 5)]
+        transport, _ = self._transport(tasks, rate_limit_after=2)
+        self._patch(monkeypatch, transport)
+        runner.invoke(app, ["sweep", "--config", _conf(tmp_path, tmp_path / "state")])
+        with Store.open(tmp_path / "state") as store:
+            mark = store.sweep_watermark()
+        assert mark is not None
+        assert mark.day == 22, f"watermark ran ahead to day {mark.day}"
+
+    def test_a_bug_with_no_logs_is_counted_not_hidden(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """LP#2161332 attached two screenshots.
+
+        "No upgrade logs were attached" is the correct answer and the commonest
+        reason a report cannot be triaged, so it is reported rather than buried.
+        """
+        transport, _ = self._transport([self._task(1), self._task(2)], logs_for={1})
+        self._patch(monkeypatch, transport)
+        payload = json.loads(
+            runner.invoke(
+                app, ["sweep", "--json", "--config", _conf(tmp_path, tmp_path / "state")]
+            ).stdout
+        )
+        assert payload["no_logs"] == [2]
+
+    def test_since_overrides_the_watermark(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, _ = self._transport([self._task(1)])
+        self._patch(monkeypatch, transport)
+        payload = json.loads(
+            runner.invoke(
+                app,
+                [
+                    "sweep",
+                    "--since",
+                    "2026-01-01",
+                    "--json",
+                    "--config",
+                    _conf(tmp_path, tmp_path / "state"),
+                ],
+            ).stdout
+        )
+        assert payload["since"].startswith("2026-01-01")
+
+    def test_a_bad_since_is_a_usage_error(self, tmp_path: Path) -> None:
+        result = runner.invoke(
+            app,
+            ["sweep", "--since", "last tuesday", "--config", _conf(tmp_path, tmp_path / "state")],
+        )
+        assert result.exit_code == EXIT_USAGE
+
+    def test_nothing_new_is_not_a_failure(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, _ = self._transport([])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(
+            app, ["sweep", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+
+    def test_the_imperfect_warning_is_not_repeated_under_strict(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Said once. The same duplicate-print slip as in ``ingest``.
+
+        Fixed there, then reintroduced here by copying the shape rather than
+        the lesson -- which is why both now have a test.
+        """
+        apt = fixture_text("apt/lp2150339-apt.log").splitlines()[:200]
+        apt.append("Blorp Fnord gibberish that no grammar matches")
+        dirty = "\n".join(apt) + "\n"
+        main = fixture_text("logs/lp2150339-main.log")
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            url = str(request.url)
+            if "searchTasks" in url:
+                return httpx.Response(200, json={"entries": [self._task(1)]})
+            if "+attachment" in url:
+                body = main if url.endswith("/1/data") else dirty
+                return httpx.Response(200, content=body.encode())
+            if url.endswith("/attachments"):
+                return httpx.Response(
+                    200,
+                    json={
+                        "entries": [
+                            {
+                                "title": "VarLogDistupgradeAptlog.txt",
+                                "data_link": f"{self.API}/bugs/1/+attachment/0/data",
+                            },
+                            {
+                                "title": "VarLogDistupgradeMainlog.txt",
+                                "data_link": f"{self.API}/bugs/1/+attachment/1/data",
+                            },
+                        ]
+                    },
+                )
+            return httpx.Response(
+                200,
+                json={
+                    "id": 1,
+                    "title": "t",
+                    "description": "ProblemType: Bug\n",
+                    "tags": [],
+                    "number_of_duplicates": 0,
+                },
+            )
+
+        self._patch(monkeypatch, httpx.MockTransport(handler))
+        result = runner.invoke(
+            app, ["sweep", "--strict", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_IMPERFECT, result.output
+        assert result.output.count("imperfect parse") == 1
+
+
+class TestProgressDisplay:
+    """Progress must never reach the thing a command exists to produce.
+
+    ``--json`` and ``--markdown`` write a document to stdout that is meant to
+    be redirected. A spinner in the middle of it is corruption, not noise.
+    """
+
+    def test_a_disabled_tracker_is_a_safe_no_op(self) -> None:
+        """So no caller has to ask whether progress is on."""
+        from uru_doctor.cli import Tracker
+
+        tracker = Tracker(None, None)
+        tracker.start("anything", total=5)
+        tracker.context("LP#1")
+        tracker.note("working")
+        tracker.advance()
+        tracker.advance("done")
+        tracker.callback("via the client")
+        assert tracker.task is None
+
+    def test_no_display_when_the_console_is_not_a_terminal(self) -> None:
+        """A cron job or a `2>log` capture must get no control codes."""
+        from io import StringIO
+
+        from rich.console import Console
+
+        from uru_doctor.cli import _progress
+
+        with _progress(console=Console(file=StringIO(), force_terminal=False)) as tracker:
+            assert tracker.display is None
+
+    def test_one_task_at_a_time(self) -> None:
+        """A second phase must not leave the first drawing itself.
+
+        A sweep showed ``searching Launchpad 0/?`` stuck above the real bar for
+        its whole run, because the phase that had moved on still had a row.
+        """
+        from io import StringIO
+
+        from rich.console import Console
+
+        from uru_doctor.cli import _progress
+
+        console = Console(file=StringIO(), force_terminal=True, width=100)
+        with _progress(console=console) as tracker:
+            assert tracker.display is not None
+            tracker.start("first", total=3)
+            tracker.advance()
+            tracker.start("second", total=None)
+            assert len(tracker.display.tasks) == 1
+            assert tracker.display.tasks[0].description == "second"
+
+    def test_an_indeterminate_phase_clears_the_previous_total(self) -> None:
+        """Rich reads ``total=None`` as "leave it alone" on both reset and update.
+
+        Resetting therefore kept the previous phase's total and drew
+        ``clustering 0/7`` -- a bar measuring seven of something that was no
+        longer being counted. Replacing the task is what actually clears it.
+        """
+        from io import StringIO
+
+        from rich.console import Console
+
+        from uru_doctor.cli import _progress
+
+        console = Console(file=StringIO(), force_terminal=True, width=100)
+        with _progress(console=console) as tracker:
+            assert tracker.display is not None
+            tracker.start("counted", total=7)
+            tracker.start("uncountable", total=None)
+            assert tracker.display.tasks[0].total is None
+
+    def test_the_prefix_keeps_the_subject_visible(self) -> None:
+        """Otherwise the label is whatever the client last said.
+
+        ``GET 6003872/data`` tells you the tool is alive but not what it is
+        working on, and an opaque attachment id is the least useful half.
+        """
+        from io import StringIO
+
+        from rich.console import Console
+
+        from uru_doctor.cli import _progress
+
+        console = Console(file=StringIO(), force_terminal=True, width=100)
+        with _progress(console=console) as tracker:
+            assert tracker.display is not None
+            tracker.start("fetching", total=2)
+            tracker.context("LP#2169028")
+            tracker.callback("GET 6003872/data")
+            assert tracker.display.tasks[0].description == "LP#2169028 GET 6003872/data"
+
+    def test_a_new_phase_drops_the_old_prefix(self) -> None:
+        from io import StringIO
+
+        from rich.console import Console
+
+        from uru_doctor.cli import _progress
+
+        console = Console(file=StringIO(), force_terminal=True, width=100)
+        with _progress(console=console) as tracker:
+            assert tracker.display is not None
+            tracker.start("fetching", total=1)
+            tracker.context("LP#1")
+            tracker.start("clustering", total=None)
+            tracker.note("working")
+            assert tracker.display.tasks[0].description == "working"
+
+    def test_json_output_stays_parseable(self, tmp_path: Path, ingested: Path) -> None:
+        """The end-to-end guarantee, however the bar is rendered."""
+        for argv in (
+            ["dedup", "--json"],
+            ["stats", "--json"],
+            ["coverage", "--json"],
+        ):
+            result = runner.invoke(
+                app, [*argv, "--config", _conf(tmp_path, ingested)]
+            )
+            assert result.exit_code == EXIT_OK, (argv, result.output)
+            json.loads(result.stdout)
+
+    def test_markdown_output_has_no_control_codes(self, logs: Path) -> None:
+        result = runner.invoke(app, ["diagnose", str(logs), "--markdown"])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "\x1b[" not in result.stdout
+        assert result.stdout.lstrip().startswith("# ")
+
+    def test_title_remains_one_clean_line(self, logs: Path) -> None:
+        """It exists to be piped, so nothing may share its stdout."""
+        result = runner.invoke(app, ["title", str(logs)])
+        assert result.exit_code == EXIT_OK
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+        assert len(lines) == 1
+        assert "\x1b[" not in result.stdout

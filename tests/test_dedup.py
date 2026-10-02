@@ -88,6 +88,28 @@ class TestNoTextIsUsed:
         run, result = ingest(interner, apt="lp2150319-apt.log")
         assert build_signature(run, result.findings, interner).apport_dupe is None
 
+    def test_prior_triage_does_not_affect_the_signature(self, interner: Interner) -> None:
+        """Launchpad's own verdicts are ground truth, never evidence.
+
+        ``duplicate_of``, ``duplicate_count`` and ``bug_status`` are carried on
+        the run because the bug's resolution is the best cheap check on whether
+        this tool is right. Reading them back in as evidence would reproduce
+        the triage mistakes already in the corpus -- and these bugs accumulate
+        duplicates precisely because the existing grouping is wrong, so
+        learning from it would be learning the error.
+        """
+        run, result = ingest(interner, apt="lp2150319-apt.log")
+        baseline = build_signature(run, result.findings, interner)
+
+        for update in (
+            {"duplicate_of": 2150245},
+            {"duplicate_count": 13},
+            {"bug_status": "Invalid"},
+            {"bug_status": "Fix Released", "duplicate_of": 99, "duplicate_count": 7},
+        ):
+            altered = run.model_copy(update=update)
+            assert build_signature(altered, result.findings, interner) == baseline, update
+
     def test_the_exclusion_list_names_real_fields(self) -> None:
         """Guards the list itself against drifting out of date."""
         known = set(UpgradeRun.model_fields) | {"preamble", "duplicate_signature"}

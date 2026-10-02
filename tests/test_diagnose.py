@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import replace
 
 import pytest
@@ -363,6 +364,47 @@ class TestRulesDigest:
             del RULES["test.ephemeral"]
         assert rules_digest() == before
 
+    def test_changes_when_the_grammar_gains_a_verb(self) -> None:
+        """A pattern addition changes the graph, so it must move the stamp.
+
+        A line the lexer could not read is a verb the conflict graph could not
+        see, so adding a pattern changes the graph, the coverage figure and
+        potentially the ranking. Omitting the grammar was a real gap: after the
+        ``Or group remove`` and parenthesised-``PreDepends`` patterns landed,
+        stored runs held coverage numbers the current build would no longer
+        produce and nothing said so.
+        """
+        import uru_doctor.apt.grammar as grammar
+        from uru_doctor.apt.grammar import Verb
+
+        before = rules_digest()
+        original = grammar.PATTERNS
+        grammar.PATTERNS = (*original, (Verb.UNKNOWN, re.compile("^never$")))
+        try:
+            assert rules_digest() != before
+        finally:
+            grammar.PATTERNS = original
+        assert rules_digest() == before
+
+    def test_is_unmoved_by_tightening_a_pattern(self) -> None:
+        """The verb set, not the expressions.
+
+        Rewriting a regex without changing which verbs exist does not change
+        what can be recognised, and a digest that moved on every refactor would
+        be ignored within a week.
+        """
+        import uru_doctor.apt.grammar as grammar
+
+        before = rules_digest()
+        original = grammar.PATTERNS
+        grammar.PATTERNS = tuple(
+            (verb, re.compile(pattern.pattern + "")) for verb, pattern in original
+        )
+        try:
+            assert rules_digest() == before
+        finally:
+            grammar.PATTERNS = original
+
     def test_is_unmoved_by_documentation(self) -> None:
         """Rewording a remedy must not look like a policy change.
 
@@ -669,3 +711,50 @@ class TestNewGrammarShapes:
         )
         assert [t.verb for t in tokens] == [Verb.IGNORE_NOT_INSTVER]
         assert tokens[0].subject == "pulseaudio"
+
+    def test_both_or_group_verbs(self) -> None:
+        """``Or group remove for A`` as well as ``Or group keep for A``.
+
+        Found by the first live ``sweep``: LP#2168863 dropped coverage to
+        99.9527% on two lines reading ``Or group remove for teamviewer:amd64``.
+        Only the ``keep`` form had been enumerated.
+
+        Both strings sit adjacent to each other in ``libapt-pkg``, which is the
+        recurring shape of a grammar gap in this codebase -- an upstream pair
+        whose sibling stays invisible until some log happens to contain it.
+        Checked against the library rather than against the one log that
+        exposed it, so the fix covers the pair rather than the instance.
+
+        The ``remove`` form is the one that carries blame: apt emits it when no
+        alternative in an or-group can be satisfied, immediately before the
+        ``MarkDelete`` that drops the package.
+        """
+        from uru_doctor.apt.grammar import Verb
+        from uru_doctor.apt.lexer import lex
+
+        tokens = list(
+            lex(
+                [
+                    "  Or group keep for gedit:amd64",
+                    "  Or group remove for teamviewer:amd64",
+                    "  MarkDelete teamviewer:amd64 < 15.17.6 @ii mK Ib > FU=0",
+                ]
+            )
+        )
+        assert [t.verb for t in tokens] == [
+            Verb.OR_GROUP_KEEP,
+            Verb.OR_GROUP_REMOVE,
+            Verb.MARK_DELETE,
+        ]
+        assert tokens[1].subject == "teamviewer:amd64"
+
+    def test_or_group_verbs_are_distinct(self) -> None:
+        """Keep and remove are opposite outcomes and must not share a verb.
+
+        A single ``OR_GROUP`` token would make "apt kept this package" and
+        "apt deleted this package" indistinguishable downstream.
+        """
+        from uru_doctor.apt.grammar import Verb
+
+        assert Verb.OR_GROUP_KEEP is not Verb.OR_GROUP_REMOVE
+        assert Verb.OR_GROUP_KEEP.value != Verb.OR_GROUP_REMOVE.value

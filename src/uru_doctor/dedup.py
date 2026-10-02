@@ -76,15 +76,29 @@ __all__ = [
 #: Recorded so the exclusion is checkable rather than merely intended.
 #:
 #: Asserted by the test suite against :func:`build_signature`: no field listed
-#: here may influence a signature. The first three are reporter prose; the
-#: fourth is apport's version-sensitive signature, which fails to collapse the
-#: very reports it is meant to.
+#: here may influence a signature. Two kinds of thing are named.
+#:
+#: **Reporter prose**, plus apport's version-sensitive signature, which fails to
+#: collapse the very reports it is meant to.
+#:
+#: **Prior triage.** ``duplicate_of``, ``duplicate_count`` and ``bug_status``
+#: are Launchpad's existing verdicts on a bug. They are deliberately carried on
+#: the run -- they are the best cheap ground truth for checking whether this
+#: tool is right -- and they must never be read back in as evidence. A tool
+#: that learns from triage decisions reproduces the triage mistakes already in
+#: the corpus, which is the problem it exists to fix: these bugs accumulate
+#: duplicates precisely because the existing grouping is wrong. Listing them
+#: here is what makes "used for validation, never for inference" enforceable
+#: rather than a claim in a docstring.
 EXCLUDED_FROM_SIGNATURES: Final[frozenset[str]] = frozenset(
     {
         "current_title",
         "tags",
         "preamble",
         "duplicate_signature",
+        "duplicate_of",
+        "duplicate_count",
+        "bug_status",
     }
 )
 

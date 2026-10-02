@@ -1362,6 +1362,23 @@ class UpgradeRun(Frozen):
     :data:`~uru_doctor.dedup.EXCLUDED_FROM_SIGNATURES`.
     """
 
+    bug_status: str = ""
+    """Launchpad's status for this bug, e.g. ``New``, ``Invalid``, ``Won't Fix``.
+
+    The bug's own resolution is the second-strongest form of ground truth
+    available for checking this tool -- below an upstream fix, above reading
+    the log by hand, and well above triager tags. LP#2150245 closing Invalid
+    with thirteen duplicates is what confirms the surface PPA verdict.
+
+    Empty means not known rather than not set. ``sweep`` fills it in because
+    ``searchTasks`` returns it in the task entry at no extra cost; ``fetch``
+    leaves it blank, because status lives on the bug's *tasks* rather than the
+    bug, and asking for it would add a third request to every bug at three
+    seconds each. That asymmetry is tolerable precisely because this field is
+    mutable triage state used to *validate* a diagnosis, never to produce one
+    -- so a run that lacks it is diagnosed identically.
+    """
+
     # -- provenance of the diagnosis ----------------------------------------
     tool_version: str = ""
     """Which release of uru-doctor produced ``findings`` and ``signature``.

@@ -126,6 +126,25 @@ backoff_base_s = 2.0
 # interesting at the end, because that is where it stopped.
 max_attachment_bytes = 33554432
 
+# Tasks per `searchTasks` page during a sweep. The listing is the cheap part of
+# a sweep -- the logs are what cost -- so larger pages buy little, and 50 is
+# what the API returns comfortably.
+sweep_page_size = 50
+
+# How many new bugs one `uru-doctor sweep` will fetch logs for.
+#
+# A stop, not a target. At roughly six requests per bug and three seconds
+# between them, a hundred bugs is half an hour. The watermark only advances
+# over bugs actually handled, so whatever this leaves behind is picked up by
+# the next run rather than skipped -- which is why capping it is safe and why
+# `sweep` reports how many remain.
+#
+# Note that the statuses a sweep asks for are not configurable. Launchpad's
+# search omits closed bugs by default, and a bug's own resolution is the
+# second-strongest ground truth available for checking this tool, so excluding
+# them is never the right answer; see `lp.read.ALL_STATUSES`.
+sweep_max_bugs = 50
+
 
 [report]
 

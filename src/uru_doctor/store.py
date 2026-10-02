@@ -941,6 +941,52 @@ class Store:
     def meta_put(self, key: str, value: str) -> None:
         self._conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (key, value))
 
+    # -- sweep watermark ----------------------------------------------------
+
+    def sweep_watermark(self) -> datetime | None:
+        """When the last completed sweep had reached, or ``None``.
+
+        Stored as a date rather than a bug id. Bug numbers are allocated
+        globally across Launchpad, so "every bug after 2169028" is not a
+        question the API can answer for one source package, and a numeric
+        high-water mark would skip anything filed earlier but only *reported*
+        against this package later.
+        """
+        raw = self.meta_get("sweep_watermark")
+        if not raw:
+            return None
+        try:
+            return datetime.fromisoformat(raw)
+        except ValueError:
+            # A corrupt watermark must not wedge the sweep permanently. Losing
+            # it costs a re-fetch, which the ETag cache makes nearly free.
+            return None
+
+    def advance_watermark(self, when: datetime) -> None:
+        """Move the watermark forward, never backward.
+
+        Monotonic on purpose. A sweep that stops early -- a 429, an
+        interruption -- must not be able to rewind a mark that a previous,
+        further-reaching pass had already set, because the gap between the two
+        would never be swept again. Re-fetching a bug is cheap and idempotent;
+        silently never fetching one is not.
+        """
+        current = self.sweep_watermark()
+        if current is not None and when <= current:
+            return
+        self.meta_put("sweep_watermark", when.isoformat())
+
+    def known_bug_ids(self) -> set[int]:
+        """Every bug id already in the store.
+
+        Lets a sweep report what is genuinely new, and skip re-diagnosing what
+        is not, without deserialising any payloads.
+        """
+        return {
+            int(r["bug_id"])
+            for r in self._conn.execute("SELECT DISTINCT bug_id FROM runs WHERE bug_id IS NOT NULL")
+        }
+
     def stats(self) -> dict[str, Any]:
         """Counts for ``uru-doctor stats``."""
 

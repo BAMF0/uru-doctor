@@ -65,7 +65,17 @@ REF = r"[a-z0-9][a-z0-9+.~-]*(?::[a-z0-9]+(?::any)?)?"
 #: contain whitespace, so the non-greedy match cannot run past the anchor. The
 #: word itself is resolved by :func:`dep_type`, which consults every
 #: translation installed on the system.
-DEP = r"[^<>()\s][^<>()]*?"
+#:
+#: Parentheses are permitted after the first character because German renders
+#: ``PreDepends`` as ``Hängt ab von (vorher)``. Excluding them cost five lines
+#: on LP#2168919 -- the same shape as the Italian ``Va in conflitto``, which is
+#: why spaces were already allowed, one punctuation class later. ``<`` and
+#: ``>`` stay excluded: those bracket the state blob that follows, and letting
+#: a dependency name swallow it would turn one line into nonsense rather than
+#: into a miss. A leading parenthesis is still refused, so the paren-delimited
+#: ``Setting X NOT as auto-installed (direct DEP of Y ...)`` form cannot have
+#: its opening bracket absorbed.
+DEP = r"[^<>()\s][^<>]*?"
 
 #: apt's resolver scores, which go negative.
 SCORE = r"-?\d+"
@@ -218,6 +228,21 @@ class Verb(StrEnum):
     OR_GROUP_KEEP = "or_group_keep"
     """``Or group keep for A`` -- an alternation left unsatisfied."""
 
+    OR_GROUP_REMOVE = "or_group_remove"
+    """``Or group remove for A`` -- an alternation that cost A its place.
+
+    The remove half of the pair above, and the one that carries blame: apt
+    emits it when no alternative in an or-group can be satisfied, immediately
+    before the ``MarkDelete`` that drops the package. In LP#2168863,
+    ``teamviewer Depends on qt56-teamviewer < none @un mH >`` is unsatisfiable
+    in every branch, so teamviewer is removed.
+
+    Both strings are in ``libapt-pkg`` adjacent to each other. Only the
+    ``keep`` form was enumerated, which is the recurring shape of a grammar
+    gap here -- an upstream pair where the sibling is invisible until a log
+    happens to contain it. The first live ``sweep`` produced one.
+    """
+
     SETTING_NOT_AUTO = "setting_not_auto"
     """``Setting A NOT as auto-installed (direct Depends of B which is in
     APT::Never-MarkAuto-Sections)``.
@@ -295,6 +320,7 @@ VERB_STREAM: dict[Verb, AptStream] = {
     Verb.TRY_INSTALLING_BEFORE: AptStream.RESOLVER,
     Verb.IGNORE_MARK_KEEP_PROTECTED: AptStream.RESOLVER,
     Verb.OR_GROUP_KEEP: AptStream.RESOLVER,
+    Verb.OR_GROUP_REMOVE: AptStream.RESOLVER,
     Verb.SETTING_NOT_AUTO: AptStream.AUTOINSTALL,
     Verb.ENTERING_RESOLVE_BY_KEEP: AptStream.RESOLVER,
     Verb.DONE: AptStream.RESOLVER,
@@ -478,6 +504,10 @@ PATTERNS: tuple[tuple[Verb, re.Pattern[str]], ...] = (
     (
         Verb.OR_GROUP_KEEP,
         re.compile(rf"^Or\s+group\s+keep\s+for\s+(?P<subject>{REF})$"),
+    ),
+    (
+        Verb.OR_GROUP_REMOVE,
+        re.compile(rf"^Or\s+group\s+remove\s+for\s+(?P<subject>{REF})$"),
     ),
     # -- marker -------------------------------------------------------------
     (

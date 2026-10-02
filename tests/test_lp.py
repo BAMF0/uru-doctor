@@ -437,3 +437,246 @@ def test_config_has_no_second_attachment_table() -> None:
     """
     assert not hasattr(LaunchpadConfig(), "wanted_attachments")
     assert json.dumps(LaunchpadConfig().model_dump(), default=str)
+
+
+def _task(bug_id: int, status: str = "New", created: str = "2026-09-29T10:00:00+00:00") -> dict:
+    """One ``searchTasks`` entry, shaped like the real API's."""
+    return {
+        "bug_link": f"{API}/bugs/{bug_id}",
+        "status": status,
+        "date_created": created,
+        "title": f'Bug #{bug_id} in ubuntu-release-upgrader (Ubuntu): "upgrade failed"',
+    }
+
+
+class TestSearchTasks:
+    """Finding bugs to fetch, rather than being handed a list.
+
+    Without this the queue is curated by hand, which means the tool only ever
+    sees bugs somebody already decided were interesting -- the selection bias
+    the rest of the design exists to remove.
+    """
+
+    def _search(self, payload: dict, **kwargs: object) -> tuple[list, Recorder]:
+        recorder = Recorder(
+            {f"{API}/ubuntu/+source/ubuntu-release-upgrader": httpx.Response(200, json=payload)}
+        )
+        with _launchpad(recorder) as client:
+            return (list(client.search_tasks(**kwargs)), recorder)  # type: ignore[arg-type]
+
+    def test_parses_ids_statuses_and_dates(self) -> None:
+        refs, _ = self._search({"entries": [_task(2168863, "New"), _task(2168919, "Won't Fix")]})
+        assert [r.bug_id for r in refs] == [2168863, 2168919]
+        assert {r.status for r in refs} == {"New", "Won't Fix"}
+        assert all(r.created is not None for r in refs)
+
+    def test_closed_statuses_are_requested_explicitly(self) -> None:
+        """Launchpad's default omits closed bugs, and that is the wrong default.
+
+        Measured against the live API over one week of release-upgrader
+        reports: the default returned 23 tasks and hid two ``Won't Fix`` ones.
+        A bug's own resolution is the second-strongest ground truth there is,
+        so accepting the default would make a sweep exclude its own best
+        evidence -- silently.
+        """
+        _, recorder = self._search({"entries": []})
+        url = recorder.urls[0]
+        for status in ("Invalid", "Won%27t+Fix", "Fix+Released", "Expired"):
+            assert status in url, f"{status} not requested: {url}"
+
+    def test_results_are_oldest_first(self) -> None:
+        """A watermark can only advance over bugs already handled.
+
+        The API returns newest-first. Processing in that order and then storing
+        the newest timestamp seen would move the mark past everything older,
+        which would never be swept again.
+        """
+        refs, _ = self._search(
+            {
+                "entries": [
+                    _task(3, created="2026-09-30T10:00:00+00:00"),
+                    _task(1, created="2026-09-28T10:00:00+00:00"),
+                    _task(2, created="2026-09-29T10:00:00+00:00"),
+                ]
+            }
+        )
+        assert [r.bug_id for r in refs] == [1, 2, 3]
+
+    def test_created_since_is_sent_as_a_date(self) -> None:
+        """The API compares inclusively, so a timestamp re-fetches the boundary."""
+        from datetime import UTC, datetime
+
+        _, recorder = self._search(
+            {"entries": []},
+            created_since=datetime(2026, 9, 28, 14, 30, tzinfo=UTC),
+        )
+        assert "created_since=2026-09-28" in recorder.urls[0]
+        assert "14%3A30" not in recorder.urls[0]
+
+    def test_pagination_is_followed(self) -> None:
+        pages = {
+            "page1": {
+                "entries": [_task(1, created="2026-09-28T10:00:00+00:00")],
+                "next_collection_link": f"{API}/page2",
+            },
+            "page2": {"entries": [_task(2, created="2026-09-29T10:00:00+00:00")]},
+        }
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            key = "page2" if "page2" in str(request.url) else "page1"
+            return httpx.Response(200, json=pages[key])
+
+        client = Launchpad(
+            config=LaunchpadConfig(min_interval_s=0.0, backoff_base_s=0.001),
+            client=httpx.Client(transport=httpx.MockTransport(handler)),
+            sleep=lambda _s: None,
+        )
+        with client:
+            assert [r.bug_id for r in client.search_tasks()] == [1, 2]
+
+    def test_pagination_is_bounded(self) -> None:
+        """A runaway loop at three seconds a request is a slow afternoon."""
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(
+                200,
+                json={"entries": [_task(1)], "next_collection_link": f"{API}/more"},
+            )
+
+        client = Launchpad(
+            config=LaunchpadConfig(min_interval_s=0.0, backoff_base_s=0.001),
+            client=httpx.Client(transport=httpx.MockTransport(handler)),
+            sleep=lambda _s: None,
+        )
+        with client:
+            refs = list(client.search_tasks(max_pages=3))
+        assert len(refs) == 3
+
+    def test_a_task_without_a_bug_link_is_skipped(self) -> None:
+        """Not fatal: one malformed entry must not abandon the page."""
+        refs, _ = self._search({"entries": [{"status": "New"}, _task(7)]})
+        assert [r.bug_id for r in refs] == [7]
+
+    def test_a_missing_entries_list_raises(self) -> None:
+        """Distinct from an empty one: no entries is an answer, no list is not."""
+        with pytest.raises(LaunchpadError, match="no entries list"):
+            self._search({"total_size": 0})
+
+    def test_an_empty_result_is_not_an_error(self) -> None:
+        refs, _ = self._search({"entries": []})
+        assert refs == []
+
+    def test_a_task_with_an_unparseable_date_sorts_oldest(self) -> None:
+        """Safe direction: handled before the watermark can move past it."""
+        refs, _ = self._search(
+            {
+                "entries": [
+                    _task(1, created="2026-09-29T10:00:00+00:00"),
+                    _task(2, created="not a date"),
+                ]
+            }
+        )
+        assert [r.bug_id for r in refs] == [2, 1]
+
+
+class TestProgressReporting:
+    """The client is mostly *waiting*, and silence looks like a hang.
+
+    At a three-second minimum interval a bug costing six requests spends
+    eighteen seconds asleep. ``sweep`` reported nothing until a whole bug
+    completed, so a fifty-bug pass appeared to do nothing for a quarter of an
+    hour.
+    """
+
+    def test_requests_are_announced(self) -> None:
+        said: list[str] = []
+        recorder = Recorder(_routes("VarLogDistupgradeAptlog.txt"))
+        with _launchpad(recorder, progress=said.append) as client:
+            client.bug(2150319)
+        assert any(message.startswith("GET ") for message in said)
+
+    def test_pacing_is_announced(self) -> None:
+        """The dominant cost, and the one that used to be invisible."""
+        said: list[str] = []
+        waits: list[float] = []
+        recorder = Recorder(_routes("VarLogDistupgradeAptlog.txt"))
+        client = Launchpad(
+            config=LaunchpadConfig(min_interval_s=3.0, backoff_base_s=0.001),
+            client=_client(recorder),
+            sleep=waits.append,
+            progress=said.append,
+        )
+        with client:
+            client.bug(2150319)
+        assert waits, "precondition: the second request is paced"
+        assert any(message.startswith("pacing ") for message in said), said
+
+    def test_a_rate_limit_wait_is_announced(self) -> None:
+        """Tens of seconds of silence is indistinguishable from a hang."""
+        said: list[str] = []
+        state = {"calls": 0}
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            state["calls"] += 1
+            if state["calls"] == 1:
+                return httpx.Response(429, headers={"Retry-After": "42"})
+            return httpx.Response(200, json=_bug_payload())
+
+        client = Launchpad(
+            config=LaunchpadConfig(min_interval_s=0.0, backoff_base_s=0.001),
+            client=httpx.Client(transport=httpx.MockTransport(handler)),
+            sleep=lambda _s: None,
+            progress=said.append,
+        )
+        with client:
+            client._json(f"{API}/bugs/2150319")
+        assert any("429" in message and "42" in message for message in said), said
+
+    def test_attachments_are_counted(self) -> None:
+        """Which of four logs is downloading, not merely that one is."""
+        said: list[str] = []
+        recorder = Recorder(
+            _routes("VarLogDistupgradeAptlog.txt", "VarLogDistupgradeMainlog.txt")
+        )
+        with _launchpad(recorder, progress=said.append) as client:
+            client.logs(2150319)
+        assert any("attachment 1/2" in message for message in said), said
+        assert any("attachment 2/2" in message for message in said), said
+
+    def test_the_search_announces_pages(self) -> None:
+        recorder = Recorder(
+            {
+                f"{API}/ubuntu/+source/ubuntu-release-upgrader": httpx.Response(
+                    200, json={"entries": []}
+                )
+            }
+        )
+        said: list[str] = []
+        with _launchpad(recorder, progress=said.append) as client:
+            list(client.search_tasks())
+        assert any("page 1" in message for message in said), said
+
+    def test_silent_by_default(self) -> None:
+        """A library caller and every test want nothing printed.
+
+        Asserted by construction: there is no console in this module, so the
+        only way a message escapes is through the injected callback.
+        """
+        recorder = Recorder(_routes("VarLogDistupgradeAptlog.txt"))
+        with _launchpad(recorder) as client:
+            assert client.progress is None
+            client.bug(2150319)
+
+    def test_messages_are_short_enough_for_one_line(self) -> None:
+        """A progress line that wraps is worse than no progress line.
+
+        A full Launchpad API URL is ninety characters of which the last two
+        segments are the only informative part.
+        """
+        said: list[str] = []
+        recorder = Recorder(_routes("VarLogDistupgradeAptlog.txt"))
+        with _launchpad(recorder, progress=said.append) as client:
+            client.logs(2150319)
+        assert said
+        for message in said:
+            assert len(message) <= 60, message

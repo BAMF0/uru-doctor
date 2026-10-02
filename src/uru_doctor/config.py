@@ -244,6 +244,24 @@ class LaunchpadConfig(BaseModel):
     and answers nothing the resolver trace does not answer better.
     """
 
+    sweep_page_size: int = Field(50, ge=1, le=300)
+    """Tasks per ``searchTasks`` page.
+
+    Larger pages mean fewer requests for the listing, which is the cheap part
+    of a sweep -- the logs are what cost. 50 is what the API returns
+    comfortably.
+    """
+
+    sweep_max_bugs: int = Field(50, ge=1)
+    """How many new bugs one ``sweep`` will fetch logs for.
+
+    A stop, not a target. At roughly six requests and three seconds each, a
+    hundred bugs is half an hour; an unbounded sweep against a quiet week is
+    fine and against a flood is an afternoon. The watermark only advances over
+    bugs actually handled, so the remainder is picked up by the next run rather
+    than skipped.
+    """
+
     # There is deliberately no ``wanted_attachments`` list. One lived here and
     # disagreed with the code: its last three entries -- ``Dependencies``,
     # ``ProcCpuinfoMinimal`` and ``VarLogDistupgradeLspcitxt`` -- are all
