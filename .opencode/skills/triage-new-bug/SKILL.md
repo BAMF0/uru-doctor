@@ -105,6 +105,10 @@ The order matters. Each gate makes the ones below it meaningful.
 Not 99.9%. An unmatched line is a verb the graph cannot see, and the failure
 mode is a confident diagnosis of partial evidence.
 
+There is exactly one standing exception, LP#2168919, documented under *Known
+open gap* below and pinned by a test to those four lines. If a new bug fails
+this gate, it is a new gap — do not reach for the exception.
+
 Available from the tool itself, on every path — this is also the gate you can
 apply without the harness:
 
@@ -174,6 +178,17 @@ Why it is not a one-line fix:
 The honest intermediate position: classify an interleaved upgrader block as
 *not a resolver verb* rather than parse its contents, so coverage stops
 reporting a grammar gap that is not one. Do not do this by matching prose.
+
+**Status.** Still open, but no longer load-bearing for the diagnosis. The same
+conclusion is available from `main.log`'s `failed to mark '%s' for install`,
+which `upgrader.metapkg-install-failed` now reads, so LP#2168919 is diagnosed
+correctly *despite* the gap. The fixture is recorded and excluded from the two
+corpus coverage gates by name — `tests/conftest.py:APT_FIXTURES` and
+`test_i18n.py::test_the_whole_corpus_lexes_completely` — with
+`TestNewGrammarShapes::test_the_known_gap_is_exactly_the_upgrader_prose`
+asserting the gap is exactly those four lines so the exclusion cannot absorb a
+new one. `check_bug.py` still reports it `[FAIL]`, which is correct: it is a
+gap, it is just a bounded and understood one.
 
 Fix by adding the pattern to `apt/grammar.py`, then re-check **every** fixture —
 a widened pattern can swallow lines another pattern was matching.
@@ -387,6 +402,56 @@ The `--fixtures` pass is not optional. Two fixes so far looked clean and
 changed an earlier bug's answer.
 
 ## Traps that have actually bitten
+
+- **An unanchored `.gitignore` pattern ate the fixture corpus.** `logs/`
+  matches at *any* depth, so `tests/fixtures/logs/` — every recorded
+  `main.log`, `apt-term.log` and `history.log` — was never committed, while the
+  comment two lines above it in `.gitignore` claimed those were the exception.
+  Nothing failed, because `fixture_text` calls `pytest.skip`: a fresh clone
+  quietly skipped the `main.log` half of the ground-truth suite and reported
+  success. Twenty-one files. Anchor state-directory patterns with a leading
+  slash (`/logs/`), and when a test corpus is supposed to be committed, check
+  `git ls-files` rather than `ls`.
+- **A message is not a failure unless the run stopped.** `doUpdate() failed
+  completely` is logged by two call sites.
+  `DistUpgradeController.py:2020` runs `doUpdate(showErrors=False,
+  forceRetries=1)` before the sources rewrite and *discards the result*,
+  because the user's unmodified `sources.list` may contain unreachable
+  entries; only :2042 is guarded by `abort()`. So one dead PPA puts that line
+  in every upgrade log including successful ones, and because `UPDATE_FAILED`
+  is an environment cause it outranked everything. It took the headline on
+  LP#2168909 and LP#2169124, whose real failures were a minute later and
+  unrelated. When a rule keys on an upstream string, check every call site of
+  the function that logs it — `grep -n "logging.error(\"<string>" ` finds the
+  log line, not the callers.
+- **A table-generated rule cannot see position.** The generator in
+  `rules/upgrader.py` matches against `context.error_messages`, which drops the
+  index, so a rule that needs to know *where* in the log its string appeared
+  has to be hand-written. Two rules now are, and both say why in their
+  docstrings.
+- **A node can be in the graph and produce no finding.** apt's last word on
+  LP#2168919 is `Broken kubuntu-desktop Depends on pipewire-audio @un umH`
+  followed by three `Considering` lines and `Done` — no decision verb at all.
+  No decision means no blame edge, no cascade, and `roots.classify` emits
+  nothing, so the one node that actually ended the upgrade was invisible to
+  root analysis while `kubuntu-desktop`, `pipewire-audio` and `pulseaudio` all
+  sat in `graph.nodes`. "Not in the findings" is not "not in the evidence";
+  check the graph directly before concluding the log is silent.
+- **Sections split on `Log time:`, not on `Starting pkgProblemResolver`.** One
+  section can therefore contain several complete resolves, and roots from a
+  pass apt *finished* compete on blast radius with the pass that failed.
+  LP#2168919 has two (22 broken, then 74) and LP#2168863 three. `Section.score`
+  deliberately ignores file position when choosing a section, which is right,
+  and leaves no way to prefer the final invocation inside one. Still open.
+- **Corroboration unions every `E:` message, so it can stop discriminating.**
+  LP#2168919's stack holds both `resolver_breaks` and the terminal
+  `held_broken`; `corroborated_causes` ORs their affinity sets into five
+  causes, which is how a `transitional_breaks` finding earned "corroborated by
+  apt" from a message — `held_broken` — whose affinity set excludes it. And on
+  LP#2168909 the computed set actively contradicted the headline and nothing
+  noticed. Corroboration should weight the *terminal* message. Still open;
+  until it is, treat "corroborated by apt" on a run with more than one `E:`
+  line as unproven.
 
 - **`ruff format` silently undoes `python - <<'PY'` string patches.** It
   reflows multi-line calls, so a later `str.replace` finds nothing and reports

@@ -38,7 +38,9 @@ __all__ = [
     "DISK_PATTERNS",
     "dpkg_failures",
     "dpkg_interrupted",
+    "metapkg_install_failed",
     "truncated_evidence",
+    "update_failed",
     "upgrader_crash",
 ]
 
@@ -195,21 +197,12 @@ _ENVIRONMENT_RULES: Final[
         Severity.HIGH,
         21,
     ),
-    (
-        "net.update-failed",
-        Cause.UPDATE_FAILED,
-        (
-            upstream("doUpdate() failed completely", "DistUpgradeController.doUpdate"),
-            upstream(
-                "openCache() failed: '%s'",
-                "DistUpgradeController.openCache",
-                "error",
-            ),
-        ),
-        "refreshing the package lists failed",
-        Severity.HIGH,
-        22,
-    ),
+    # ``net.update-failed`` is deliberately absent from this table. Its
+    # upstream string is logged by a call whose failure is expected and
+    # discarded, so the rule needs the *position* of the message rather than
+    # its text alone -- which this generator cannot provide, because it
+    # matches against ``context.error_messages`` and drops the index. See
+    # :func:`update_failed` below.
     # -- upgrader internals ---------------------------------------------
     (
         "upgrader.view-depends",
@@ -349,6 +342,201 @@ _register_pattern_rules()
 # ---------------------------------------------------------------------------
 # Rules that need more than a pattern match
 # ---------------------------------------------------------------------------
+
+#: ``DistUpgradeController.doUpdate`` giving up after exhausting its retries.
+_DO_UPDATE_FAILED: Final = "doUpdate() failed completely"
+
+#: The same function announcing itself, one line earlier.
+#:
+#: ``showErrors`` is the discriminator between the two call sites, and it is
+#: logged at DEBUG immediately before the attempt, so the pairing is reliable.
+_DO_UPDATE_START: Final = re.compile(r"running doUpdate\(\) \(showErrors=(?P<show>True|False)\)")
+
+#: ``openCache`` failing, which is not retried and has no benign call site.
+_OPEN_CACHE_PATTERNS: Final[tuple[ErrorPattern, ...]] = (
+    upstream("openCache() failed: '%s'", "DistUpgradeController.openCache", "error"),
+)
+
+
+def _update_failure_was_fatal(messages: Sequence[str], index: int) -> bool:
+    """Whether the ``doUpdate`` that failed at ``index`` was the fatal one.
+
+    The upgrader calls ``doUpdate`` twice and only the second call can end the
+    run. ``DistUpgradeController.py:2020`` runs it *before* the sources
+    rewrite, with ``showErrors=False``, ``forceRetries=1`` and -- decisively --
+    its return value discarded::
+
+        # because the (unmodified) sources.list of the user
+        # may contain bad/unreachable entries we run only
+        # with a single retry
+        self.doUpdate(showErrors=False, forceRetries=1)
+
+    A reporter with one dead PPA therefore logs ``doUpdate() failed
+    completely`` on every single upgrade, successful ones included. The call
+    that matters is at :2042, ``if not self.doUpdate(): self.abort()``.
+
+    Defaults to ``True`` when no announcement is found. Conservative in the
+    same direction as :func:`uru_doctor.ingest.is_terminal_error`: a log
+    without the DEBUG line should keep the rule rather than silently lose it.
+    """
+    for candidate in range(index - 1, -1, -1):
+        if match := _DO_UPDATE_START.search(messages[candidate]):
+            return match.group("show") == "True"
+    return True
+
+
+@rule(
+    "net.update-failed",
+    Cause.UPDATE_FAILED,
+    priority=22,
+    severity=Severity.HIGH,
+    confidence=Confidence.STRONG,
+    phase_hint="PRE_DIST_UPGRADE",
+    provenance=(
+        "DistUpgradeController.doUpdate ('doUpdate() failed completely'), gated on "
+        "the showErrors=True call site at DistUpgradeController.py:2042; "
+        "DistUpgradeController.openCache"
+    ),
+    remedy="Fix or disable the unreachable repository, then retry",
+)
+def update_failed(context: RuleContext) -> Sequence[Finding]:
+    """Refreshing the package lists failed in a way that ended the run.
+
+    Hand-written rather than table-generated because the text of the message
+    is not sufficient to know whether it was fatal -- the position is, and the
+    generator in this module discards it. See
+    :func:`_update_failure_was_fatal`.
+
+    The case that forced this: LP#2168909 has three PPAs with no ``Release``
+    file, so the pre-rewrite ``doUpdate`` fails at 23:18:16. The upgrade then
+    carries on for another minute, the real ``doUpdate`` succeeds at 23:18:35,
+    and the run dies at 23:19:20 because ``lubuntu-desktop`` could not be
+    installed. Because :data:`~uru_doctor.diagnose._ENVIRONMENT_CAUSES` ranks
+    the environment above the packages -- correctly, in general -- a recovered
+    network error became the headline and a thirty-victim holdback cascade,
+    which apt's own ``E:`` line corroborated, was buried beneath it.
+    """
+    messages = context.all_messages
+    for index in reversed(range(len(messages))):
+        if _DO_UPDATE_FAILED not in messages[index]:
+            continue
+        # The fatal call aborts the run, so it can only ever be the last
+        # occurrence. Checking earlier ones would reintroduce the bug.
+        if _update_failure_was_fatal(messages, index):
+            return (
+                context.finding(
+                    rule="net.update-failed",
+                    cause=Cause.UPDATE_FAILED,
+                    summary="refreshing the package lists failed",
+                    severity=Severity.HIGH,
+                    confidence=Confidence.STRONG,
+                    evidence=context.event_indices(_DO_UPDATE_FAILED)[:4],
+                    detail={"upstream": "DistUpgradeController.doUpdate"},
+                ),
+            )
+        break
+
+    for pattern in _OPEN_CACHE_PATTERNS:
+        for message in context.error_messages:
+            if match := pattern.pattern.search(message):
+                error = (match.groupdict().get("error") or "").strip()
+                return (
+                    context.finding(
+                        rule="net.update-failed",
+                        cause=Cause.UPDATE_FAILED,
+                        summary="refreshing the package lists failed",
+                        severity=Severity.HIGH,
+                        confidence=Confidence.STRONG,
+                        evidence=context.event_indices("openCache() failed")[:4],
+                        detail={"error": error, "upstream": pattern.source},
+                    ),
+                )
+    return ()
+
+
+#: The upgrader failing to mark a guessed desktop metapackage for install.
+#:
+#: Two captures: the metapackage, and apt's own exception text, which carries
+#: the mechanism (``held broken packages``, ``Resolve generated breaks``).
+_METAPKG_PATTERNS: Final[tuple[ErrorPattern, ...]] = (
+    upstream(
+        "failed to mark '%s' for install (%s)",
+        "DistUpgradeCache._installMetaPkgs",
+        "package",
+        "error",
+    ),
+)
+
+
+@rule(
+    "upgrader.metapkg-install-failed",
+    Cause.META_PACKAGE_UNINSTALLABLE,
+    priority=35,
+    severity=Severity.HIGH,
+    confidence=Confidence.STRONG,
+    phase_hint="PRE_DIST_UPGRADE",
+    provenance="DistUpgradeCache._installMetaPkgs: \"failed to mark '%s' for install (%s)\"",
+    remedy=(
+        "Re-install the named metapackage before upgrading, or resolve the dependency it names"
+    ),
+)
+def metapkg_install_failed(context: RuleContext) -> Sequence[Finding]:
+    """A desktop metapackage the upgrader requires could not be installed.
+
+    This is the upgrader stating its own conclusion, which is why it is ranked
+    above the conflict graph: ``_installMetaPkgs`` returns ``False`` here and
+    the upgrade stops, whatever else the resolver was doing.
+
+    Why it needs to outrank blast radius. The metapackage is broken by one
+    unsatisfiable dependency, so it strands nothing and loses every comparison
+    by consequence. On LP#2168919 apt's last word is::
+
+        Investigating (2) kubuntu-desktop:amd64 < none -> 1.496 @un pumN Ib >
+        Broken kubuntu-desktop:amd64 Depends on pipewire-audio:amd64 < none | ... @un umH >
+          Considering pipewire-audio:amd64 -1 as a solution ...
+        Done
+
+    ``pipewire-audio`` is held because it conflicts with the installed
+    ``pulseaudio``, so the metapackage can never be satisfied -- and because
+    apt emits no decision verb for it, root analysis produces no finding for
+    it at all. The headline was ``libgstreamer-plugins-good1.0-0 conflicts
+    with its own replacement``, a root from an *earlier* resolver pass that
+    apt resolved and moved past. Same failure mode as LP#2150245, reached by a
+    different route.
+
+    Matched against ``ERROR`` records only. Fourteen lines above it in the same
+    upstream function sits ``logging.warning("Can't mark '%s' for upgrade
+    (%s)")``, commented "warn here, but don't fail" -- a metapackage conflict
+    the upgrade survives. Matching at WARNING level would turn that into a
+    cause.
+    """
+    for pattern in _METAPKG_PATTERNS:
+        for message in context.error_messages:
+            match = pattern.pattern.search(message)
+            if match is None:
+                continue
+            captured = {
+                key: (value or "").strip() for key, value in (match.groupdict() or {}).items()
+            }
+            package = captured.get("package", "")
+            summary = (
+                f"the {package} metapackage could not be installed"
+                if package
+                else "a required metapackage could not be installed"
+            )
+            return (
+                context.finding(
+                    rule="upgrader.metapkg-install-failed",
+                    cause=Cause.META_PACKAGE_UNINSTALLABLE,
+                    summary=summary,
+                    severity=Severity.HIGH,
+                    confidence=Confidence.STRONG,
+                    evidence=context.event_indices("failed to mark")[:4],
+                    detail={**captured, "upstream": pattern.source},
+                ),
+            )
+    return ()
+
 
 #: apt's own ``E:`` text for an interrupted dpkg, from libapt-pkg.
 #:

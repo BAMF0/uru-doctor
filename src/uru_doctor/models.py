@@ -482,6 +482,25 @@ class Cause(StrEnum):
     # -- upgrader itself ----------------------------------------------------
     UPGRADER_CRASH = "upgrader_crash"
     POST_INSTALL_SCRIPT_ERROR = "post_install_script_error"
+    META_PACKAGE_UNINSTALLABLE = "meta_package_uninstallable"
+    """A desktop metapackage the upgrader needs could not be marked for install.
+
+    When no known desktop metapackage is installed -- usually because the user
+    removed it, or it was never installed on a derivative -- the upgrader
+    *guesses* one from its key dependencies and marks it, and the upgrade
+    cannot proceed if that fails. ``DistUpgradeCache._installMetaPkgs`` logs
+    ``failed to mark '%s' for install (%s)`` and returns ``False``.
+
+    Distinct from every resolver cause because it is the upgrader's own
+    conclusion rather than an inference from the conflict graph. That matters
+    for ranking: the metapackage is broken by a single unsatisfiable
+    dependency, so it strands almost nothing and loses every blast-radius
+    comparison to the roots apt had already resolved and moved past. On
+    LP#2168919 the trace's last word is ``Broken kubuntu-desktop Depends on
+    pipewire-audio < none | ... @un umH >`` and the headline was a
+    ten-victim ``libgstreamer-plugins-good1.0-0`` transition from an earlier,
+    successfully resolved pass.
+    """
 
     # -- terminal states ----------------------------------------------------
     #: No rule fired. Surfaced loudly for human review, never silently bucketed.

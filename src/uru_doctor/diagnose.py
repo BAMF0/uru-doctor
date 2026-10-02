@@ -100,6 +100,27 @@ _ENVIRONMENT_CAUSES: frozenset[Cause] = frozenset(
     }
 )
 
+#: Failures the upgrader itself declared, as opposed to ones inferred from the
+#: conflict graph.
+#:
+#: Ranked below non-convergence and above the resolver roots, and both halves
+#: of that are deliberate.
+#:
+#: Above the roots, because the upgrader saying "I could not install this"
+#: is a statement about the ending, while a root is a statement about a
+#: decision apt made on the way there. A metapackage broken by one
+#: unsatisfiable dependency strands nothing, so ranking by blast radius buries
+#: it beneath roots apt had already resolved -- which is exactly what happened
+#: on LP#2168919, LP#2168863 and LP#2168909, three reports of one fault that
+#: came back with three different wrong causes.
+#:
+#: Below non-convergence, because a livelocked resolver *explains* why the
+#: metapackage could not be marked: apt never converged, so nothing it was
+#: asked to do succeeded. The livelock is the cause and the failed mark is its
+#: symptom. A root apt resolved and moved past explains nothing of the kind,
+#: which is why that comparison goes the other way.
+_UPGRADER_CONCLUSION_CAUSES: frozenset[Cause] = frozenset({Cause.META_PACKAGE_UNINSTALLABLE})
+
 #: Causes that can only explain a failure *before* dpkg ran.
 #:
 #: If the upgrade reached the end and wrote its packages, the resolver did its
@@ -114,7 +135,14 @@ _ENVIRONMENT_CAUSES: frozenset[Cause] = frozenset(
 #: of the Xorg proprietary-driver fixup, which is precisely the symptom. Ranked
 #: on blast radius alone, a sixteen-package holdback from a successful resolve
 #: displaced it.
-_PRE_COMMIT_ONLY_CAUSES: frozenset[Cause] = RESOLVER_CAUSES | {Cause.RESOLVER_LIVELOCK}
+#:
+#: ``META_PACKAGE_UNINSTALLABLE`` joins them because ``_installMetaPkgs`` runs
+#: long before dpkg does: if the upgrade went on to write packages, the
+#: metapackage was marked successfully and any earlier complaint about it
+#: belongs to a different attempt.
+_PRE_COMMIT_ONLY_CAUSES: frozenset[Cause] = (
+    RESOLVER_CAUSES | {Cause.RESOLVER_LIVELOCK} | _UPGRADER_CONCLUSION_CAUSES
+)
 
 
 def _upgrade_completed(run: UpgradeRun) -> bool:
@@ -157,6 +185,7 @@ _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
                 Cause.HOLDBACK_BLOCKS_NEW_DEP,
                 Cause.HELD_PACKAGE_BLOCKS_UPGRADE,
                 Cause.THIRD_PARTY_PIN,
+                Cause.META_PACKAGE_UNINSTALLABLE,
             }
         ),
     ),
@@ -168,6 +197,7 @@ _APT_ERROR_AFFINITY: tuple[tuple[str, frozenset[Cause]], ...] = (
                 Cause.TRANSITIONAL_BREAKS,
                 Cause.HOLDBACK_BLOCKS_NEW_DEP,
                 Cause.THIRD_PARTY_PIN,
+                Cause.META_PACKAGE_UNINSTALLABLE,
             }
         ),
     ),
@@ -210,11 +240,11 @@ ADVISORY_RULES: frozenset[str] = frozenset({"resolver.fragile-decision"})
 MAX_FINDINGS: int = 12
 
 
-def _is_resolver_finding(finding: Finding) -> bool:
-    """Whether a finding describes a decision apt made while planning.
+def _is_pre_commit_finding(finding: Finding) -> bool:
+    """Whether a finding can only describe something that happened before dpkg.
 
-    Tested structurally, by whether the finding came from a conflict graph,
-    rather than by enumerating causes. The cause list missed
+    Tested structurally where possible, by whether the finding came from a
+    conflict graph, rather than by enumerating causes. The cause list missed
     :attr:`Cause.UNKNOWN`, which ``apt.roots.classify`` returns for a root it
     cannot categorise: such a finding is produced by a resolver rule, carries a
     ``graph_index``, and is every bit as pre-commit as a classified one -- but
@@ -223,7 +253,9 @@ def _is_resolver_finding(finding: Finding) -> bool:
 
     ``graph_index`` is set only by the rules in
     :mod:`uru_doctor.rules.resolver`, so it is an exact marker rather than a
-    proxy.
+    proxy. The cause set catches the rest: a livelock, and the upgrader's own
+    metapackage complaint, both of which precede dpkg without coming from a
+    graph.
     """
     return finding.graph_index is not None or finding.cause in _PRE_COMMIT_ONLY_CAUSES
 
@@ -232,14 +264,14 @@ def _tier(finding: Finding, *, completed: bool = False) -> int:
     """Which band a finding sits in. Lower is more authoritative.
 
     ``completed`` marks a run that upgraded successfully, which demotes every
-    resolver finding: they describe decisions apt made on its way to a working
-    system, so they cannot explain a failure that happened afterwards.
+    pre-commit finding: they describe decisions apt made on its way to a
+    working system, so they cannot explain a failure that happened afterwards.
     """
     if finding.cause in CAVEAT_CAUSES:
         return 99
     if finding.rule in ADVISORY_RULES:
         return 50
-    if completed and _is_resolver_finding(finding):
+    if completed and _is_pre_commit_finding(finding):
         return 40
     if finding.cause in PRECONDITION_CAUSES:
         return 0
@@ -247,7 +279,9 @@ def _tier(finding: Finding, *, completed: bool = False) -> int:
         return 1
     if finding.cause in _NON_CONVERGENCE_CAUSES:
         return 2
-    return 3
+    if finding.cause in _UPGRADER_CONCLUSION_CAUSES:
+        return 3
+    return 4
 
 
 def _rank_key(

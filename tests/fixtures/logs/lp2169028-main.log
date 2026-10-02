@@ -1,0 +1,80 @@
+2026-09-30 14:59:54,917 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-09-30 14:59:54,917 INFO uname information: 'Linux redacted-host 6.8.0-142-generic #142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026 x86_64'
+2026-09-30 14:59:55,197 INFO apt version: '2.8.3'
+2026-09-30 14:59:55,197 INFO python version: '3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]'
+2026-09-30 14:59:55,202 INFO release-upgrader version '26.04.25' started
+2026-09-30 14:59:55,284 INFO locale: 'en_GB' 'UTF-8'
+2026-09-30 14:59:55,513 DEBUG Using 'DistUpgradeViewKDE' view
+2026-09-30 14:59:55,514 DEBUG enable dpkg --force-overwrite
+2026-09-30 14:59:55,536 ERROR failed to import AptClone
+2026-09-30 14:59:55,537 DEBUG Upgrading from noble to resolute
+2026-09-30 14:59:55,537 DEBUG _pythonSymlinkCheck run
+2026-09-30 14:59:55,537 DEBUG openCache()
+2026-09-30 14:59:55,538 DEBUG running Quirks.PreCacheOpen
+2026-09-30 14:59:55,912 DEBUG Comparing 6.8.0-139 with
+2026-09-30 14:59:55,912 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-30 14:59:55,967 DEBUG /openCache(), new cache size 92231
+2026-09-30 14:59:55,967 DEBUG need_server_mode(): run in 'desktop' mode, (because of key deps for 'kubuntu-desktop')
+2026-09-30 14:59:55,967 DEBUG checkViewDepends()
+2026-09-30 14:59:55,970 DEBUG running doUpdate() (showErrors=False)
+2026-09-30 14:59:57,282 DEBUG openCache()
+2026-09-30 14:59:57,644 DEBUG Comparing 6.8.0-139 with
+2026-09-30 14:59:57,644 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-30 14:59:57,702 DEBUG /openCache(), new cache size 92231
+2026-09-30 14:59:57,702 DEBUG doPostInitialUpdate
+2026-09-30 14:59:57,702 DEBUG running Quirks.PostInitialUpdate
+2026-09-30 14:59:57,703 DEBUG RVA23 check: No ISA information
+2026-09-30 14:59:57,961 DEBUG flatpak will NOT be marked as manually installed
+2026-09-30 14:59:58,848 DEBUG Snap bare is installed
+2026-09-30 14:59:58,848 DEBUG Snap bare is not tracking the release channel
+2026-09-30 14:59:59,066 DEBUG Snap brave is installed
+2026-09-30 14:59:59,066 DEBUG Snap brave is not tracking the release channel
+2026-09-30 14:59:59,247 DEBUG Snap core22 is installed
+2026-09-30 14:59:59,247 DEBUG Snap core22 is not tracking the release channel
+2026-09-30 14:59:59,469 DEBUG Snap core24 is installed
+2026-09-30 14:59:59,469 DEBUG Snap core24 is not tracking the release channel
+2026-09-30 14:59:59,740 DEBUG Snap core26 is installed
+2026-09-30 14:59:59,740 DEBUG Snap core26 is not tracking the release channel
+2026-09-30 14:59:59,910 DEBUG Snap cups is installed
+2026-09-30 14:59:59,910 DEBUG Snap cups is not tracking the release channel
+2026-09-30 15:00:00,096 DEBUG Snap gnome-42-2204 is installed
+2026-09-30 15:00:00,322 DEBUG Snap gnome-46-2404 is installed
+2026-09-30 15:00:00,322 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-09-30 15:00:00,603 DEBUG Snap gtk-common-themes is installed
+2026-09-30 15:00:01,098 DEBUG Snap hplip-printer-app is installed
+2026-09-30 15:00:01,098 DEBUG Snap hplip-printer-app is not tracking the release channel
+2026-09-30 15:00:01,826 DEBUG Snap mesa-2404 is installed
+2026-09-30 15:00:01,827 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-09-30 15:00:02,522 DEBUG Snap snapd is installed
+2026-09-30 15:00:02,522 DEBUG Snap snapd is not tracking the release channel
+2026-09-30 15:00:03,036 DEBUG Snap thunderbird is installed
+2026-09-30 15:00:03,037 DEBUG Snap thunderbird is not tracking the release channel
+2026-09-30 15:00:03,547 DEBUG Snap yt-dlp is installed
+2026-09-30 15:00:03,547 DEBUG Snap yt-dlp is not tracking the release channel
+2026-09-30 15:00:04,391 DEBUG MetaPkgs:
+2026-09-30 15:00:04,514 DEBUG Obsolete: libdvdcss-dev libdvdcss2 net.downloadhelper.coapp
+2026-09-30 15:00:04,523 DEBUG updateDeb822Sources()
+2026-09-30 15:00:04,524 DEBUG examining: 'Types: deb
+URIs: http://gb.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-30 15:00:04,524 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://gb.archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-09-30 15:00:04,524 DEBUG url_downloadable: http://gb.archive.ubuntu.com/ubuntu//dists/resolute/Release
+2026-09-30 15:00:04,524 DEBUG s='http' n='gb.archive.ubuntu.com' p='/ubuntu//dists/resolute/Release' q='' f=''
+2026-09-30 15:00:06,822 DEBUG url_downloadable: http://gb.archive.ubuntu.com/ubuntu//dists/resolute-updates/Release
+2026-09-30 15:00:06,822 DEBUG s='http' n='gb.archive.ubuntu.com' p='/ubuntu//dists/resolute-updates/Release' q='' f=''
+2026-09-30 15:00:07,339 DEBUG url_downloadable: http://gb.archive.ubuntu.com/ubuntu//dists/resolute-backports/Release
+2026-09-30 15:00:07,339 DEBUG s='http' n='gb.archive.ubuntu.com' p='/ubuntu//dists/resolute-backports/Release' q='' f=''
+2026-09-30 15:00:07,947 DEBUG running doUpdate() (showErrors=True)
+2026-09-30 15:00:11,470 DEBUG openCache()
+2026-09-30 15:00:11,827 DEBUG Comparing 6.8.0-139 with
+2026-09-30 15:00:11,827 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-30 15:00:11,882 DEBUG /openCache(), new cache size 84775
+2026-09-30 15:00:11,989 DEBUG Foreign (before rewriting sources):
+2026-09-30 15:00:11,989 DEBUG Foreign (after rewriting sources):
+2026-09-30 15:00:11,990 DEBUG running Quirks.PreDistUpgradeCache

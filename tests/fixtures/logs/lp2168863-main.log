@@ -1,0 +1,346 @@
+2026-09-29 11:17:16,102 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-09-29 11:17:16,102 INFO uname information: 'Linux redacted-host 6.8.1-060801-generic #202403151937 SMP PREEMPT_DYNAMIC Fri Mar 15 19:52:22 UTC 2024 x86_64'
+2026-09-29 11:17:16,405 INFO apt version: '2.8.3'
+2026-09-29 11:17:16,405 INFO python version: '3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]'
+2026-09-29 11:17:16,408 INFO release-upgrader version '26.04.25' started
+2026-09-29 11:17:16,459 INFO locale: 'es_AR' 'UTF-8'
+2026-09-29 11:17:16,559 DEBUG uiname is window_main
+2026-09-29 11:17:16,560 DEBUG toplevel widget is UpgraderMainWindow
+2026-09-29 11:17:16,560 DEBUG setting property geometry
+2026-09-29 11:17:16,560 DEBUG setting property windowTitle
+2026-09-29 11:17:16,560 DEBUG push UpgraderMainWindow window_main
+2026-09-29 11:17:16,561 DEBUG setting property pyuicMargins
+2026-09-29 11:17:16,561 DEBUG setting property pyuicSpacing
+2026-09-29 11:17:16,561 DEBUG push QGridLayout gridlayout
+2026-09-29 11:17:16,561 DEBUG setting property text
+2026-09-29 11:17:16,561 DEBUG push QPushButton showTerminalButton
+2026-09-29 11:17:16,561 DEBUG pop widget QPushButton showTerminalButton
+2026-09-29 11:17:16,561 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,562 DEBUG setting property text
+2026-09-29 11:17:16,562 DEBUG setting property wordWrap
+2026-09-29 11:17:16,562 DEBUG push QLabel label_status
+2026-09-29 11:17:16,562 DEBUG pop widget QLabel label_status
+2026-09-29 11:17:16,562 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,562 DEBUG setting property text
+2026-09-29 11:17:16,562 DEBUG setting property wordWrap
+2026-09-29 11:17:16,562 DEBUG push QLabel progress_text
+2026-09-29 11:17:16,562 DEBUG pop widget QLabel progress_text
+2026-09-29 11:17:16,562 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,562 DEBUG setting property pyuicSpacing
+2026-09-29 11:17:16,562 DEBUG push QGridLayout gridlayout1
+2026-09-29 11:17:16,562 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,563 DEBUG setting property text
+2026-09-29 11:17:16,563 DEBUG setting property wordWrap
+2026-09-29 11:17:16,563 DEBUG push QLabel image_step4
+2026-09-29 11:17:16,563 DEBUG pop widget QLabel image_step4
+2026-09-29 11:17:16,563 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,563 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,563 DEBUG setting property text
+2026-09-29 11:17:16,563 DEBUG setting property wordWrap
+2026-09-29 11:17:16,563 DEBUG push QLabel image_step2
+2026-09-29 11:17:16,563 DEBUG pop widget QLabel image_step2
+2026-09-29 11:17:16,564 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,564 DEBUG setting property text
+2026-09-29 11:17:16,564 DEBUG setting property wordWrap
+2026-09-29 11:17:16,564 DEBUG push QLabel label_step1
+2026-09-29 11:17:16,564 DEBUG pop widget QLabel label_step1
+2026-09-29 11:17:16,564 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,564 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,564 DEBUG setting property text
+2026-09-29 11:17:16,564 DEBUG setting property wordWrap
+2026-09-29 11:17:16,564 DEBUG push QLabel image_step1
+2026-09-29 11:17:16,564 DEBUG pop widget QLabel image_step1
+2026-09-29 11:17:16,564 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,564 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,564 DEBUG setting property text
+2026-09-29 11:17:16,564 DEBUG setting property wordWrap
+2026-09-29 11:17:16,564 DEBUG push QLabel image_step3
+2026-09-29 11:17:16,564 DEBUG pop widget QLabel image_step3
+2026-09-29 11:17:16,564 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,564 DEBUG setting property text
+2026-09-29 11:17:16,564 DEBUG setting property wordWrap
+2026-09-29 11:17:16,564 DEBUG push QLabel label_step3
+2026-09-29 11:17:16,564 DEBUG pop widget QLabel label_step3
+2026-09-29 11:17:16,564 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,564 DEBUG setting property text
+2026-09-29 11:17:16,564 DEBUG setting property wordWrap
+2026-09-29 11:17:16,564 DEBUG push QLabel label_step5
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel label_step5
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,565 DEBUG setting property text
+2026-09-29 11:17:16,565 DEBUG setting property wordWrap
+2026-09-29 11:17:16,565 DEBUG push QLabel label_step4
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel label_step4
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,565 DEBUG setting property text
+2026-09-29 11:17:16,565 DEBUG setting property wordWrap
+2026-09-29 11:17:16,565 DEBUG push QLabel label_step2
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel label_step2
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,565 DEBUG setting property text
+2026-09-29 11:17:16,565 DEBUG setting property wordWrap
+2026-09-29 11:17:16,565 DEBUG push QLabel label_step6
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel label_step6
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,565 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,565 DEBUG setting property text
+2026-09-29 11:17:16,565 DEBUG setting property wordWrap
+2026-09-29 11:17:16,565 DEBUG push QLabel image_step5
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel image_step5
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,565 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,565 DEBUG setting property text
+2026-09-29 11:17:16,565 DEBUG setting property wordWrap
+2026-09-29 11:17:16,565 DEBUG push QLabel image_step6
+2026-09-29 11:17:16,565 DEBUG pop widget QLabel image_step6
+2026-09-29 11:17:16,565 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,566 DEBUG pop layout QGridLayout gridlayout1
+2026-09-29 11:17:16,566 DEBUG setting property text
+2026-09-29 11:17:16,618 DEBUG setting property wordWrap
+2026-09-29 11:17:16,618 DEBUG push QLabel label_title
+2026-09-29 11:17:16,618 DEBUG pop widget QLabel label_title
+2026-09-29 11:17:16,618 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,618 DEBUG setting property frameShape
+2026-09-29 11:17:16,618 DEBUG setting property frameShadow
+2026-09-29 11:17:16,618 DEBUG push QFrame konsole_frame
+2026-09-29 11:17:16,618 DEBUG pop widget QFrame konsole_frame
+2026-09-29 11:17:16,618 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,618 DEBUG setting property sizePolicy
+2026-09-29 11:17:16,618 DEBUG setting property value
+2026-09-29 11:17:16,619 DEBUG push QProgressBar progressbar_cache
+2026-09-29 11:17:16,619 DEBUG pop widget QProgressBar progressbar_cache
+2026-09-29 11:17:16,619 DEBUG new topwidget <DistUpgrade.DistUpgradeViewKDE.UpgraderMainWindow object at 0x789548f68680>
+2026-09-29 11:17:16,619 DEBUG pop layout QGridLayout gridlayout
+2026-09-29 11:17:16,619 DEBUG pop widget UpgraderMainWindow window_main
+2026-09-29 11:17:16,619 DEBUG new topwidget None
+2026-09-29 11:17:16,802 DEBUG Using 'DistUpgradeViewKDE' view
+2026-09-29 11:17:16,803 DEBUG enable dpkg --force-overwrite
+2026-09-29 11:17:16,825 ERROR failed to import AptClone
+2026-09-29 11:17:16,825 DEBUG Upgrading from noble to resolute
+2026-09-29 11:17:16,826 DEBUG _pythonSymlinkCheck run
+2026-09-29 11:17:16,826 DEBUG openCache()
+2026-09-29 11:17:16,826 DEBUG running Quirks.PreCacheOpen
+2026-09-29 11:17:17,382 DEBUG Comparing unsigned-6.8.1-060801 with
+2026-09-29 11:17:17,460 DEBUG /openCache(), new cache size 92528
+2026-09-29 11:17:17,460 DEBUG need_server_mode(): run in 'desktop' mode, (because of key deps for 'kubuntu-desktop')
+2026-09-29 11:17:17,460 DEBUG checkViewDepends()
+2026-09-29 11:17:17,464 DEBUG running doUpdate() (showErrors=False)
+2026-09-29 11:17:19,012 DEBUG openCache()
+2026-09-29 11:17:19,569 DEBUG Comparing unsigned-6.8.1-060801 with
+2026-09-29 11:17:19,656 DEBUG /openCache(), new cache size 92528
+2026-09-29 11:17:19,656 DEBUG doPostInitialUpdate
+2026-09-29 11:17:19,657 DEBUG running Quirks.PostInitialUpdate
+2026-09-29 11:17:19,657 DEBUG RVA23 check: No ISA information
+2026-09-29 11:17:20,007 DEBUG flatpak will be marked as manually installed
+2026-09-29 11:17:20,028 DEBUG plasma-discover-backend-flatpak will be marked as manually installed
+2026-09-29 11:17:20,048 INFO cache.commit()
+2026-09-29 11:17:20,064 DEBUG  fork pid is: 5285
+2026-09-29 11:17:20,065 DEBUG  fork pid is: 0
+2026-09-29 11:17:25,340 DEBUG Snap bare is installed
+2026-09-29 11:17:25,340 DEBUG Snap bare is not tracking the release channel
+2026-09-29 11:17:26,011 DEBUG Snap canonical-livepatch is installed
+2026-09-29 11:17:26,011 DEBUG Snap canonical-livepatch is not tracking the release channel
+2026-09-29 11:17:26,428 DEBUG Snap code is installed
+2026-09-29 11:17:26,428 DEBUG Snap code is not tracking the release channel
+2026-09-29 11:17:26,879 DEBUG Snap core is installed
+2026-09-29 11:17:26,879 DEBUG Snap core is not tracking the release channel
+2026-09-29 11:17:27,315 DEBUG Snap core18 is installed
+2026-09-29 11:17:27,315 DEBUG Snap core18 is not tracking the release channel
+2026-09-29 11:17:27,810 DEBUG Snap core20 is installed
+2026-09-29 11:17:27,811 DEBUG Snap core20 is not tracking the release channel
+2026-09-29 11:17:28,358 DEBUG Snap core22 is installed
+2026-09-29 11:17:28,358 DEBUG Snap core22 is not tracking the release channel
+2026-09-29 11:17:28,994 DEBUG Snap core24 is installed
+2026-09-29 11:17:28,994 DEBUG Snap core24 is not tracking the release channel
+2026-09-29 11:17:29,484 DEBUG Snap cups is installed
+2026-09-29 11:17:29,484 DEBUG Snap cups is not tracking the release channel
+2026-09-29 11:17:30,010 DEBUG Snap dotnet-runtime-50 is installed
+2026-09-29 11:17:30,010 DEBUG Snap dotnet-runtime-50 is not tracking the release channel
+2026-09-29 11:17:30,637 DEBUG Snap firefox is installed
+2026-09-29 11:17:30,637 DEBUG Snap firefox is not tracking the release channel
+2026-09-29 11:17:31,186 DEBUG Snap gnome-3-28-1804 is installed
+2026-09-29 11:17:31,186 DEBUG Snap gnome-3-28-1804 is not tracking the release channel
+2026-09-29 11:17:31,596 DEBUG Snap gnome-3-34-1804 is installed
+2026-09-29 11:17:31,596 DEBUG Snap gnome-3-34-1804 is not tracking the release channel
+2026-09-29 11:17:32,072 DEBUG Snap gnome-3-38-2004 is installed
+2026-09-29 11:17:32,072 DEBUG Snap gnome-3-38-2004 is not tracking the release channel
+2026-09-29 11:17:32,552 DEBUG Snap gnome-42-2204 is installed
+2026-09-29 11:17:32,552 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-09-29 11:17:33,001 DEBUG Snap gnome-46-2404 is installed
+2026-09-29 11:17:33,001 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-09-29 11:17:33,780 DEBUG Snap gtk-common-themes is installed
+2026-09-29 11:17:33,781 DEBUG Snap gtk-common-themes is not tracking the release channel
+2026-09-29 11:17:34,243 DEBUG Snap gtk2-common-themes is installed
+2026-09-29 11:17:34,243 DEBUG Snap gtk2-common-themes is not tracking the release channel
+2026-09-29 11:17:34,755 DEBUG Snap home-media-server is installed
+2026-09-29 11:17:34,755 DEBUG Snap home-media-server is not tracking the release channel
+2026-09-29 11:17:35,263 DEBUG Snap icon-theme-breeze is installed
+2026-09-29 11:17:35,263 DEBUG Snap icon-theme-breeze is not tracking the release channel
+2026-09-29 11:17:35,698 DEBUG Snap icon-theme-papirus is installed
+2026-09-29 11:17:35,698 DEBUG Snap icon-theme-papirus is not tracking the release channel
+2026-09-29 11:17:36,153 DEBUG Snap kde-frameworks-5-98-qt-5-15-6-core20 is installed
+2026-09-29 11:17:36,153 DEBUG Snap kde-frameworks-5-98-qt-5-15-6-core20 is not tracking the release channel
+2026-09-29 11:17:36,561 DEBUG Snap kde-frameworks-5-core18 is installed
+2026-09-29 11:17:36,561 DEBUG Snap kde-frameworks-5-core18 is not tracking the release channel
+2026-09-29 11:17:36,981 DEBUG Snap kde-frameworks-5-qt-5-14-core18 is installed
+2026-09-29 11:17:36,981 DEBUG Snap kde-frameworks-5-qt-5-14-core18 is not tracking the release channel
+2026-09-29 11:17:37,401 DEBUG Snap kf5-5-104-qt-5-15-8-core22 is installed
+2026-09-29 11:17:37,401 DEBUG Snap kf5-5-104-qt-5-15-8-core22 is not tracking the release channel
+2026-09-29 11:17:37,794 DEBUG Snap kf5-5-106-qt-5-15-9-core22 is installed
+2026-09-29 11:17:37,794 DEBUG Snap kf5-5-106-qt-5-15-9-core22 is not tracking the release channel
+2026-09-29 11:17:38,206 DEBUG Snap matroska-tools is installed
+2026-09-29 11:17:38,207 DEBUG Snap matroska-tools is not tracking the release channel
+2026-09-29 11:17:38,720 DEBUG Snap mesa-2404 is installed
+2026-09-29 11:17:38,720 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-09-29 11:17:39,288 DEBUG Snap onlyoffice-desktopeditors is installed
+2026-09-29 11:17:39,288 DEBUG Snap onlyoffice-desktopeditors is not tracking the release channel
+2026-09-29 11:17:39,780 DEBUG Snap qt5-core20 is installed
+2026-09-29 11:17:39,780 DEBUG Snap qt5-core20 is not tracking the release channel
+2026-09-29 11:17:40,252 DEBUG Snap snap-store is installed
+2026-09-29 11:17:40,252 DEBUG Snap snap-store is not tracking the release channel
+2026-09-29 11:17:40,810 DEBUG Snap snapd is installed
+2026-09-29 11:17:40,810 DEBUG Snap snapd is not tracking the release channel
+2026-09-29 11:17:41,372 DEBUG Snap snapd-desktop-integration is installed
+2026-09-29 11:17:41,372 DEBUG Snap snapd-desktop-integration is not tracking the release channel
+2026-09-29 11:17:41,838 DEBUG Snap telegram-desktop is installed
+2026-09-29 11:17:41,838 DEBUG Snap telegram-desktop is not tracking the release channel
+2026-09-29 11:17:42,312 DEBUG Snap webkitgtk-6-gnome-2204 is installed
+2026-09-29 11:17:42,312 DEBUG Snap webkitgtk-6-gnome-2204 is not tracking the release channel
+2026-09-29 11:17:42,783 DEBUG Snap webkitgtk-6-gnome-2404 is installed
+2026-09-29 11:17:42,783 DEBUG Snap webkitgtk-6-gnome-2404 is not tracking the release channel
+2026-09-29 11:17:43,203 DEBUG Snap wine-platform-5-stable is installed
+2026-09-29 11:17:43,203 DEBUG Snap wine-platform-5-stable is not tracking the release channel
+2026-09-29 11:17:43,652 DEBUG Snap wine-platform-runtime is installed
+2026-09-29 11:17:43,652 DEBUG Snap wine-platform-runtime is not tracking the release channel
+2026-09-29 11:17:44,553 DEBUG MetaPkgs:
+2026-09-29 11:17:44,715 DEBUG Obsolete: acpi-support adobe-flash-properties-kde anydesk balena-etcher binance bluegriffon cin cloudflared cpdb-backend-gcp cryptowatch dgen:i386 dolphin-megasync gcc-8-base gconf-service gconf-service-backend gconf2 gconf2-common getlibs handbrake-gtk libaio1 libappindicator1 libavcodec58 libavdevice58 libavfilter-extra7 libavformat58 libavutil56 libcodec2-1.0 libcpdb-libs-common1 libdav1d5 libdbusmenu-gtk4 libfdk-aac1 libffi7 libffi7:i386 libflac8 libgconf-2-4 libicu60 libicu70 libieee1284-3 libjavascriptcoregtk-1.0-0 libldap-2.5-0 libllvm10:i386 libllvm12 libmlt7-data libmpv1 libmujs1 libncurses5 libneon27-gnutls libpgm-5.3-0 libplacebo192 libpostproc55 libprocps8 libqt6concurrent6 libreadline5 libreoffice-pdfimport librest-0.7-0 libruby2.7 libruby3.0 libsepol1 libsrt1.4-gnutls libssl1.1 libswresample3 libswscale5 libtesseract4 libtiff5 libtinfo5 libvkd3d-shader1:i386 libvpx6 libvpx7 libwxbase3.0-0v5 libwxgtk3.0-0v5 libx264-155 libx264-163 libzzip-0-13 linux-headers-6.8.1-060801 linux-image-unsigned-6.8.1-060801-generic linux-modules-6.8.1-060801-generic mainline megasync melt-7 microsoft-edge-stable mime-support obsidian ocs-url packages-microsoft-prod pdfsam-basic pencil qemu spotiflyer steam-launcher steam-libs-amd64 teamviewer ubuntu-cleaner ubuntu-system-service unetbootin unetbootin-translations urserver vkd3d-compiler:i386 windows95 youtube-dl zoom
+2026-09-29 11:17:44,716 DEBUG migrateToDeb822Sources()
+2026-09-29 11:17:44,717 DEBUG Could not migrate deb [arch=amd64 signed-by=/etc/apt/keyrings/google.asc] http://dl.google.com/linux/chrome/deb/ stable main from /etc/apt/sources.list.d/google.list, disabling instead.
+2026-09-29 11:17:44,718 DEBUG Could not migrate # deb [signed-by=/etc/apt/keyrings/boot-repair.gpg] https://ppa.launchpadcontent.net/yannubuntu/boot-repair/ubuntu noble main from /etc/apt/sources.list.d/boot-repair.list, disabling instead.
+2026-09-29 11:17:44,718 DEBUG updateDeb822Sources()
+2026-09-29 11:17:44,719 DEBUG examining: 'Types: deb
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: noble noble-updates
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 11:17:44,720 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: resolute resolute-updates
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-09-29 11:17:44,720 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute/Release
+2026-09-29 11:17:44,720 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute/Release' q='' f=''
+2026-09-29 11:17:45,268 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute-updates/Release
+2026-09-29 11:17:45,268 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute-updates/Release' q='' f=''
+2026-09-29 11:17:45,738 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 11:17:45,739 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/kubuntu-ppa/ppa/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mI0ESgMYswEEAOzc0ePR1UkVIg9dZZgl6exOQlr+pAoDIrlEmv1WX977Ciwh9GI6
+ g2KMf3Ci8DY2jluksPyNWlAtG9rls0NvFyqWkRnRm68Tm8jy+/X7LTfz1YIixoO6
+ xq+8i8YfXoWg0ZaJ0MjRm2s+jxZmcx199kLC3CL7sS0ui6ZOzXpuMn7FABEBAAGw
+ DAAAZ3BnAQAAAAAAALQZTGF1bmNocGFkIEt1YnVudHUgVXBkYXRlc7AMAABncGcC
+ AAAAAAAAiLYEEwECACAFAkoDGLMCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAK
+ CRAoNssKisk/etPNBADK8sHz2ZBGuNkTo5un4ieoZTSOLpoqiddVb5ssuz5BRWqc
+ 46RavXSGEZJNtz2r00U/ZymvezfIxvhH+B6S368YwG+avnuwI98pBKjXEFl6SaaW
+ NE0UA4kzIASSs93S4Ehxb0ZPEa+hSNYvGY55ExiXe2H5Mp8oQOgAhB1Qwy8PrLAG
+ AANncGcAiEYEEBECAAYFAkpO53cACgkQIhyVzoM62tOy5QCbB/C5Lk/Ry5kyHrm0
+ GzB4XzbEtZ8AoJWniuytagca0u5EyKKjTzpqA3VzsAYAAGdwZwCIRgQQEQIABgUC
+ St/rpAAKCRD2LeRNjujH0HwOAJ0XFU1UoQgwClQkPLU90pkdLvA+FgCeIrIVd+ko
+ SGs7VmSuWCqwkh7Ma6uwBgAAZ3BnAIhGBBARAgAGBQJNHKe5AAoJEGBwsJDfG93T
+ BwoAn0jbFn23GqcXeckIzgiuHaSSP6CEAKCB/2Ov6OLWR/PjImN3QZpwcKkjo7AG
+ AABncGcAiQGcBBEBCgAGBQJOqaJSAAoJEKDyE/FG61gfH/sL+gNkhFZHQJDJOi3N
+ OWctFEw3jWg8SV2L69Fg7F7LY8O1IwJ4mw2Gxqj895fQw8f8eiQ/G8vOJcVYXSj0
+ dRn84a0Z6jKm76BQpA+8mFmoNAR23FxS3dYVa9IIb7yXF7PmzUW10jEpVHuq36N/
+ s2Alz8OwIXeLkKgzsI1rAZxBxAA2CsUJf8YFrAKJ8d3YVBP/Jt3lEA9g157b0TdR
+ Df4WfeqbX8heJRlAKMn9irEjs7xYz3CLb/wyAUWePNSecWiDgFvtArPDa5G3vhN4
+ jINvyeDceA47A8FhZqIl3Ux77FU+eObdkNiRnomRzfKrOUAtZF9UMId1r5rqMJ3o
+ oEdxsDlUoa5O8PAMJtNSRb/C1HggO2UrmBxlMGF03YzHo2IiUTeEgyRSfS7RpFdK
+ 7ypJqKhNb7hsIlUD7znNx/G7ONc43lPe486OKA1JR3yDD8wgDYGOYywkwyqOvvRY
+ T6tQzscRSXIGR6UQLMSITpwFQplGqMrAkzP3grr1KSNsx0PGCrAGAABncGcA
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-09-29 11:17:45,742 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/kubuntu-ppa/ppa/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mI0ESgMYswEEAOzc0ePR1UkVIg9dZZgl6exOQlr+pAoDIrlEmv1WX977Ciwh9GI6
+ g2KMf3Ci8DY2jluksPyNWlAtG9rls0NvFyqWkRnRm68Tm8jy+/X7LTfz1YIixoO6
+ xq+8i8YfXoWg0ZaJ0MjRm2s+jxZmcx199kLC3CL7sS0ui6ZOzXpuMn7FABEBAAGw
+ DAAAZ3BnAQAAAAAAALQZTGF1bmNocGFkIEt1YnVudHUgVXBkYXRlc7AMAABncGcC
+ AAAAAAAAiLYEEwECACAFAkoDGLMCGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAK
+ CRAoNssKisk/etPNBADK8sHz2ZBGuNkTo5un4ieoZTSOLpoqiddVb5ssuz5BRWqc
+ 46RavXSGEZJNtz2r00U/ZymvezfIxvhH+B6S368YwG+avnuwI98pBKjXEFl6SaaW
+ NE0UA4kzIASSs93S4Ehxb0ZPEa+hSNYvGY55ExiXe2H5Mp8oQOgAhB1Qwy8PrLAG
+ AANncGcAiEYEEBECAAYFAkpO53cACgkQIhyVzoM62tOy5QCbB/C5Lk/Ry5kyHrm0
+ GzB4XzbEtZ8AoJWniuytagca0u5EyKKjTzpqA3VzsAYAAGdwZwCIRgQQEQIABgUC
+ St/rpAAKCRD2LeRNjujH0HwOAJ0XFU1UoQgwClQkPLU90pkdLvA+FgCeIrIVd+ko
+ SGs7VmSuWCqwkh7Ma6uwBgAAZ3BnAIhGBBARAgAGBQJNHKe5AAoJEGBwsJDfG93T
+ BwoAn0jbFn23GqcXeckIzgiuHaSSP6CEAKCB/2Ov6OLWR/PjImN3QZpwcKkjo7AG
+ AABncGcAiQGcBBEBCgAGBQJOqaJSAAoJEKDyE/FG61gfH/sL+gNkhFZHQJDJOi3N
+ OWctFEw3jWg8SV2L69Fg7F7LY8O1IwJ4mw2Gxqj895fQw8f8eiQ/G8vOJcVYXSj0
+ dRn84a0Z6jKm76BQpA+8mFmoNAR23FxS3dYVa9IIb7yXF7PmzUW10jEpVHuq36N/
+ s2Alz8OwIXeLkKgzsI1rAZxBxAA2CsUJf8YFrAKJ8d3YVBP/Jt3lEA9g157b0TdR
+ Df4WfeqbX8heJRlAKMn9irEjs7xYz3CLb/wyAUWePNSecWiDgFvtArPDa5G3vhN4
+ jINvyeDceA47A8FhZqIl3Ux77FU+eObdkNiRnomRzfKrOUAtZF9UMId1r5rqMJ3o
+ oEdxsDlUoa5O8PAMJtNSRb/C1HggO2UrmBxlMGF03YzHo2IiUTeEgyRSfS7RpFdK
+ 7ypJqKhNb7hsIlUD7znNx/G7ONc43lPe486OKA1JR3yDD8wgDYGOYywkwyqOvvRY
+ T6tQzscRSXIGR6UQLMSITpwFQplGqMrAkzP3grr1KSNsx0PGCrAGAABncGcA
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 11:17:45,743 DEBUG running doUpdate() (showErrors=True)
+2026-09-29 11:17:50,621 DEBUG openCache()
+2026-09-29 11:17:51,111 DEBUG Comparing unsigned-6.8.1-060801 with
+2026-09-29 11:17:51,174 DEBUG /openCache(), new cache size 84869
+2026-09-29 11:17:51,335 DEBUG Foreign (before rewriting sources): 7zip bleachbit catdoc ffmpeg fig2dev flatpak freerdp2-x11 gdal-bin gdal-data gdal-plugins gimp gimp-data google-chrome-stable gstreamer1.0-plugins-bad imagemagick imagemagick-6-common imagemagick-6.q16 iperf3 konsole konsole-kpart libass9 libavcodec-dev libavcodec-extra60 libavdevice60 libavfilter-dev libavfilter-extra libavfilter-extra9 libavformat-dev libavformat60 libavutil-dev libavutil58 libbotan-2-19 libcjson1 libflatpak0 libfreerdp-client2-2t64 libfreerdp2-2t64 libgdal34t64 libgimp2.0t64 libglut3.12 libgstreamer-plugins-bad1.0-0 libimage-magick-perl libimage-magick-q16-perl libiperf0 libmagick++-6.q16-9t64 libmagickcore-6.q16-7-extra libmagickcore-6.q16-7t64 libmagickwand-6.q16-7t64 libmbedcrypto7t64 libmbedtls14t64 libmbedx509-1t64 libopenexr-3-1-30 libpostproc-dev libpostproc57 libqt5concurrent5t64 libqt5core5t64 libqt5dbus5t64 libqt5gui5t64 libqt5network5t64 libqt5opengl5t64 libqt5printsupport5t64 libqt5qml5 libqt5qmlmodels5 libqt5qmlworkerscript5 libqt5quick5 libqt5quickshapes5 libqt5quickwidgets5 libqt5sql5-mysql libqt5sql5-sqlite libqt5sql5t64 libqt5test5t64 libqt5webengine-data libqt5webengine5 libqt5webenginecore5 libqt5webenginewidgets5 libqt5widgets5t64 libqt5xml5t64 libsrt1.5-gnutls libsrt1.5-openssl libswresample-dev libswresample4 libswscale-dev libswscale7 liburiparser1 libvlc-bin libvlc5 libvlccore9 libwinpr2-2t64 libzvbi-common libzvbi0t64 mupdf-tools python3-gdal python3-pip python3-pip-whl python3-wheel qml-module-qt-labs-folderlistmodel qml-module-qt-labs-qmlmodels qml-module-qt-labs-settings qml-module-qtqml qml-module-qtqml-models2 qml-module-qtquick-layouts qml-module-qtquick-shapes qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtwebengine qt5-gtk-platformtheme steam-libs-i386:i386 vlc vlc-bin vlc-data vlc-l10n vlc-plugin-access-extra vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization xrdp
+2026-09-29 11:17:51,336 DEBUG Foreign (after rewriting sources):
+2026-09-29 11:17:51,336 DEBUG running Quirks.PreDistUpgradeCache
+2026-09-29 11:17:51,336 INFO Quirk: Marking 'libfile-libmagic-perl' for install to prevent dependency deadlock.
+2026-09-29 11:17:51,969 DEBUG none of the '['ubuntu-desktop', 'kubuntu-desktop', 'xubuntu-core', 'xubuntu-desktop', 'ubuntustudio-desktop', 'ubuntustudio-desktop-core', 'lubuntu-desktop', 'ubuntu-gnome-desktop', 'ubuntu-mate-core', 'ubuntu-mate-desktop', 'ubuntukylin-desktop', 'ubuntu-budgie-desktop', 'ubuntu-unity-desktop']' meta-pkgs installed
+2026-09-29 11:17:51,969 DEBUG guessing 'kubuntu-desktop' as missing meta-pkg
+2026-09-29 11:17:52,671 DEBUG marked_install: 'kubuntu-desktop' -> 'True'
+2026-09-29 11:17:53,436 DEBUG uiname is dialog_error
+2026-09-29 11:17:53,436 DEBUG toplevel widget is QDialog
+2026-09-29 11:17:53,436 DEBUG setting property geometry
+2026-09-29 11:17:53,436 DEBUG setting property sizePolicy
+2026-09-29 11:17:53,436 DEBUG setting property windowTitle
+2026-09-29 11:17:53,436 DEBUG setting property modal
+2026-09-29 11:17:53,436 DEBUG push QDialog dialog_error
+2026-09-29 11:17:53,436 DEBUG setting property pyuicMargins
+2026-09-29 11:17:53,437 DEBUG setting property pyuicSpacing
+2026-09-29 11:17:53,437 DEBUG push QVBoxLayout verticalLayout
+2026-09-29 11:17:53,437 DEBUG setting property pyuicSpacing
+2026-09-29 11:17:53,437 DEBUG push QHBoxLayout horizontalLayout
+2026-09-29 11:17:53,437 DEBUG setting property sizePolicy
+2026-09-29 11:17:53,437 DEBUG setting property text
+2026-09-29 11:17:53,437 DEBUG setting property pixmap
+2026-09-29 11:17:53,442 DEBUG setting property wordWrap
+2026-09-29 11:17:53,442 DEBUG push QLabel image
+2026-09-29 11:17:53,442 DEBUG pop widget QLabel image
+2026-09-29 11:17:53,442 DEBUG new topwidget <PyQt5.QtWidgets.QDialog object at 0x78952d7cb1d0>
+2026-09-29 11:17:53,442 DEBUG setting property sizePolicy
+2026-09-29 11:17:53,442 DEBUG setting property text
+2026-09-29 11:17:53,442 DEBUG setting property wordWrap
+2026-09-29 11:17:53,442 DEBUG push QLabel label_error
+2026-09-29 11:17:53,443 DEBUG pop widget QLabel label_error
+2026-09-29 11:17:53,443 DEBUG new topwidget <PyQt5.QtWidgets.QDialog object at 0x78952d7cb1d0>
+2026-09-29 11:17:53,443 DEBUG pop layout QHBoxLayout horizontalLayout
+2026-09-29 11:17:53,443 DEBUG setting property openExternalLinks
+2026-09-29 11:17:53,443 DEBUG push QTextBrowser textview_error
+2026-09-29 11:17:53,443 DEBUG pop widget QTextBrowser textview_error
+2026-09-29 11:17:53,443 DEBUG new topwidget <PyQt5.QtWidgets.QDialog object at 0x78952d7cb1d0>
+2026-09-29 11:17:53,443 DEBUG setting property standardButtons
+2026-09-29 11:17:53,450 DEBUG push QDialogButtonBox buttonBox
+2026-09-29 11:17:53,450 DEBUG pop widget QDialogButtonBox buttonBox
+2026-09-29 11:17:53,450 DEBUG new topwidget <PyQt5.QtWidgets.QDialog object at 0x78952d7cb1d0>
+2026-09-29 11:17:53,450 DEBUG pop layout QVBoxLayout verticalLayout
+2026-09-29 11:17:53,450 DEBUG pop widget QDialog dialog_error
+2026-09-29 11:17:53,450 DEBUG new topwidget None

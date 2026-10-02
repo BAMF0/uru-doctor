@@ -1,0 +1,146 @@
+2026-04-25 18:18:44,418 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-04-25 18:18:44,418 INFO uname information: 'Linux redacted-host 6.17.0-22-generic #22-Ubuntu SMP PREEMPT_DYNAMIC Fri Mar 13 12:04:44 UTC 2026 x86_64'
+2026-04-25 18:18:44,761 INFO apt version: '3.1.6ubuntu2'
+2026-04-25 18:18:44,761 INFO python version: '3.13.7 (main, Mar  3 2026, 12:19:54) [GCC 15.2.0]'
+2026-04-25 18:18:44,763 INFO release-upgrader version '26.04.18' started
+2026-04-25 18:18:44,766 INFO locale: 'en_US' 'UTF-8'
+2026-04-25 18:18:44,815 DEBUG Using 'DistUpgradeViewText' view
+2026-04-25 18:18:44,817 DEBUG enable dpkg --force-overwrite
+2026-04-25 18:18:44,870 ERROR failed to import AptClone
+2026-04-25 18:18:44,871 DEBUG Upgrading from questing to resolute
+2026-04-25 18:18:44,871 DEBUG _pythonSymlinkCheck run
+2026-04-25 18:18:44,871 DEBUG openCache()
+2026-04-25 18:18:44,871 DEBUG running Quirks.PreCacheOpen
+2026-04-25 18:18:45,466 DEBUG Comparing 6.17.0-20 with
+2026-04-25 18:18:45,466 DEBUG Comparing 6.17.0-22 with 6.17.0-20
+2026-04-25 18:18:45,537 DEBUG /openCache(), new cache size 80639
+2026-04-25 18:18:45,538 DEBUG need_server_mode(): can not find a desktop meta package or key deps, running in server mode
+2026-04-25 18:18:45,538 DEBUG checkViewDepends()
+2026-04-25 18:18:45,539 DEBUG running doUpdate() (showErrors=False)
+2026-04-25 18:18:52,114 DEBUG openCache()
+2026-04-25 18:18:54,061 DEBUG Comparing 6.17.0-20 with
+2026-04-25 18:18:54,061 DEBUG Comparing 6.17.0-22 with 6.17.0-20
+2026-04-25 18:18:54,144 DEBUG /openCache(), new cache size 80639
+2026-04-25 18:18:54,144 DEBUG doPostInitialUpdate
+2026-04-25 18:18:54,144 DEBUG running Quirks.PostInitialUpdate
+2026-04-25 18:18:54,145 DEBUG RVA23 check: No ISA information
+2026-04-25 18:18:54,547 DEBUG flatpak will be marked as manually installed
+2026-04-25 18:18:54,580 DEBUG gnome-software-plugin-flatpak will be marked as manually installed
+2026-04-25 18:18:54,613 INFO cache.commit()
+2026-04-25 18:18:59,924 DEBUG Snap bare is installed
+2026-04-25 18:18:59,924 DEBUG Snap bare is not tracking the release channel
+2026-04-25 18:19:00,345 DEBUG Snap bitwarden is installed
+2026-04-25 18:19:00,345 DEBUG Snap bitwarden is not tracking the release channel
+2026-04-25 18:19:00,801 DEBUG Snap chromium is installed
+2026-04-25 18:19:00,801 DEBUG Snap chromium is not tracking the release channel
+2026-04-25 18:19:01,175 DEBUG Snap code is installed
+2026-04-25 18:19:01,175 DEBUG Snap code is not tracking the release channel
+2026-04-25 18:19:01,605 DEBUG Snap core18 is installed
+2026-04-25 18:19:01,605 DEBUG Snap core18 is not tracking the release channel
+2026-04-25 18:19:02,021 DEBUG Snap core20 is installed
+2026-04-25 18:19:02,022 DEBUG Snap core20 is not tracking the release channel
+2026-04-25 18:19:02,526 DEBUG Snap core22 is installed
+2026-04-25 18:19:02,527 DEBUG Snap core22 is not tracking the release channel
+2026-04-25 18:19:02,861 DEBUG Snap core24 is installed
+2026-04-25 18:19:02,862 DEBUG Snap core24 is not tracking the release channel
+2026-04-25 18:19:03,365 DEBUG Snap cups is installed
+2026-04-25 18:19:03,365 DEBUG Snap cups is not tracking the release channel
+2026-04-25 18:19:03,757 DEBUG Snap dust is installed
+2026-04-25 18:19:03,757 DEBUG Snap dust is not tracking the release channel
+2026-04-25 18:19:04,268 DEBUG Snap firefox is installed
+2026-04-25 18:19:04,268 DEBUG Snap firefox is not tracking the release channel
+2026-04-25 18:19:04,588 DEBUG Snap foliate is installed
+2026-04-25 18:19:04,588 DEBUG Snap foliate is not tracking the release channel
+2026-04-25 18:19:04,981 DEBUG Snap gnome-3-28-1804 is installed
+2026-04-25 18:19:04,981 DEBUG Snap gnome-3-28-1804 is not tracking the release channel
+2026-04-25 18:19:05,315 DEBUG Snap gnome-3-38-2004 is installed
+2026-04-25 18:19:05,316 DEBUG Snap gnome-3-38-2004 is not tracking the release channel
+2026-04-25 18:19:05,648 DEBUG Snap gnome-42-2204 is installed
+2026-04-25 18:19:05,949 DEBUG Snap gnome-46-2404 is installed
+2026-04-25 18:19:05,950 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-04-25 18:19:06,249 DEBUG Snap gtk-common-themes is installed
+2026-04-25 18:19:06,570 DEBUG Snap gtk-theme-pocillo is installed
+2026-04-25 18:19:06,570 DEBUG Snap gtk-theme-pocillo is not tracking the release channel
+2026-04-25 18:19:06,877 DEBUG Snap kf6-core24 is installed
+2026-04-25 18:19:06,877 DEBUG Snap kf6-core24 is not tracking the release channel
+2026-04-25 18:19:07,211 DEBUG Snap mesa-2404 is installed
+2026-04-25 18:19:07,211 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-04-25 18:19:07,643 DEBUG Snap signal-desktop is installed
+2026-04-25 18:19:07,643 DEBUG Snap signal-desktop is not tracking the release channel
+2026-04-25 18:19:08,157 DEBUG Snap snapd is installed
+2026-04-25 18:19:08,157 DEBUG Snap snapd is not tracking the release channel
+2026-04-25 18:19:08,467 DEBUG Snap snapd-desktop-integration is installed
+2026-04-25 18:19:08,785 DEBUG Snap spotify is installed
+2026-04-25 18:19:08,785 DEBUG Snap spotify is not tracking the release channel
+2026-04-25 18:19:09,183 DEBUG Snap sttr is installed
+2026-04-25 18:19:09,183 DEBUG Snap sttr is not tracking the release channel
+2026-04-25 18:19:09,510 DEBUG Snap thunderbird is installed
+2026-04-25 18:19:09,510 DEBUG Snap thunderbird is not tracking the release channel
+2026-04-25 18:19:09,845 DEBUG Snap ubuntu-budgie-welcome is installed
+2026-04-25 18:19:10,158 DEBUG Snap webkitgtk-6-gnome-2204 is installed
+2026-04-25 18:19:10,159 DEBUG Snap webkitgtk-6-gnome-2204 is not tracking the release channel
+2026-04-25 18:19:10,505 DEBUG Snap webkitgtk-6-gnome-2404 is installed
+2026-04-25 18:19:10,505 DEBUG Snap webkitgtk-6-gnome-2404 is not tracking the release channel
+2026-04-25 18:19:11,392 DEBUG MetaPkgs:
+2026-04-25 18:19:11,560 DEBUG Obsolete: budgie-analogue-clock-applet budgie-calendar-applet budgie-carbon-tray-applet budgie-clipboard-applet budgie-cpufreq-applet budgie-cputemp-applet budgie-lightpad-applet budgie-media-player-applet budgie-performance-gauge-applet budgie-pixel-saver-applet budgie-sys-monitor-applet budgie-sysmonitor-applet budgie-user-indicator-redux-applet libgdk-pixbuf2.0-0 lightpad sshpilot synaptics-repository-keyring tailscale tailscale-archive-keyring teamviewer
+2026-04-25 18:19:11,562 DEBUG updateDeb822Sources()
+2026-04-25 18:19:11,563 DEBUG upgrade to development release, disabling proposed
+2026-04-25 18:19:11,563 DEBUG examining: 'Suites: librewolf
+Architectures: amd64 arm64
+Components: main
+Uris: https://repo.librewolf.net
+Types: deb
+Signed-By: /var/lib/extrepo/keys/librewolf.asc'
+2026-04-25 18:19:11,564 DEBUG entry 'Suites: librewolf
+Architectures: amd64 arm64
+Components: main
+Uris: https://repo.librewolf.net
+Types: deb
+Signed-By: /var/lib/extrepo/keys/librewolf.asc
+Enabled: no' was disabled (unknown mirror)
+2026-04-25 18:19:11,564 DEBUG upgrade to development release, disabling proposed
+2026-04-25 18:19:11,564 DEBUG examining: 'Types: deb
+URIs: https://download.sublimetext.com/
+Suites: apt/dev/
+Signed-By: /etc/apt/keyrings/sublimehq-pub.asc'
+2026-04-25 18:19:11,565 DEBUG entry 'Types: deb
+URIs: https://download.sublimetext.com/
+Suites: apt/dev/
+Signed-By: /etc/apt/keyrings/sublimehq-pub.asc
+Enabled: no' was disabled (unknown mirror)
+2026-04-25 18:19:11,565 DEBUG upgrade to development release, disabling proposed
+2026-04-25 18:19:11,566 DEBUG examining: 'Types: deb
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: questing-updates questing
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 18:19:11,566 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: resolute resolute-updates
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-04-25 18:19:11,566 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute/Release
+2026-04-25 18:19:11,566 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute/Release' q='' f=''
+2026-04-25 18:19:11,772 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute-updates/Release
+2026-04-25 18:19:11,772 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute-updates/Release' q='' f=''
+2026-04-25 18:19:11,959 DEBUG upgrade to development release, disabling proposed
+2026-04-25 18:19:11,959 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu
+Suites: questing-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 18:19:11,961 DEBUG running doUpdate() (showErrors=True)
+2026-04-25 18:19:16,125 DEBUG openCache()
+2026-04-25 18:19:16,764 DEBUG Comparing 6.17.0-20 with
+2026-04-25 18:19:16,764 DEBUG Comparing 6.17.0-22 with 6.17.0-20
+2026-04-25 18:19:16,834 DEBUG /openCache(), new cache size 81656
+2026-04-25 18:19:17,010 DEBUG Foreign (before rewriting sources):
+2026-04-25 18:19:17,010 DEBUG Foreign (after rewriting sources):
+2026-04-25 18:19:17,010 DEBUG need_server_mode(): can not find a desktop meta package or key deps, running in server mode
+2026-04-25 18:19:17,011 DEBUG running Quirks.PreDistUpgradeCache
+2026-04-25 18:19:18,105 ERROR Dist-upgrade failed: 'E:Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.'
+2026-04-25 18:19:18,114 DEBUG abort called
+2026-04-25 18:19:18,116 DEBUG openCache()
+2026-04-25 18:19:20,039 DEBUG Comparing 6.17.0-20 with
+2026-04-25 18:19:20,040 DEBUG Comparing 6.17.0-22 with 6.17.0-20
+2026-04-25 18:19:20,122 DEBUG /openCache(), new cache size 80639

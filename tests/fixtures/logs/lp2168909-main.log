@@ -1,0 +1,348 @@
+2026-09-29 23:18:11,514 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-09-29 23:18:11,514 INFO uname information: 'Linux redacted-host 6.8.0-142-generic #142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026 x86_64'
+2026-09-29 23:18:12,222 INFO apt version: '2.8.3'
+2026-09-29 23:18:12,223 INFO python version: '3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]'
+2026-09-29 23:18:12,229 INFO release-upgrader version '26.04.25' started
+2026-09-29 23:18:12,359 INFO locale: 'de_DE' 'UTF-8'
+2026-09-29 23:18:12,690 DEBUG Using 'DistUpgradeViewGtk3' view
+2026-09-29 23:18:12,692 DEBUG enable dpkg --force-overwrite
+2026-09-29 23:18:12,710 ERROR failed to import AptClone
+2026-09-29 23:18:12,729 DEBUG Upgrading from noble to resolute
+2026-09-29 23:18:12,730 DEBUG _pythonSymlinkCheck run
+2026-09-29 23:18:12,731 DEBUG openCache()
+2026-09-29 23:18:12,731 DEBUG running Quirks.PreCacheOpen
+2026-09-29 23:18:13,918 DEBUG Comparing 6.8.0-139 with
+2026-09-29 23:18:13,919 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-29 23:18:14,108 DEBUG /openCache(), new cache size 92701
+2026-09-29 23:18:14,108 DEBUG need_server_mode(): run in 'desktop' mode, (because of key deps for 'lubuntu-desktop')
+2026-09-29 23:18:14,108 DEBUG checkViewDepends()
+2026-09-29 23:18:14,110 DEBUG running doUpdate() (showErrors=False)
+2026-09-29 23:18:16,019 ERROR IOError/SystemError in cache.update(): 'E:Das Depot »https://ppa.launchpadcontent.net/cteehayder/ffmulticonverter/ubuntu noble Release« enthält keine Release-Datei., W:Eine Aktualisierung von solch einem Depot kann nicht auf eine sichere Art durchgeführt werden, daher ist es standardmäßig deaktiviert., W:Weitere Details zur Erzeugung von Paketdepots sowie zu deren Benutzerkonfiguration finden Sie in der Handbuchseite apt-secure(8)., E:Das Depot »https://ppa.launchpadcontent.net/dhor/myway/ubuntu noble Release« enthält keine Release-Datei., W:Eine Aktualisierung von solch einem Depot kann nicht auf eine sichere Art durchgeführt werden, daher ist es standardmäßig deaktiviert., W:Weitere Details zur Erzeugung von Paketdepots sowie zu deren Benutzerkonfiguration finden Sie in der Handbuchseite apt-secure(8)., E:Das Depot »https://ppa.launchpadcontent.net/george-edison55/nitroshare/ubuntu noble Release« enthält keine Release-Datei., W:Eine Aktualisierung von solch einem Depot kann nicht auf eine sichere Art durchgeführt werden, daher ist es standardmäßig deaktiviert., W:Weitere Details zur Erzeugung von Paketdepots sowie zu deren Benutzerkonfiguration finden Sie in der Handbuchseite apt-secure(8)., W:Während der Überprüfung der Signatur trat ein Fehler auf. Das Depot wurde nicht aktualisiert und die vorherigen Indexdateien werden verwendet. GPG-Fehler: https://brave-browser-apt-release.s3.brave.com stable InRelease: Die folgenden Signaturen konnten nicht überprüft werden, weil ihr öffentlicher Schlüssel nicht verfügbar ist: NO_PUBKEY 0686B78420038257'. Retrying (currentRetry: 0)
+2026-09-29 23:18:16,019 ERROR doUpdate() failed completely
+2026-09-29 23:18:16,020 DEBUG openCache()
+2026-09-29 23:18:17,253 DEBUG Comparing 6.8.0-139 with
+2026-09-29 23:18:17,254 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-29 23:18:17,456 DEBUG /openCache(), new cache size 92701
+2026-09-29 23:18:17,456 DEBUG doPostInitialUpdate
+2026-09-29 23:18:17,456 DEBUG running Quirks.PostInitialUpdate
+2026-09-29 23:18:17,458 DEBUG RVA23 check: No ISA information
+2026-09-29 23:18:18,234 DEBUG flatpak will be marked as manually installed
+2026-09-29 23:18:18,309 DEBUG plasma-discover-backend-flatpak will be marked as manually installed
+2026-09-29 23:18:18,382 DEBUG gnome-software-plugin-flatpak will be marked as manually installed
+2026-09-29 23:18:18,457 INFO cache.commit()
+2026-09-29 23:18:25,453 DEBUG Snap bare is installed
+2026-09-29 23:18:25,453 DEBUG Snap bare is not tracking the release channel
+2026-09-29 23:18:25,810 DEBUG Snap canonical-livepatch is installed
+2026-09-29 23:18:25,811 DEBUG Snap canonical-livepatch is not tracking the release channel
+2026-09-29 23:18:26,097 DEBUG Snap core is installed
+2026-09-29 23:18:26,097 DEBUG Snap core is not tracking the release channel
+2026-09-29 23:18:26,407 DEBUG Snap core18 is installed
+2026-09-29 23:18:26,408 DEBUG Snap core18 is not tracking the release channel
+2026-09-29 23:18:26,703 DEBUG Snap core20 is installed
+2026-09-29 23:18:26,703 DEBUG Snap core20 is not tracking the release channel
+2026-09-29 23:18:27,002 DEBUG Snap core22 is installed
+2026-09-29 23:18:27,003 DEBUG Snap core22 is not tracking the release channel
+2026-09-29 23:18:27,296 DEBUG Snap core24 is installed
+2026-09-29 23:18:27,296 DEBUG Snap core24 is not tracking the release channel
+2026-09-29 23:18:27,646 DEBUG Snap cups is installed
+2026-09-29 23:18:27,646 DEBUG Snap cups is not tracking the release channel
+2026-09-29 23:18:27,937 DEBUG Snap czkawka is installed
+2026-09-29 23:18:27,937 DEBUG Snap czkawka is not tracking the release channel
+2026-09-29 23:18:28,252 DEBUG Snap ferdi is installed
+2026-09-29 23:18:28,252 DEBUG Snap ferdi is not tracking the release channel
+2026-09-29 23:18:28,601 DEBUG Snap firefox is installed
+2026-09-29 23:18:28,601 DEBUG Snap firefox is not tracking the release channel
+2026-09-29 23:18:28,858 DEBUG Snap gnome-3-28-1804 is installed
+2026-09-29 23:18:28,858 DEBUG Snap gnome-3-28-1804 is not tracking the release channel
+2026-09-29 23:18:29,143 DEBUG Snap gnome-3-38-2004 is installed
+2026-09-29 23:18:29,143 DEBUG Snap gnome-3-38-2004 is not tracking the release channel
+2026-09-29 23:18:29,423 DEBUG Snap gnome-42-2204 is installed
+2026-09-29 23:18:29,423 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-09-29 23:18:29,697 DEBUG Snap gnome-46-2404 is installed
+2026-09-29 23:18:29,697 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-09-29 23:18:29,992 DEBUG Snap gradle is installed
+2026-09-29 23:18:29,993 DEBUG Snap gradle is not tracking the release channel
+2026-09-29 23:18:30,291 DEBUG Snap gtk-common-themes is installed
+2026-09-29 23:18:30,291 DEBUG Snap gtk-common-themes is not tracking the release channel
+2026-09-29 23:18:30,612 DEBUG Snap kde-frameworks-5-core18 is installed
+2026-09-29 23:18:30,612 DEBUG Snap kde-frameworks-5-core18 is not tracking the release channel
+2026-09-29 23:18:30,938 DEBUG Snap mesa-2404 is installed
+2026-09-29 23:18:30,938 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-09-29 23:18:31,242 DEBUG Snap ocrthypdf is installed
+2026-09-29 23:18:31,242 DEBUG Snap ocrthypdf is not tracking the release channel
+2026-09-29 23:18:31,589 DEBUG Snap pdfmixtool is installed
+2026-09-29 23:18:31,589 DEBUG Snap pdfmixtool is not tracking the release channel
+2026-09-29 23:18:32,018 DEBUG Snap shortwave is installed
+2026-09-29 23:18:32,019 DEBUG Snap shortwave is not tracking the release channel
+2026-09-29 23:18:32,325 DEBUG Snap signal-desktop is installed
+2026-09-29 23:18:32,326 DEBUG Snap signal-desktop is not tracking the release channel
+2026-09-29 23:18:32,635 DEBUG Snap snapd is installed
+2026-09-29 23:18:32,635 DEBUG Snap snapd is not tracking the release channel
+2026-09-29 23:18:32,985 DEBUG Snap thunderbird is installed
+2026-09-29 23:18:32,985 DEBUG Snap thunderbird is not tracking the release channel
+2026-09-29 23:18:33,255 DEBUG Snap whatsdesk is installed
+2026-09-29 23:18:33,256 DEBUG Snap whatsdesk is not tracking the release channel
+2026-09-29 23:18:35,059 DEBUG MetaPkgs:
+2026-09-29 23:18:35,403 DEBUG Obsolete: anydesk breitbandmessung dropbox dus epson-pc-fax ferdi ffdiaporama-data google-earth-pro-stable guidus iscan iscan-data iscan-network-nt libavutil56 libcodec2-1.0 libdav1d5 libdvdcss-dev libdvdcss2 libpango1.0-0 libsane libssl1.1 libtiff5 libvpx6 libwxbase3.0-0v5 libwxgtk3.0-gtk3-0v5 mkusb mkusb-common mkusb-nox mkusb-plug muse-sounds-manager net.downloadhelper.coapp ocenaudio teamviewer unetbootin unetbootin-translations usb-pack-efi virtualbox-7.0 vivaldi-stable woeusb woeusb-frontend-wxgtk xnconvert zoom
+2026-09-29 23:18:35,423 DEBUG migrateToDeb822Sources()
+2026-09-29 23:18:35,425 DEBUG Could not migrate # Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources from /etc/apt/sources.list, disabling instead.
+2026-09-29 23:18:35,425 DEBUG Could not migrate deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main from /etc/apt/sources.list.d/signal-xenial.list, disabling instead.
+2026-09-29 23:18:35,426 DEBUG updateDeb822Sources()
+2026-09-29 23:18:35,430 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/dhor/myway/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYzojABEAC+NQfUdroDi+qzoDZanAYrPxktC3Om+yTTxXMemV6vKPCB0408
+ x8VwKRgji0gN4PWsXXot0I/DSzSTzhdHiMqmZxmkvmFL07+0D8PBF2TTLGo7huXn
+ qTojPJF4SMXc6q3KYXxG+CssQtpTUSQmtHdjWzLiinyGpvDjXgs3QJrnp755Z+zM
+ eLx6tIfNSBwMYnHFa8dwKd+1lpdsk0qmjM48YlDhqKPkdlRJhGTvJqef1vcqk8kv
+ Qz0TH2hwrdvTmnlNTzhI8jDXoOVQUtIFXa1RwB+8bE9iViin2vAy8WJTHhl5ql1U
+ +8BtJ0ADmfYRRKIo41OQmBG/uWhdSZJsHdDPdBaBtfUllfhvN8s7kx1gWwE6s5Op
+ 5OyoFycKT3C7vp8J2jnYZFhCGV7sfoGnuy3+phlAtl/yKVJSySTM0NUN/sD+HSXd
+ ygnZnj/Jv5wBmZxls4jYJA/D7ZhRIaLBKEUIVenKxt7ZAgc44SHocdtMlXAa9YTV
+ YIEIN4fb8pvDldoMVMEG4YucTeQsseAXgYBLkkcjGPunmGWRdYc6oFUhd7FqUn8B
+ jitY36os8/AfbtyqTHzKlxYTMvbd3He86UtAHGjMu2dp7w57efWoYAlPKedS4sDr
+ a5pnSgdBmUs20hstW3yYzPL7ycPAzLM1lIJ40XTxegTmZATB05b3ZKR+wwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBEYXJpdXN6IER1bWGJAk4EEwEKADgWIQSa8kQL
+ lCguJagMUJ/+nimsEJgAtgUCZjOiMAIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRD+nimsEJgAtlDHD/4sertnaZvZz9wA+SZyXJknegpXcE9MsUfSuG1zE/SD
+ BP6nY/+3QgsRyuxXCbPXW5DQXY8CXmx/qbau1X+jhJFDLA4osUps/GSMPPVX6jRO
+ huDYDe/E5Ibcq3dyRyjpAvyMhQZFJAB7s42bkAiOrtxwABJxqQeb0TX5rWQLhduP
+ H89H0osdQvpjsN3zvQtlLHvJSXxOb/ISEjvm2roHi7cEBdsTxZxC5UlSWs4NfOvp
+ DM3p84Qj+h5ojFcDA/Jmbg8Jo09XNjOeUUZXB4nFZUhhf/QU5Z9xj2kcbYGnA0tQ
+ kgWlj8ywSrA1t4eoQEc1OTFdIKU9MaWFqr2L5wzpUuP/baH77j1YN4u70H785MMY
+ MHkLRDrWPFLkWjIyUcUedASEWPy8NynOffp2f0SSXy/dTV9BSHH9/Rc5RRuEnNE3
+ tGx37NxSv+9kFL7skSjC316/sqF1Z5FT1UeR6P95Zr7WppDRJIgHzpgHJ+NdiARq
+ 9xIqzHeJt5v1BPCkuzYt+jrgE/2Vi4zN0qZle6hLIk60G6r1f3FhP2u/wpecUxHr
+ nOp/hYMTar17xWer3r8blv/WwOrtfmlmp/5NaGcrmdtdKHRjXYPu/7X+vzMgE0br
+ FWqs5GohQolj6CrEN9GEEW4S0CWwHysVD1A7gZ88vW249bFXH5jOFE7gib3nOCZD
+ uA==
+ =1/8a
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-09-29 23:18:35,432 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/dhor/myway/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYzojABEAC+NQfUdroDi+qzoDZanAYrPxktC3Om+yTTxXMemV6vKPCB0408
+ x8VwKRgji0gN4PWsXXot0I/DSzSTzhdHiMqmZxmkvmFL07+0D8PBF2TTLGo7huXn
+ qTojPJF4SMXc6q3KYXxG+CssQtpTUSQmtHdjWzLiinyGpvDjXgs3QJrnp755Z+zM
+ eLx6tIfNSBwMYnHFa8dwKd+1lpdsk0qmjM48YlDhqKPkdlRJhGTvJqef1vcqk8kv
+ Qz0TH2hwrdvTmnlNTzhI8jDXoOVQUtIFXa1RwB+8bE9iViin2vAy8WJTHhl5ql1U
+ +8BtJ0ADmfYRRKIo41OQmBG/uWhdSZJsHdDPdBaBtfUllfhvN8s7kx1gWwE6s5Op
+ 5OyoFycKT3C7vp8J2jnYZFhCGV7sfoGnuy3+phlAtl/yKVJSySTM0NUN/sD+HSXd
+ ygnZnj/Jv5wBmZxls4jYJA/D7ZhRIaLBKEUIVenKxt7ZAgc44SHocdtMlXAa9YTV
+ YIEIN4fb8pvDldoMVMEG4YucTeQsseAXgYBLkkcjGPunmGWRdYc6oFUhd7FqUn8B
+ jitY36os8/AfbtyqTHzKlxYTMvbd3He86UtAHGjMu2dp7w57efWoYAlPKedS4sDr
+ a5pnSgdBmUs20hstW3yYzPL7ycPAzLM1lIJ40XTxegTmZATB05b3ZKR+wwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBEYXJpdXN6IER1bWGJAk4EEwEKADgWIQSa8kQL
+ lCguJagMUJ/+nimsEJgAtgUCZjOiMAIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRD+nimsEJgAtlDHD/4sertnaZvZz9wA+SZyXJknegpXcE9MsUfSuG1zE/SD
+ BP6nY/+3QgsRyuxXCbPXW5DQXY8CXmx/qbau1X+jhJFDLA4osUps/GSMPPVX6jRO
+ huDYDe/E5Ibcq3dyRyjpAvyMhQZFJAB7s42bkAiOrtxwABJxqQeb0TX5rWQLhduP
+ H89H0osdQvpjsN3zvQtlLHvJSXxOb/ISEjvm2roHi7cEBdsTxZxC5UlSWs4NfOvp
+ DM3p84Qj+h5ojFcDA/Jmbg8Jo09XNjOeUUZXB4nFZUhhf/QU5Z9xj2kcbYGnA0tQ
+ kgWlj8ywSrA1t4eoQEc1OTFdIKU9MaWFqr2L5wzpUuP/baH77j1YN4u70H785MMY
+ MHkLRDrWPFLkWjIyUcUedASEWPy8NynOffp2f0SSXy/dTV9BSHH9/Rc5RRuEnNE3
+ tGx37NxSv+9kFL7skSjC316/sqF1Z5FT1UeR6P95Zr7WppDRJIgHzpgHJ+NdiARq
+ 9xIqzHeJt5v1BPCkuzYt+jrgE/2Vi4zN0qZle6hLIk60G6r1f3FhP2u/wpecUxHr
+ nOp/hYMTar17xWer3r8blv/WwOrtfmlmp/5NaGcrmdtdKHRjXYPu/7X+vzMgE0br
+ FWqs5GohQolj6CrEN9GEEW4S0CWwHysVD1A7gZ88vW249bFXH5jOFE7gib3nOCZD
+ uA==
+ =1/8a
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:18:35,432 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/cteehayder/ffmulticonverter/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBFoa6cIBEACrlung4fH1lREtOVPhLaUl3aJol8lAjey6hIb/vWnUOgpLIoTv
+ mmEdk9WxObhSfRqw0wbPO0jKyTV41XUA75waM6N6k0d7OmRTn2mtnA4xwuuIjQFv
+ YlQU82ukIHlRb+hXjbHPsikpaUP0jRXpwFZkMrC12526fEE0SEdiXr89AjMZZGns
+ h6YJiOeZ3XMQItgdz0p74mGHpihvXnPXB0iVVXRTPXJyIcJ9Fjxe1OMckLFPYAZF
+ f/0dImWDT8gwqUbLSOCg0KU2wKAfCvG3UWAwyak7feR36XFUCiRp0SK89l8qoshw
+ bGo/iq404RPUsjPdyUdoqxNA7kyx6ceqVEJMuRh7AgXiFAEP/qkU+pebAR+YfAL4
+ U1v+GJuBC1ftQdRq4KG+Go2VKAaJpWeToolj3EMAEUc5foMAiyjYAOIzGH+aax3Z
+ BMcMZfoH3SyTFgoaBtGr6Ksuz10+oScIZhINWdPcfwiUNnyKi/zhHfJoR2gcUQCu
+ 7ggEsGj+7Gfh7wdFkZ8kxc9yq/tOzc64aBR9mmvIuB2jeP3WyhN3isos13sNRYgG
+ jjtx+VbXWU0N2umfvdP1CFWDY4dKm2YVNHVx/k9DVn0o5fD2bA7Etr/fi+6NT25e
+ fbyyKrPfdRfXM+3M/Do6sOgXWMoaKtJjwTrgFmwEOcoQbjcerR5wqa3T2wARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBoYXlkZXIgbWFqZWSJAjgEEwECACIFAloa6cIC
+ GwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEG9vAofjsdF88XsP/0BxIxaW
+ Yne7I5RPdv1nWFhRQ2NqlWEk+o3zKdz5T6ioQbWs2ceO6PdWXlefUuasUoMzSAWn
+ 3GQCoeNeCUDPS8sXwZaDeE4Hjt7CvkvwaI9d4rr5y7TW1jsbFZliJQnKM3MvTp6O
+ 9ccWmmZF9IulE5+dArNshzMoLAzwRkIUTKeekK4/m/SfQzEKTG2BJo5PAoMhR9eI
+ tF9BbJJVhmfVqkmhc/2GOA11sCn3sFsdPgzvBfiimJWTsjodMZG+03pdqgLYciol
+ +honon25YaPg8wAeFsa/8PgbEn6sXqZAlqfHomtq9p9NNLzOz+U/jU5+ZmKs+gQW
+ cSDT8qXTI387eCxLmHt1H1bb2lO2XBL4uGRd44cPEWa5yyRHLTN35OA1HcKftshI
+ cmn1mZ8anOC3rju25vXi2NbqHc1Jn5ZA+F7Ixf1EkzneUK0Zoc+fNu2/Za6tmpkz
+ rNQGjQ6xu76TRTFBfzF4XL6NVIDghUyt4j9d0SKDWNdJQOTFq0foDJN9IPIk8WKf
+ Of8qiny/llxYiYLnzOtgDM6Ms0eamKRkZn8yemf1ilSQm4JiN27P6cOOYOKDCY49
+ 01JBuv6g4KWQV6HQuzAZgjuMfluQmo5WEd1jwuwsj2pjOaEBMgafl75pkDacEF9S
+ ts6P7aHp94AvIZYDkX8Z7akxmqtsDbM7gngd
+ =C47Z
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-09-29 23:18:35,434 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/cteehayder/ffmulticonverter/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBFoa6cIBEACrlung4fH1lREtOVPhLaUl3aJol8lAjey6hIb/vWnUOgpLIoTv
+ mmEdk9WxObhSfRqw0wbPO0jKyTV41XUA75waM6N6k0d7OmRTn2mtnA4xwuuIjQFv
+ YlQU82ukIHlRb+hXjbHPsikpaUP0jRXpwFZkMrC12526fEE0SEdiXr89AjMZZGns
+ h6YJiOeZ3XMQItgdz0p74mGHpihvXnPXB0iVVXRTPXJyIcJ9Fjxe1OMckLFPYAZF
+ f/0dImWDT8gwqUbLSOCg0KU2wKAfCvG3UWAwyak7feR36XFUCiRp0SK89l8qoshw
+ bGo/iq404RPUsjPdyUdoqxNA7kyx6ceqVEJMuRh7AgXiFAEP/qkU+pebAR+YfAL4
+ U1v+GJuBC1ftQdRq4KG+Go2VKAaJpWeToolj3EMAEUc5foMAiyjYAOIzGH+aax3Z
+ BMcMZfoH3SyTFgoaBtGr6Ksuz10+oScIZhINWdPcfwiUNnyKi/zhHfJoR2gcUQCu
+ 7ggEsGj+7Gfh7wdFkZ8kxc9yq/tOzc64aBR9mmvIuB2jeP3WyhN3isos13sNRYgG
+ jjtx+VbXWU0N2umfvdP1CFWDY4dKm2YVNHVx/k9DVn0o5fD2bA7Etr/fi+6NT25e
+ fbyyKrPfdRfXM+3M/Do6sOgXWMoaKtJjwTrgFmwEOcoQbjcerR5wqa3T2wARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBoYXlkZXIgbWFqZWSJAjgEEwECACIFAloa6cIC
+ GwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEG9vAofjsdF88XsP/0BxIxaW
+ Yne7I5RPdv1nWFhRQ2NqlWEk+o3zKdz5T6ioQbWs2ceO6PdWXlefUuasUoMzSAWn
+ 3GQCoeNeCUDPS8sXwZaDeE4Hjt7CvkvwaI9d4rr5y7TW1jsbFZliJQnKM3MvTp6O
+ 9ccWmmZF9IulE5+dArNshzMoLAzwRkIUTKeekK4/m/SfQzEKTG2BJo5PAoMhR9eI
+ tF9BbJJVhmfVqkmhc/2GOA11sCn3sFsdPgzvBfiimJWTsjodMZG+03pdqgLYciol
+ +honon25YaPg8wAeFsa/8PgbEn6sXqZAlqfHomtq9p9NNLzOz+U/jU5+ZmKs+gQW
+ cSDT8qXTI387eCxLmHt1H1bb2lO2XBL4uGRd44cPEWa5yyRHLTN35OA1HcKftshI
+ cmn1mZ8anOC3rju25vXi2NbqHc1Jn5ZA+F7Ixf1EkzneUK0Zoc+fNu2/Za6tmpkz
+ rNQGjQ6xu76TRTFBfzF4XL6NVIDghUyt4j9d0SKDWNdJQOTFq0foDJN9IPIk8WKf
+ Of8qiny/llxYiYLnzOtgDM6Ms0eamKRkZn8yemf1ilSQm4JiN27P6cOOYOKDCY49
+ 01JBuv6g4KWQV6HQuzAZgjuMfluQmo5WEd1jwuwsj2pjOaEBMgafl75pkDacEF9S
+ ts6P7aHp94AvIZYDkX8Z7akxmqtsDbM7gngd
+ =C47Z
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:18:35,434 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/george-edison55/nitroshare/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYzlMoBEADYhS+fC7Lhl4kcQfBHxLozFvP7jJDhJ+ogjS0Cb4NvCrzzt3b7
+ nRKhzscRUmNZdWbNKe573tp+rI02mZXDjmDRhKlLcvxImlrnNUILFePOFk3KzxjM
+ Onw4+bbay+ifAx8G7yXWFU+MZBBvw5WS++hdP9yZ9j2cSZieibplPZ6HTG2kOp4m
+ IeQmNzbvWcrxXU07Ye7OOVUZk7f6HV7OiP5791VlEcK2vZHZofhviw5vBqChQora
+ 0qQisPEBZ4wkCYaVjzb5omnQAqZLj+u7K5YHA+8b77ns5FaqiNECBTDO6S3tdetL
+ xSmVlgC+iUPEN+TNE9HNQ7qQ3W2lXkb+mAcgFu764BWJsAKXqbyvEPM9Zyo/7n0X
+ 1fiMNPMhh9dFVbj6jVJvOz8r2WZvlttPH+p3GFPpg87j01s04KdxnEDSelvIprN1
+ BPZbDkEghe8AXPa24eJEitr+G00ZEmRHpPdrvQuNz6XIFJqzGeLHeFer9c2MbxB5
+ kR1RgbayvfHrYvRzCWvv7rb05ddwxLrhC1e/MWSWG/XaO0Pi+7CIzexICnWqf9f4
+ 619TtCczXuaEHXVN9p29A0JwX2EjzOTByCOkB3s/gry1e8zgBVVIa6hs5eAO7PbD
+ 1rKkOBPDqH4zwluP9EpSZSA2eRNbqVOA+0HxGtE1JNAkQm9NrZl4DM97NQARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBOYXRoYW4gT3NtYW6JAk4EEwEKADgWIQRPpgum
+ f+UNq+LpttT6IzTfPdfqQAUCZjOUygIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRD6IzTfPdfqQNYhD/95FEIKuUgQJy4WDYTZa4zp16r+vYSAEqdKVvpDZa58
+ ydSes7ydawDgeuhg83qvqs33GbpTsNSb0qgr22hI242z4t6rwlE5I8OrX/edFlne
+ FWmNLPXTA8yXntzjAPIV9EhCjOv6h1F+DLiY6og39+Sd727aHO5fcHsIhYVeL++w
+ AWq8aywt+7I4aAfL4sRnhVWVqd7DHjVFDcOhXrnBFTB57L8z9dlND5wt52u3VMax
+ Da/1qGc20l8tJK4K+mthbJLvfw8MQqTWxsxOZCX6v7sp1jmfIE6wdpGPnZ6P5+kY
+ 1L8Bl/Rnqp32ppZzmo1jnd+KGU18XykVvolecV1Xj3708GAEZznPWEFVxb4zJCSq
+ EuH5jCHYY4zbLWgkG5WkEdAfiOc0kGna28S3CGhAZ60iqCOXzO/qE/T6+agbExRm
+ D1DKEOks/b3Zvv6pcwNzoKG0DTh/HDZZXBCrn+lV5lwQJxExpLas1Ld3oiKGkKg7
+ Mt2yiBEN+yuocS4y+LQBaMN5ojNuMc89lGwlshZCoRuDGlmTEUxbUblFIFyHu/sT
+ NKp+5be3Cz3zuZO2QRbUKKlJjXsYRy4aLLSj8gwGKLJKlfJxnCSOr43IPO5LGAnk
+ Wbr5aA4o/Wg2AgcN0EObAyKadhy2hQyZa98cVRCc9+OWScHvyymwk0NoQRUIKqy1
+ cA==
+ =ZM8Z
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-09-29 23:18:35,435 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/george-edison55/nitroshare/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYzlMoBEADYhS+fC7Lhl4kcQfBHxLozFvP7jJDhJ+ogjS0Cb4NvCrzzt3b7
+ nRKhzscRUmNZdWbNKe573tp+rI02mZXDjmDRhKlLcvxImlrnNUILFePOFk3KzxjM
+ Onw4+bbay+ifAx8G7yXWFU+MZBBvw5WS++hdP9yZ9j2cSZieibplPZ6HTG2kOp4m
+ IeQmNzbvWcrxXU07Ye7OOVUZk7f6HV7OiP5791VlEcK2vZHZofhviw5vBqChQora
+ 0qQisPEBZ4wkCYaVjzb5omnQAqZLj+u7K5YHA+8b77ns5FaqiNECBTDO6S3tdetL
+ xSmVlgC+iUPEN+TNE9HNQ7qQ3W2lXkb+mAcgFu764BWJsAKXqbyvEPM9Zyo/7n0X
+ 1fiMNPMhh9dFVbj6jVJvOz8r2WZvlttPH+p3GFPpg87j01s04KdxnEDSelvIprN1
+ BPZbDkEghe8AXPa24eJEitr+G00ZEmRHpPdrvQuNz6XIFJqzGeLHeFer9c2MbxB5
+ kR1RgbayvfHrYvRzCWvv7rb05ddwxLrhC1e/MWSWG/XaO0Pi+7CIzexICnWqf9f4
+ 619TtCczXuaEHXVN9p29A0JwX2EjzOTByCOkB3s/gry1e8zgBVVIa6hs5eAO7PbD
+ 1rKkOBPDqH4zwluP9EpSZSA2eRNbqVOA+0HxGtE1JNAkQm9NrZl4DM97NQARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBOYXRoYW4gT3NtYW6JAk4EEwEKADgWIQRPpgum
+ f+UNq+LpttT6IzTfPdfqQAUCZjOUygIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRD6IzTfPdfqQNYhD/95FEIKuUgQJy4WDYTZa4zp16r+vYSAEqdKVvpDZa58
+ ydSes7ydawDgeuhg83qvqs33GbpTsNSb0qgr22hI242z4t6rwlE5I8OrX/edFlne
+ FWmNLPXTA8yXntzjAPIV9EhCjOv6h1F+DLiY6og39+Sd727aHO5fcHsIhYVeL++w
+ AWq8aywt+7I4aAfL4sRnhVWVqd7DHjVFDcOhXrnBFTB57L8z9dlND5wt52u3VMax
+ Da/1qGc20l8tJK4K+mthbJLvfw8MQqTWxsxOZCX6v7sp1jmfIE6wdpGPnZ6P5+kY
+ 1L8Bl/Rnqp32ppZzmo1jnd+KGU18XykVvolecV1Xj3708GAEZznPWEFVxb4zJCSq
+ EuH5jCHYY4zbLWgkG5WkEdAfiOc0kGna28S3CGhAZ60iqCOXzO/qE/T6+agbExRm
+ D1DKEOks/b3Zvv6pcwNzoKG0DTh/HDZZXBCrn+lV5lwQJxExpLas1Ld3oiKGkKg7
+ Mt2yiBEN+yuocS4y+LQBaMN5ojNuMc89lGwlshZCoRuDGlmTEUxbUblFIFyHu/sT
+ NKp+5be3Cz3zuZO2QRbUKKlJjXsYRy4aLLSj8gwGKLJKlfJxnCSOr43IPO5LGAnk
+ Wbr5aA4o/Wg2AgcN0EObAyKadhy2hQyZa98cVRCc9+OWScHvyymwk0NoQRUIKqy1
+ cA==
+ =ZM8Z
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:18:35,436 DEBUG examining: 'Types: deb
+URIs: https://brave-browser-apt-beta.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-beta-archive-keyring.gpg'
+2026-09-29 23:18:35,437 DEBUG entry 'Types: deb
+URIs: https://brave-browser-apt-beta.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-beta-archive-keyring.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:18:35,437 DEBUG examining: 'Types: deb
+URIs: https://brave-browser-apt-release.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg'
+2026-09-29 23:18:35,439 DEBUG entry 'Types: deb
+URIs: https://brave-browser-apt-release.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:18:35,439 DEBUG examining: 'Types: deb
+URIs: http://de.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 23:18:35,439 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://de.archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-09-29 23:18:35,439 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu//dists/resolute/Release
+2026-09-29 23:18:35,439 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu//dists/resolute/Release' q='' f=''
+2026-09-29 23:18:35,544 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu//dists/resolute-updates/Release
+2026-09-29 23:18:35,544 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu//dists/resolute-updates/Release' q='' f=''
+2026-09-29 23:18:35,610 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu//dists/resolute-backports/Release
+2026-09-29 23:18:35,611 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu//dists/resolute-backports/Release' q='' f=''
+2026-09-29 23:18:35,684 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 23:18:35,693 DEBUG running doUpdate() (showErrors=True)
+2026-09-29 23:19:15,442 DEBUG openCache()
+2026-09-29 23:19:16,597 DEBUG Comparing 6.8.0-139 with
+2026-09-29 23:19:16,597 DEBUG Comparing 6.8.0-142 with 6.8.0-139
+2026-09-29 23:19:16,746 DEBUG /openCache(), new cache size 85029
+2026-09-29 23:19:17,091 DEBUG Foreign (before rewriting sources): 7zip 7zip-standalone ffmpeg gimp gimp-data imagemagick imagemagick-6-common imagemagick-6.q16 libavcodec60 libavcodec60:i386 libavdevice60 libavfilter9 libavformat60 libavutil58 libavutil58:i386 libbcmail-java libbcpkix-java libbcprov-java libbcutil-java libcjson1 libcommons-io-java libcommons-lang3-java libgimp2.0t64 libgraphicsmagick++-q16-12t64 libgraphicsmagick-q16-3t64 libgstreamer-plugins-bad1.0-0 libmagickcore-6.q16-7-extra libmagickcore-6.q16-7t64 libmagickwand-6.q16-7t64 libmbedcrypto7t64 libopenexr-3-1-30 libpostproc57 libqt5concurrent5t64 libqt5core5t64 libqt5dbus5t64 libqt5gui5t64 libqt5network5t64 libqt5opengl5-dev libqt5opengl5t64 libqt5printsupport5t64 libqt5qml5 libqt5qmlmodels5 libqt5qmlworkerscript5 libqt5quick5 libqt5quickwidgets5 libqt5sql5-sqlite libqt5sql5t64 libqt5test5t64 libqt5webengine-data libqt5webengine5 libqt5webenginecore5 libqt5webenginewidgets5 libqt5widgets5t64 libqt5xml5t64 libswresample4 libswresample4:i386 libswscale7 liburiparser1 libvlc-bin libvlc5 libvlccore9 libzvbi-common libzvbi0t64 libzvbi0t64:i386 qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings qml-module-qtqml qml-module-qtqml-models2 qml-module-qtquick-layouts qml-module-qtquick-window2 qml-module-qtquick2 qml-module-qtwebengine qt5-gtk-platformtheme qt5-qmake qt5-qmake-bin qtbase5-dev qtbase5-dev-tools vlc vlc-bin vlc-data vlc-l10n vlc-plugin-access-extra vlc-plugin-base vlc-plugin-fluidsynth vlc-plugin-jack vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-svg vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization
+2026-09-29 23:19:17,091 DEBUG Foreign (after rewriting sources):
+2026-09-29 23:19:17,093 DEBUG running Quirks.PreDistUpgradeCache
+2026-09-29 23:19:17,093 INFO Quirk: Marking 'libfile-libmagic-perl' for install to prevent dependency deadlock.
+2026-09-29 23:19:18,934 DEBUG none of the '['ubuntu-desktop', 'kubuntu-desktop', 'xubuntu-core', 'xubuntu-desktop', 'ubuntustudio-desktop', 'ubuntustudio-desktop-core', 'lubuntu-desktop', 'ubuntu-gnome-desktop', 'ubuntu-mate-core', 'ubuntu-mate-desktop', 'ubuntukylin-desktop', 'ubuntu-budgie-desktop', 'ubuntu-unity-desktop']' meta-pkgs installed
+2026-09-29 23:19:18,935 DEBUG guessing 'lubuntu-desktop' as missing meta-pkg
+2026-09-29 23:19:20,383 ERROR failed to mark 'lubuntu-desktop' for install (W:Datei »signal-xenial.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., W:Datei »signal-xenial.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., W:Datei »signal-xenial.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., E:Probleme können nicht korrigiert werden, Sie haben zurückgehaltene defekte Pakete.)

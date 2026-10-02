@@ -1,0 +1,164 @@
+2026-10-01 20:01:42,650 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-10-01 20:01:42,650 INFO uname information: 'Linux redacted-host 6.8.0-146-generic #146-Ubuntu SMP PREEMPT_DYNAMIC Thu Sep  3 16:12:30 UTC 2026 x86_64'
+2026-10-01 20:01:43,027 INFO apt version: '2.8.3'
+2026-10-01 20:01:43,027 INFO python version: '3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]'
+2026-10-01 20:01:43,031 INFO release-upgrader version '26.04.25' started
+2026-10-01 20:01:43,101 INFO locale: 'ca_ES' 'UTF-8'
+2026-10-01 20:01:43,301 DEBUG Using 'DistUpgradeViewGtk3' view
+2026-10-01 20:01:43,302 DEBUG enable dpkg --force-overwrite
+2026-10-01 20:01:43,316 DEBUG creating statefile: '/var/log/dist-upgrade/apt-clone_system_state.tar.gz'
+2026-10-01 20:01:50,578 DEBUG Upgrading from noble to resolute
+2026-10-01 20:01:50,579 DEBUG _pythonSymlinkCheck run
+2026-10-01 20:01:50,579 DEBUG openCache()
+2026-10-01 20:01:50,579 DEBUG running Quirks.PreCacheOpen
+2026-10-01 20:01:51,204 DEBUG Comparing 4.15.0-92 with
+2026-10-01 20:01:51,204 DEBUG Comparing 4.4.0-102 with 4.15.0-92
+2026-10-01 20:01:51,204 DEBUG Comparing 4.4.0-97 with 4.15.0-92
+2026-10-01 20:01:51,205 DEBUG Comparing 5.4.0-73 with 4.15.0-92
+2026-10-01 20:01:51,205 DEBUG Comparing 6.8.0-134 with 5.4.0-73
+2026-10-01 20:01:51,206 DEBUG Comparing 6.8.0-142 with 6.8.0-134
+2026-10-01 20:01:51,206 DEBUG Comparing 6.8.0-146 with 6.8.0-142
+2026-10-01 20:01:51,300 DEBUG /openCache(), new cache size 94359
+2026-10-01 20:01:51,300 DEBUG need_server_mode(): run in 'desktop' mode, (because of key deps for 'ubuntu-desktop')
+2026-10-01 20:01:51,300 DEBUG checkViewDepends()
+2026-10-01 20:01:51,304 DEBUG running doUpdate() (showErrors=False)
+2026-10-01 20:01:53,004 DEBUG openCache()
+2026-10-01 20:01:53,635 DEBUG Comparing 4.15.0-92 with
+2026-10-01 20:01:53,635 DEBUG Comparing 4.4.0-102 with 4.15.0-92
+2026-10-01 20:01:53,635 DEBUG Comparing 4.4.0-97 with 4.15.0-92
+2026-10-01 20:01:53,635 DEBUG Comparing 5.4.0-73 with 4.15.0-92
+2026-10-01 20:01:53,636 DEBUG Comparing 6.8.0-134 with 5.4.0-73
+2026-10-01 20:01:53,636 DEBUG Comparing 6.8.0-142 with 6.8.0-134
+2026-10-01 20:01:53,636 DEBUG Comparing 6.8.0-146 with 6.8.0-142
+2026-10-01 20:01:53,740 DEBUG /openCache(), new cache size 94359
+2026-10-01 20:01:53,740 DEBUG doPostInitialUpdate
+2026-10-01 20:01:53,740 DEBUG running Quirks.PostInitialUpdate
+2026-10-01 20:01:53,741 DEBUG RVA23 check: No ISA information
+2026-10-01 20:01:55,487 DEBUG Snap acestreamplayer is installed
+2026-10-01 20:01:55,488 DEBUG Snap acestreamplayer is not tracking the release channel
+2026-10-01 20:01:55,851 DEBUG Snap bare is installed
+2026-10-01 20:01:55,851 DEBUG Snap bare is not tracking the release channel
+2026-10-01 20:01:56,093 DEBUG Snap bytecode-viewer is installed
+2026-10-01 20:01:56,093 DEBUG Snap bytecode-viewer is not tracking the release channel
+2026-10-01 20:01:56,478 DEBUG Snap canonical-livepatch is installed
+2026-10-01 20:01:56,478 DEBUG Snap canonical-livepatch is not tracking the release channel
+2026-10-01 20:01:56,795 DEBUG Snap core is installed
+2026-10-01 20:01:56,795 DEBUG Snap core is not tracking the release channel
+2026-10-01 20:01:57,102 DEBUG Snap core18 is installed
+2026-10-01 20:01:57,102 DEBUG Snap core18 is not tracking the release channel
+2026-10-01 20:01:57,419 DEBUG Snap core20 is installed
+2026-10-01 20:01:57,419 DEBUG Snap core20 is not tracking the release channel
+2026-10-01 20:01:57,737 DEBUG Snap core22 is installed
+2026-10-01 20:01:57,737 DEBUG Snap core22 is not tracking the release channel
+2026-10-01 20:01:58,066 DEBUG Snap core24 is installed
+2026-10-01 20:01:58,066 DEBUG Snap core24 is not tracking the release channel
+2026-10-01 20:01:58,259 DEBUG Snap deja-dup is installed
+2026-10-01 20:01:58,259 DEBUG Snap deja-dup is not tracking the release channel
+2026-10-01 20:01:58,642 DEBUG Snap firefox is installed
+2026-10-01 20:01:58,642 DEBUG Snap firefox is not tracking the release channel
+2026-10-01 20:01:58,913 DEBUG Snap gnome-3-28-1804 is installed
+2026-10-01 20:01:58,913 DEBUG Snap gnome-3-28-1804 is not tracking the release channel
+2026-10-01 20:01:59,178 DEBUG Snap gnome-42-2204 is installed
+2026-10-01 20:01:59,178 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-10-01 20:01:59,568 DEBUG Snap gnome-46-2404 is installed
+2026-10-01 20:01:59,568 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-10-01 20:01:59,872 DEBUG Snap gtk-common-themes is installed
+2026-10-01 20:01:59,872 DEBUG Snap gtk-common-themes is not tracking the release channel
+2026-10-01 20:02:00,192 DEBUG Snap helm is installed
+2026-10-01 20:02:00,192 DEBUG Snap helm is not tracking the release channel
+2026-10-01 20:02:00,505 DEBUG Snap hunspell-dictionaries-1-7-2004 is installed
+2026-10-01 20:02:00,505 DEBUG Snap hunspell-dictionaries-1-7-2004 is not tracking the release channel
+2026-10-01 20:02:00,832 DEBUG Snap k3b is installed
+2026-10-01 20:02:00,832 DEBUG Snap k3b is not tracking the release channel
+2026-10-01 20:02:01,154 DEBUG Snap kf6-core24 is installed
+2026-10-01 20:02:01,154 DEBUG Snap kf6-core24 is not tracking the release channel
+2026-10-01 20:02:01,573 DEBUG Snap libreoffice is installed
+2026-10-01 20:02:01,573 DEBUG Snap libreoffice is not tracking the release channel
+2026-10-01 20:02:01,965 DEBUG Snap lxqt-support-core24 is installed
+2026-10-01 20:02:01,966 DEBUG Snap lxqt-support-core24 is not tracking the release channel
+2026-10-01 20:02:02,527 DEBUG Snap mesa-2404 is installed
+2026-10-01 20:02:02,527 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-10-01 20:02:03,103 DEBUG Snap obs-studio is installed
+2026-10-01 20:02:03,103 DEBUG Snap obs-studio is not tracking the release channel
+2026-10-01 20:02:03,522 DEBUG Snap projectlibre is installed
+2026-10-01 20:02:03,522 DEBUG Snap projectlibre is not tracking the release channel
+2026-10-01 20:02:04,091 DEBUG Snap snap-store is installed
+2026-10-01 20:02:04,092 DEBUG Snap snap-store is not tracking the release channel
+2026-10-01 20:02:04,594 DEBUG Snap snapd is installed
+2026-10-01 20:02:04,594 DEBUG Snap snapd is not tracking the release channel
+2026-10-01 20:02:05,074 DEBUG Snap teams-for-linux is installed
+2026-10-01 20:02:05,074 DEBUG Snap teams-for-linux is not tracking the release channel
+2026-10-01 20:02:05,445 DEBUG Snap thincast-client is installed
+2026-10-01 20:02:05,446 DEBUG Snap thincast-client is not tracking the release channel
+2026-10-01 20:02:06,466 DEBUG MetaPkgs:
+2026-10-01 20:02:06,650 DEBUG Obsolete: account-plugin-tools acestream-player-compat acpi-support aeskulap app-install-data-partner apparmor-easyprof apparmor-easyprof-ubuntu archdetect-deb aspnetcore-runtime-2.1 aspnetcore-runtime-3.1 aspnetcore-runtime-5.0 aspnetcore-runtime-6.0 aspnetcore-targeting-pack-3.1 aspnetcore-targeting-pack-5.0 aspnetcore-targeting-pack-6.0 autofirma avidemux2.6-common avidemux2.6-jobs avidemux2.6-plugins-common avidemux2.6-plugins-qt avidemux2.6-qt bless blubuntu-wallpapers btrfs-tools clang-10 clang-6.0 code containerd.io cpp-7 crda docker-buildx-plugin docker-ce docker-ce-cli docker-ce-rootless-extras docker-compose-plugin dotnet-apphost-pack-3.1 dotnet-apphost-pack-5.0 dotnet-apphost-pack-6.0 dotnet-host dotnet-hostfxr-2.1 dotnet-hostfxr-3.1 dotnet-hostfxr-5.0 dotnet-hostfxr-6.0 dotnet-runtime-2.1 dotnet-runtime-3.1 dotnet-runtime-5.0 dotnet-runtime-6.0 dotnet-runtime-deps-2.1 dotnet-runtime-deps-3.1 dotnet-runtime-deps-5.0 dotnet-sdk-2.1 dotnet-sdk-3.1 dotnet-sdk-5.0 dotnet-sdk-6.0 dotnet-targeting-pack-3.1 dotnet-targeting-pack-5.0 dotnet-targeting-pack-6.0 dotnet-templates-6.0 e2fslibs epson-inkjet-printer-escpr flashplugin-installer gcc-4.8-base gcc-4.9-base gcc-7 gcc-7-base gcc-8-base gcompris gcompris-data gcompris-sound-en gcompris-sound-es gir1.2-signon-1.0 gnome-getting-started-docs gnome-getting-started-docs-ca gnome-getting-started-docs-es gnome-orca gnome-search-tool gnome-system-log gnomine gstreamer0.10-alsa gstreamer0.10-fluendo-mp3 gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-base-apps gstreamer0.10-tools gstreamer1.0-fluendo-mp3 insserv jitsi jitsi-archive-keyring kde-l10n-es kse lib32bz2-1.0 libaccount-plugin-1.0-0 libaccount-plugin-generic-oauth libaccount-plugin-google libandroid-properties1 libappindicator1 libapt-inst1.5 libapt-pkg4.12 libasan4 libavcodec-extra58 libavcodec-ffmpeg-extra56 libavformat-ffmpeg56 libavformat58 libavidemux2.6 libavutil-ffmpeg54 libavutil56 libbluray1 libboost-date-time1.54.0 libboost-filesystem1.58.0 libboost-iostreams1.54.0 libboost-program-options1.54.0 libboost-serialization1.54.0 libboost-system1.54.0 libboost-system1.58.0 libcapnp-0.4.0 libcilkrts5 libclang-common-10-dev libclang-common-6.0-dev libclang-cpp10 libclang1-10 libclang1-6.0 libcmis-0.4-4 libcodec2-1.0 libcomerr2 libcryptsetup4 libcrystalhd3 libdav1d5 libdbus-cpp2 libdbusmenu-gtk4 libdcmtk16 libdvdcss2 libegl1-mesa libegl1-mesa-lts-xenial libffi6 libffi6:i386 libffi7 libfltk-gl1.3 libfltk1.3 libfsharp-core4.5-cil libfsharp-core5.0-cil libgcc-7-dev libgcrypt11 libgdbm3 libgl1-mesa-glx libgl1-mesa-glx-lts-xenial libglade2.0-cil libglademm-2.4-1v5 libglib2.0-cil libglib2.0-cil-dev libgnutls-deb0-28 libgstreamer-plugins-base0.10-0 libgstreamer0.10-0 libgtk2.0-cil libgtk2.0-cil-dev libgtkmm-2.4-1v5 libhardware2 libhogweed4 libhybris libhybris-common1 libicu52 libicu55 libicu66 libicu70 libieee1284-3 libisl22 libjson-c2 libjson0 libjsoncpp0 libjsoncpp1 libleveldb1v5 libllvm10 libllvm3.4 libllvm3.4:i386 libllvm6.0 liblttng-ust-ctl4 liblttng-ust0 libmedia1 libmediascanner-2.0-0 libmirclient7 libmirclientplatform-mesa libmirplatform libmirprotobuf0 libmpdec2 libmpx2 libmspub-0.0-0 libncurses5 libncursesw5 libnettle6 libobasis7.0-ooofonts libofono-qt1 liboil0.3 libopenjpeg5 liborcus-0.6-0 libpgm-5.1-0 libpgm-5.3-0 libprocess-cpp1 libprocps3 libprotobuf8 libpython2-stdlib libpython2.7-minimal libpython2.7-stdlib libreadline5 libreadline6 libruby2.7 libruby3.0 libschroedinger-1.0-0 libsepol1 libsignon-glib1 libsrt1.4-gnutls libssl1.0.0 libssl1.1 libswresample-ffmpeg1 libswresample3 libsystemsettings1 libtiff5 libtinfo5 libtinfo5:i386 libubsan0 libubuntu-application-api3 libubuntu-download-manager-client0 libubuntu-download-manager-common0 libubuntu-platform-hardware-api3 libubuntuoneauth-2.0-0 liburcu6 libusbredirhost1 libva-x11-1 libva1 libvala-0.40-0 libvala-0.40-dev libvpx3 libvpx7 libwayland-egl1-mesa libwayland-egl1-mesa-lts-xenial libwebp5 libwpd-0.9-9 libwps-0.2-2 libx264-148 libx264-163 libx265-79 libxp6 linux-headers-4.4.0-102 linux-headers-4.4.0-102-generic linux-headers-4.4.0-97 linux-headers-4.4.0-97-generic linux-headers-5.4.0-73 linux-headers-5.4.0-73-generic linux-image-4.15.0-92-generic linux-image-4.4.0-102-generic linux-image-4.4.0-97-generic linux-image-5.4.0-73-generic linux-modules-4.15.0-92-generic linux-modules-5.4.0-73-generic linux-modules-extra-4.15.0-92-generic llvm-10 llvm-10-dev llvm-10-runtime llvm-10-tools llvm-6.0 llvm-6.0-dev llvm-6.0-runtime lsb lsb-core lsb-invalid-mta lsb-printing lsb-security mime-support mlocate mono-llvm-support mono-llvm-tools mono-roslyn monodevelop msbuild msbuild-libhostfxr msbuild-sdkresolver multiarch-support myspell-ca myspell-en-gb myspell-en-za mysql-workbench-community net.downloadhelper.coapp netstandard-targeting-pack-2.1 octave-htmldoc octave-info openjdk-7-doc oxideqt-codecs-extra packages-microsoft-prod pdfmod pdftk powerd pyotherside python-cffi-backend python-cryptography python-enum34 python-ipaddress python-pkg-resources python-pyasn1 python-setuptools python-six python2 python2-minimal python2.7 python2.7-minimal qtdeclarative5-folderlistmodel-plugin qtdeclarative5-systeminfo-plugin qtdeclarative5-ubuntu-settings-components-assets qtdeclarative5-unity-notifications-plugin referenceassemblies-pcl rhythmbox-plugin-magnatune rtl8192eu-dkms skypeforlinux spotify-client sun-javadb-client system-config-printer-gnome system-image-common system-image-dbus sysv-rc teams thumbnailer-service toshset ttf-indic-fonts-core ttf-ubuntu-font-family ubuntu-application-api3-test ubuntu-system-service ubuntuone-client-data ubuntuone-credentials-common unity-control-center-signon vdpau-va-driver vulkan-utils webaccounts-extension-common xamarin-gtk-theme xamarin.android-oss xserver-xorg-core-lts-xenial xserver-xorg-input-all-lts-xenial xserver-xorg-input-void xserver-xorg-lts-xenial xul-ext-webaccounts zoom
+2026-10-01 20:02:06,653 DEBUG migrateToDeb822Sources()
+2026-10-01 20:02:06,655 DEBUG Could not migrate # Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources from /etc/apt/sources.list, disabling instead.
+2026-10-01 20:02:06,655 DEBUG updateDeb822Sources()
+2026-10-01 20:02:06,662 DEBUG examining: 'Types: deb deb-src
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-10-01 20:02:06,662 DEBUG verifySourcesListEntry: Types: deb deb-src
+URIs: http://archive.ubuntu.com/ubuntu
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-10-01 20:02:06,662 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute/Release
+2026-10-01 20:02:06,662 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute/Release' q='' f=''
+2026-10-01 20:02:06,759 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute-updates/Release
+2026-10-01 20:02:06,759 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute-updates/Release' q='' f=''
+2026-10-01 20:02:06,826 DEBUG url_downloadable: http://archive.ubuntu.com/ubuntu/dists/resolute-backports/Release
+2026-10-01 20:02:06,826 DEBUG s='http' n='archive.ubuntu.com' p='/ubuntu/dists/resolute-backports/Release' q='' f=''
+2026-10-01 20:02:07,041 DEBUG examining: 'Types: deb deb-src
+URIs: http://security.ubuntu.com/ubuntu
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-10-01 20:02:07,042 DEBUG examining: '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# Changes to this file will not be preserved.
+# This file will not be recreated if removed.
+X-Repolib-Name: Google Chrome
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/google-chrome.gpg'
+2026-10-01 20:02:07,043 DEBUG entry '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# Changes to this file will not be preserved.
+# This file will not be recreated if removed.
+X-Repolib-Name: Google Chrome
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/google-chrome.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-10-01 20:02:07,048 DEBUG running doUpdate() (showErrors=True)
+2026-10-01 20:02:30,046 DEBUG openCache()
+2026-10-01 20:02:30,661 DEBUG Comparing 4.15.0-92 with
+2026-10-01 20:02:30,662 DEBUG Comparing 4.4.0-102 with 4.15.0-92
+2026-10-01 20:02:30,668 DEBUG Comparing 4.4.0-97 with 4.15.0-92
+2026-10-01 20:02:30,668 DEBUG Comparing 5.4.0-73 with 4.15.0-92
+2026-10-01 20:02:30,668 DEBUG Comparing 6.8.0-134 with 5.4.0-73
+2026-10-01 20:02:30,668 DEBUG Comparing 6.8.0-142 with 6.8.0-134
+2026-10-01 20:02:30,669 DEBUG Comparing 6.8.0-146 with 6.8.0-142
+2026-10-01 20:02:30,752 DEBUG /openCache(), new cache size 86654
+2026-10-01 20:02:30,939 DEBUG Foreign (before rewriting sources): ca-certificates-mono ffmpeg fsharp google-chrome-stable libavcodec-extra libavcodec-extra60 libavdevice60 libavfilter9 libavformat60 libavutil58 libcjson1 libfsharp-core4.3-cil libmono-2.0-dev libmono-accessibility4.0-cil libmono-btls-interface4.0-cil libmono-cairo4.0-cil libmono-cecil-private-cil libmono-cil-dev libmono-codecontracts4.0-cil libmono-compilerservices-symbolwriter4.0-cil libmono-corlib4.5-cil libmono-cscompmgd0.0-cil libmono-csharp4.0c-cil libmono-custommarshalers4.0-cil libmono-data-tds4.0-cil libmono-db2-1.0-cil libmono-debugger-soft4.0a-cil libmono-http4.0-cil libmono-i18n-cjk4.0-cil libmono-i18n-mideast4.0-cil libmono-i18n-other4.0-cil libmono-i18n-rare4.0-cil libmono-i18n-west4.0-cil libmono-i18n4.0-all libmono-i18n4.0-cil libmono-ldap4.0-cil libmono-management4.0-cil libmono-messaging-rabbitmq4.0-cil libmono-messaging4.0-cil libmono-microsoft-build-engine4.0-cil libmono-microsoft-build-framework4.0-cil libmono-microsoft-build-tasks-v4.0-4.0-cil libmono-microsoft-build-utilities-v4.0-4.0-cil libmono-microsoft-build4.0-cil libmono-microsoft-csharp4.0-cil libmono-microsoft-visualc10.0-cil libmono-microsoft-web-infrastructure1.0-cil libmono-oracle4.0-cil libmono-parallel4.0-cil libmono-peapi4.0a-cil libmono-posix4.0-cil libmono-rabbitmq4.0-cil libmono-relaxng4.0-cil libmono-security4.0-cil libmono-sharpzip4.84-cil libmono-simd4.0-cil libmono-smdiagnostics0.0-cil libmono-sqlite4.0-cil libmono-system-componentmodel-composition4.0-cil libmono-system-componentmodel-dataannotations4.0-cil libmono-system-configuration-install4.0-cil libmono-system-configuration4.0-cil libmono-system-core4.0-cil libmono-system-data-datasetextensions4.0-cil libmono-system-data-entity4.0-cil libmono-system-data-linq4.0-cil libmono-system-data-services-client4.0-cil libmono-system-data-services4.0-cil libmono-system-data4.0-cil libmono-system-deployment4.0-cil libmono-system-design4.0-cil libmono-system-drawing-design4.0-cil libmono-system-drawing4.0-cil libmono-system-dynamic4.0-cil libmono-system-enterpriseservices4.0-cil libmono-system-identitymodel-selectors4.0-cil libmono-system-identitymodel4.0-cil libmono-system-io-compression-filesystem4.0-cil libmono-system-io-compression4.0-cil libmono-system-json-microsoft4.0-cil libmono-system-json4.0-cil libmono-system-ldap-protocols4.0-cil libmono-system-ldap4.0-cil libmono-system-management4.0-cil libmono-system-messaging4.0-cil libmono-system-net-http-formatting4.0-cil libmono-system-net-http-webrequest4.0-cil libmono-system-net-http4.0-cil libmono-system-net4.0-cil libmono-system-numerics-vectors4.0-cil libmono-system-numerics4.0-cil libmono-system-reactive-core2.2-cil libmono-system-reactive-debugger2.2-cil libmono-system-reactive-experimental2.2-cil libmono-system-reactive-interfaces2.2-cil libmono-system-reactive-linq2.2-cil libmono-system-reactive-observable-aliases0.0-cil libmono-system-reactive-platformservices2.2-cil libmono-system-reactive-providers2.2-cil libmono-system-reactive-runtime-remoting2.2-cil libmono-system-reactive-windows-forms2.2-cil libmono-system-reactive-windows-threading2.2-cil libmono-system-reflection-context4.0-cil libmono-system-runtime-caching4.0-cil libmono-system-runtime-durableinstancing4.0-cil libmono-system-runtime-serialization-formatters-soap4.0-cil libmono-system-runtime-serialization4.0-cil libmono-system-runtime4.0-cil libmono-system-security4.0-cil libmono-system-servicemodel-activation4.0-cil libmono-system-servicemodel-discovery4.0-cil libmono-system-servicemodel-internals0.0-cil libmono-system-servicemodel-routing4.0-cil libmono-system-servicemodel-web4.0-cil libmono-system-servicemodel4.0a-cil libmono-system-serviceprocess4.0-cil libmono-system-threading-tasks-dataflow4.0-cil libmono-system-transactions4.0-cil libmono-system-web-abstractions4.0-cil libmono-system-web-applicationservices4.0-cil libmono-system-web-dynamicdata4.0-cil libmono-system-web-extensions-design4.0-cil libmono-system-web-extensions4.0-cil libmono-system-web-http-selfhost4.0-cil libmono-system-web-http-webhost4.0-cil libmono-system-web-http4.0-cil libmono-system-web-mobile4.0-cil libmono-system-web-mvc3.0-cil libmono-system-web-razor2.0-cil libmono-system-web-regularexpressions4.0-cil libmono-system-web-routing4.0-cil libmono-system-web-services4.0-cil libmono-system-web-webpages-deployment2.0-cil libmono-system-web-webpages-razor2.0-cil libmono-system-web-webpages2.0-cil libmono-system-web4.0-cil libmono-system-windows-forms-datavisualization4.0a-cil libmono-system-windows-forms4.0-cil libmono-system-windows4.0-cil libmono-system-workflow-activities4.0-cil libmono-system-workflow-componentmodel4.0-cil libmono-system-workflow-runtime4.0-cil libmono-system-xaml4.0-cil libmono-system-xml-linq4.0-cil libmono-system-xml-serialization4.0-cil libmono-system-xml4.0-cil libmono-system4.0-cil libmono-tasklets4.0-cil libmono-webbrowser4.0-cil libmono-webmatrix-data4.0-cil libmono-windowsbase4.0-cil libmono-xbuild-tasks4.0-cil libmonosgen-2.0-1 libmonosgen-2.0-dev libpostproc57 libswresample4 libswscale7 mono-4.0-gac mono-csharp-shell mono-devel mono-gac mono-mcs mono-runtime mono-runtime-common mono-runtime-sgen mono-xbuild mono-xsp4 mono-xsp4-base monodoc-base monodoc-manual
+2026-10-01 20:02:30,939 DEBUG Foreign (after rewriting sources):
+2026-10-01 20:02:30,940 DEBUG running Quirks.PreDistUpgradeCache
+2026-10-01 20:02:30,940 INFO Quirk: Marking 'libfile-libmagic-perl' for install to prevent dependency deadlock.
+2026-10-01 20:03:04,575 ERROR Dist-upgrade failed: 'W:S'està ignorant el fitxer «libreoffice-ppa-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «tsbarnes-indicator-keylock-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «ffdiaporamateam-stable-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «videolan-stable-daily-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «libreoffice-ppa-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «tsbarnes-indicator-keylock-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «ffdiaporamateam-stable-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «videolan-stable-daily-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «libreoffice-ppa-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «tsbarnes-indicator-keylock-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «ffdiaporamateam-stable-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, W:S'està ignorant el fitxer «videolan-stable-daily-trusty.list.migrate» al directori «/etc/apt/sources.list.d/» perquè té una extensió al nom de fitxer no vàlida, E:Error, pkgProblemResolver::Resolve ha trencat coses, potser a causa de paquets retinguts.'
+2026-10-01 20:03:04,606 DEBUG abort called
+2026-10-01 20:03:04,613 DEBUG openCache()
+2026-10-01 20:03:07,098 DEBUG Comparing 4.15.0-92 with
+2026-10-01 20:03:07,098 DEBUG Comparing 4.4.0-102 with 4.15.0-92
+2026-10-01 20:03:07,099 DEBUG Comparing 4.4.0-97 with 4.15.0-92
+2026-10-01 20:03:07,099 DEBUG Comparing 5.4.0-73 with 4.15.0-92
+2026-10-01 20:03:07,100 DEBUG Comparing 6.8.0-134 with 5.4.0-73
+2026-10-01 20:03:07,100 DEBUG Comparing 6.8.0-142 with 6.8.0-134
+2026-10-01 20:03:07,100 DEBUG Comparing 6.8.0-146 with 6.8.0-142
+2026-10-01 20:03:07,214 DEBUG /openCache(), new cache size 94359

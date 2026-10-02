@@ -1,0 +1,242 @@
+2026-09-29 23:49:44,218 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-09-29 23:49:44,218 INFO uname information: 'Linux redacted-host 7.0.0-34-generic #34~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Sep  4 15:38:29 UTC 2 x86_64'
+2026-09-29 23:49:44,727 INFO apt version: '2.8.3'
+2026-09-29 23:49:44,727 INFO python version: '3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]'
+2026-09-29 23:49:44,730 INFO release-upgrader version '26.04.25' started
+2026-09-29 23:49:44,747 INFO locale: 'de_DE' 'UTF-8'
+2026-09-29 23:49:44,757 INFO screen could not be run
+2026-09-29 23:49:44,814 DEBUG Using 'DistUpgradeViewText' view
+2026-09-29 23:49:44,816 DEBUG enable dpkg --force-overwrite
+2026-09-29 23:49:44,847 ERROR failed to import AptClone
+2026-09-29 23:49:44,847 DEBUG Upgrading from noble to resolute
+2026-09-29 23:49:44,848 DEBUG _pythonSymlinkCheck run
+2026-09-29 23:49:44,848 DEBUG openCache()
+2026-09-29 23:49:44,848 DEBUG running Quirks.PreCacheOpen
+2026-09-29 23:49:45,687 DEBUG Comparing 7.0.0-31 with
+2026-09-29 23:49:45,687 DEBUG Comparing 7.0.0-34 with 7.0.0-31
+2026-09-29 23:49:45,801 DEBUG /openCache(), new cache size 92501
+2026-09-29 23:49:45,802 DEBUG need_server_mode(): run in 'desktop' mode, (because of key deps for 'kubuntu-desktop')
+2026-09-29 23:49:45,802 DEBUG checkViewDepends()
+2026-09-29 23:49:45,806 DEBUG running doUpdate() (showErrors=False)
+2026-09-29 23:49:47,012 DEBUG openCache()
+2026-09-29 23:49:47,841 DEBUG Comparing 7.0.0-31 with
+2026-09-29 23:49:47,841 DEBUG Comparing 7.0.0-34 with 7.0.0-31
+2026-09-29 23:49:47,965 DEBUG /openCache(), new cache size 92501
+2026-09-29 23:49:47,965 DEBUG doPostInitialUpdate
+2026-09-29 23:49:47,965 DEBUG running Quirks.PostInitialUpdate
+2026-09-29 23:49:47,967 DEBUG RVA23 check: No ISA information
+2026-09-29 23:49:48,476 DEBUG flatpak will be marked as manually installed
+2026-09-29 23:49:48,514 DEBUG plasma-discover-backend-flatpak will be marked as manually installed
+2026-09-29 23:49:48,542 INFO cache.commit()
+2026-09-29 23:49:53,007 DEBUG Snap bare is installed
+2026-09-29 23:49:53,007 DEBUG Snap bare is not tracking the release channel
+2026-09-29 23:49:53,331 DEBUG Snap core18 is installed
+2026-09-29 23:49:53,332 DEBUG Snap core18 is not tracking the release channel
+2026-09-29 23:49:53,628 DEBUG Snap core20 is installed
+2026-09-29 23:49:53,628 DEBUG Snap core20 is not tracking the release channel
+2026-09-29 23:49:54,024 DEBUG Snap core22 is installed
+2026-09-29 23:49:54,024 DEBUG Snap core22 is not tracking the release channel
+2026-09-29 23:49:54,386 DEBUG Snap core24 is installed
+2026-09-29 23:49:54,386 DEBUG Snap core24 is not tracking the release channel
+2026-09-29 23:49:54,751 DEBUG Snap cups is installed
+2026-09-29 23:49:54,751 DEBUG Snap cups is not tracking the release channel
+2026-09-29 23:49:55,112 DEBUG Snap firefox is installed
+2026-09-29 23:49:55,427 DEBUG Snap firmware-updater is installed
+2026-09-29 23:49:55,736 DEBUG Snap gaming-graphics-core24 is installed
+2026-09-29 23:49:55,737 DEBUG Snap gaming-graphics-core24 is not tracking the release channel
+2026-09-29 23:49:56,055 DEBUG Snap gnome-42-2204 is installed
+2026-09-29 23:49:56,055 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-09-29 23:49:56,346 DEBUG Snap gnome-46-2404 is installed
+2026-09-29 23:49:56,346 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-09-29 23:49:56,649 DEBUG Snap gtk-common-themes is installed
+2026-09-29 23:49:57,168 DEBUG Snap kf6-core24 is installed
+2026-09-29 23:49:57,168 DEBUG Snap kf6-core24 is not tracking the release channel
+2026-09-29 23:49:57,445 DEBUG Snap lxqt-support-core24 is installed
+2026-09-29 23:49:57,445 DEBUG Snap lxqt-support-core24 is not tracking the release channel
+2026-09-29 23:49:58,020 DEBUG Snap mesa-2404 is installed
+2026-09-29 23:49:58,020 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-09-29 23:49:58,341 DEBUG Snap musescore is installed
+2026-09-29 23:49:58,341 DEBUG Snap musescore is not tracking the release channel
+2026-09-29 23:49:58,622 DEBUG Snap notepad-plus-plus is installed
+2026-09-29 23:49:58,622 DEBUG Snap notepad-plus-plus is not tracking the release channel
+2026-09-29 23:49:58,916 DEBUG Snap snapd is installed
+2026-09-29 23:49:58,916 DEBUG Snap snapd is not tracking the release channel
+2026-09-29 23:49:59,218 DEBUG Snap thunderbird is installed
+2026-09-29 23:49:59,542 DEBUG Snap wine-platform is installed
+2026-09-29 23:49:59,542 DEBUG Snap wine-platform is not tracking the release channel
+2026-09-29 23:49:59,824 DEBUG Snap wine-platform-9-devel-core22 is installed
+2026-09-29 23:49:59,824 DEBUG Snap wine-platform-9-devel-core22 is not tracking the release channel
+2026-09-29 23:50:00,113 DEBUG Snap wine-platform-runtime-core22 is installed
+2026-09-29 23:50:00,113 DEBUG Snap wine-platform-runtime-core22 is not tracking the release channel
+2026-09-29 23:50:00,408 DEBUG Snap wine-platform-runtime-core24 is installed
+2026-09-29 23:50:00,408 DEBUG Snap wine-platform-runtime-core24 is not tracking the release channel
+2026-09-29 23:50:01,680 DEBUG MetaPkgs:
+2026-09-29 23:50:01,914 DEBUG Obsolete: adobeair claude-desktop devolo-dlan-cockpit devolo-ia32-libs:i386 libdvdcss-dev libdvdcss2 master-pdf-editor-5 pdfsam-basic
+2026-09-29 23:50:01,916 DEBUG migrateToDeb822Sources()
+2026-09-29 23:50:01,918 DEBUG Could not migrate ## See sources.list(5) for more information, especialy from /etc/apt/sources.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG Could not migrate # Remember that you can only use http, ftp or file URIs from /etc/apt/sources.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG Could not migrate # CDROMs are managed through the apt-cdrom tool. from /etc/apt/sources.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG Could not migrate ### Managed by the claude-desktop package. from /etc/apt/sources.list.d/claude-desktop.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG Could not migrate ### Set CLAUDE_DESKTOP_ADD_REPO="true"|"false" in /etc/default/claude-desktop from /etc/apt/sources.list.d/claude-desktop.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG Could not migrate ### to force this entry on or off; remove this file too when opting out. from /etc/apt/sources.list.d/claude-desktop.list, disabling instead.
+2026-09-29 23:50:01,918 DEBUG updateDeb822Sources()
+2026-09-29 23:50:01,921 DEBUG examining: 'Types: deb
+URIs: https://brave-browser-apt-release.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg'
+2026-09-29 23:50:01,922 DEBUG entry 'Types: deb
+URIs: https://brave-browser-apt-release.s3.brave.com
+Suites: stable
+Components: main
+Architectures: amd64 arm64
+Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:50:01,922 DEBUG examining: 'Types: deb
+URIs: https://dl.winehq.org/wine-builds/ubuntu
+Suites: jammy
+Components: main
+Architectures: amd64 i386
+Signed-By: /etc/apt/keyrings/winehq-archive.key'
+2026-09-29 23:50:01,924 DEBUG entry 'Types: deb
+URIs: https://dl.winehq.org/wine-builds/ubuntu
+Suites: jammy
+Components: main
+Architectures: amd64 i386
+Signed-By: /etc/apt/keyrings/winehq-archive.key
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:50:01,924 DEBUG examining: 'Types: deb
+URIs: https://dl.winehq.org/wine-builds/ubuntu
+Suites: noble
+Components: main
+Architectures: amd64 i386
+Signed-By: /etc/apt/keyrings/winehq-archive.key'
+2026-09-29 23:50:01,925 DEBUG entry 'Types: deb
+URIs: https://dl.winehq.org/wine-builds/ubuntu
+Suites: noble
+Components: main
+Architectures: amd64 i386
+Signed-By: /etc/apt/keyrings/winehq-archive.key
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:50:01,925 DEBUG examining: '# Automatically generated by Calamares on 2025-10-20.
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of Kubuntu.
+## Ubuntu distribution repository
+##
+## The following settings can be adjusted to configure which packages to use from Ubuntu.
+## Mirror your choices (except for URIs and Suites) in the security section below to
+## ensure timely security updates.
+##
+## Types: Append deb-src to enable the fetching of source package.
+## URIs: A URL to the repository (you may add multiple URLs)
+## Suites: The following additional suites can be configured
+##   <name>-updates   - Major bug fix updates produced after the final release of the
+##                      distribution.
+##   <name>-backports - software from this repository may not have been tested as
+##                      extensively as that contained in the main release, although it includes
+##                      newer versions of some applications which may provide useful features.
+##                      Also, please note that software in backports WILL NOT receive any review
+##                      or updates from the Ubuntu security team.
+## Components: Aside from main, the following components can be added to the list
+##   restricted  - Software that may not be under a free license, or protected by patents.
+##   universe    - Community maintained packages.
+##                 Software from this repository is only maintained and supported by Canonical
+##                 for machines with Ubuntu Pro subscriptions. Without Ubuntu Pro, the Ubuntu
+##                 community provides best-effort security maintenance.
+##   multiverse  - Community maintained of restricted. Software from this repository is
+##                 ENTIRELY UNSUPPORTED by the Ubuntu team, and may not be under a free
+##                 licence. Please satisfy yourself as to your rights to use the software.
+##                 Also, please note that software in multiverse WILL NOT receive any
+##                 review or updates from the Ubuntu security team.
+##
+## See the sources.list(5) manual page for further settings.
+Types: deb
+URIs: http://de.archive.ubuntu.com/ubuntu
+Suites: noble noble-updates noble-backports
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 23:50:01,926 DEBUG verifySourcesListEntry: # Automatically generated by Calamares on 2025-10-20.
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of Kubuntu.
+## Ubuntu distribution repository
+##
+## The following settings can be adjusted to configure which packages to use from Ubuntu.
+## Mirror your choices (except for URIs and Suites) in the security section below to
+## ensure timely security updates.
+##
+## Types: Append deb-src to enable the fetching of source package.
+## URIs: A URL to the repository (you may add multiple URLs)
+## Suites: The following additional suites can be configured
+##   <name>-updates   - Major bug fix updates produced after the final release of the
+##                      distribution.
+##   <name>-backports - software from this repository may not have been tested as
+##                      extensively as that contained in the main release, although it includes
+##                      newer versions of some applications which may provide useful features.
+##                      Also, please note that software in backports WILL NOT receive any review
+##                      or updates from the Ubuntu security team.
+## Components: Aside from main, the following components can be added to the list
+##   restricted  - Software that may not be under a free license, or protected by patents.
+##   universe    - Community maintained packages.
+##                 Software from this repository is only maintained and supported by Canonical
+##                 for machines with Ubuntu Pro subscriptions. Without Ubuntu Pro, the Ubuntu
+##                 community provides best-effort security maintenance.
+##   multiverse  - Community maintained of restricted. Software from this repository is
+##                 ENTIRELY UNSUPPORTED by the Ubuntu team, and may not be under a free
+##                 licence. Please satisfy yourself as to your rights to use the software.
+##                 Also, please note that software in multiverse WILL NOT receive any
+##                 review or updates from the Ubuntu security team.
+##
+## See the sources.list(5) manual page for further settings.
+Types: deb
+URIs: http://de.archive.ubuntu.com/ubuntu
+Suites: resolute resolute-updates resolute-backports
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-09-29 23:50:01,926 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu/dists/resolute/Release
+2026-09-29 23:50:01,926 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu/dists/resolute/Release' q='' f=''
+2026-09-29 23:50:02,017 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu/dists/resolute-updates/Release
+2026-09-29 23:50:02,017 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu/dists/resolute-updates/Release' q='' f=''
+2026-09-29 23:50:02,064 DEBUG url_downloadable: http://de.archive.ubuntu.com/ubuntu/dists/resolute-backports/Release
+2026-09-29 23:50:02,065 DEBUG s='http' n='de.archive.ubuntu.com' p='/ubuntu/dists/resolute-backports/Release' q='' f=''
+2026-09-29 23:50:02,113 DEBUG examining: '## Ubuntu security updates. Aside from URIs and Suites,
+## this should mirror your choices in the previous section.
+Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: noble-security
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-09-29 23:50:02,114 DEBUG examining: '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# You may comment out this entry, but any other modifications may be lost.
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/microsoft.gpg'
+2026-09-29 23:50:02,116 DEBUG entry '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# You may comment out this entry, but any other modifications may be lost.
+Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/microsoft.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-09-29 23:50:02,119 DEBUG running doUpdate() (showErrors=True)
+2026-09-29 23:50:08,279 DEBUG openCache()
+2026-09-29 23:50:08,930 DEBUG Comparing 7.0.0-31 with
+2026-09-29 23:50:08,930 DEBUG Comparing 7.0.0-34 with 7.0.0-31
+2026-09-29 23:50:09,022 DEBUG /openCache(), new cache size 84777
+2026-09-29 23:50:09,244 DEBUG Foreign (before rewriting sources): brave-browser brave-keyring code wine-staging wine-staging-amd64 wine-staging-i386:i386 winehq-staging
+2026-09-29 23:50:09,244 DEBUG Foreign (after rewriting sources):
+2026-09-29 23:50:09,245 DEBUG running Quirks.PreDistUpgradeCache
+2026-09-29 23:50:09,314 DEBUG none of the '['ubuntu-desktop', 'kubuntu-desktop', 'xubuntu-core', 'xubuntu-desktop', 'ubuntustudio-desktop', 'ubuntustudio-desktop-core', 'lubuntu-desktop', 'ubuntu-gnome-desktop', 'ubuntu-mate-core', 'ubuntu-mate-desktop', 'ubuntukylin-desktop', 'ubuntu-budgie-desktop', 'ubuntu-unity-desktop']' meta-pkgs installed
+2026-09-29 23:50:09,314 DEBUG guessing 'kubuntu-desktop' as missing meta-pkg
+2026-09-29 23:50:10,085 ERROR failed to mark 'kubuntu-desktop' for install (W:Datei »claude-desktop.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., W:Datei »claude-desktop.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., W:Datei »claude-desktop.list.migrate« in Verzeichnis »/etc/apt/sources.list.d/« wird ignoriert, da sie eine ungültige Dateinamen-Erweiterung hat., E:Fehler: Unterbrechungen durch pkgProblemResolver::Resolve hervorgerufen; dies könnte durch zurückgehaltene Pakete verursacht worden sein.)
+2026-09-29 23:50:10,970 ERROR Dist-upgrade failed: 'E:Probleme können nicht korrigiert werden, Sie haben zurückgehaltene defekte Pakete.'
+2026-09-29 23:50:10,979 DEBUG abort called
+2026-09-29 23:50:10,982 DEBUG openCache()
+2026-09-29 23:50:14,226 DEBUG Comparing 7.0.0-31 with
+2026-09-29 23:50:14,226 DEBUG Comparing 7.0.0-34 with 7.0.0-31
+2026-09-29 23:50:14,375 DEBUG /openCache(), new cache size 92501

@@ -267,6 +267,27 @@ error it printed names no package at all. The thresholds come from the corpus:
 reversal counts are bimodal, 1–2 for noise and 16–20 for real livelocks, with
 nothing in between.
 
+**The upgrader's own conclusion outranks the graph.** When no desktop
+metapackage is installed the upgrader guesses one and marks it, and the upgrade
+stops if that fails. The metapackage is then broken by a single unsatisfiable
+dependency, so it strands nothing and loses every ranking by consequence to
+roots apt had already resolved and moved past. Three reports of exactly that —
+2168863, 2168909 and 2168919 — came back as three different causes
+(`holdback_blocks_new_dep`, `update_failed`, `transitional_breaks`), none right
+and no two clustered. A statement about why the run ended beats an inference
+about a decision made on the way there. It still loses to non-convergence,
+because a livelocked resolver is *why* the mark failed.
+
+**A message is not a failure unless the run stopped.** The upgrader refreshes
+the package lists twice: once before rewriting `sources.list`, where failure is
+expected because the user's existing entries may be unreachable and the result
+is discarded, and once after, where failure aborts. Both log the same line. One
+dead PPA therefore writes `doUpdate() failed completely` into every upgrade
+including the successful ones, and because the environment is ranked above the
+packages — correctly, in general — that recovered error took the headline on a
+run that died ninety seconds later for an unrelated reason. The discriminator
+is in the log: `showErrors=True` marks the call that matters.
+
 **A successful upgrade needs a positive finding.** A clean resolve is not a
 quiet one: apt breaks and repairs packages as it searches, so a working
 upgrade's trace still contains holdbacks and unsatisfiable virtuals. Without
@@ -342,17 +363,31 @@ uv run ruff check src tests
 uv run mypy src/uru_doctor
 ```
 
-The test corpus is 37 recorded fixtures from real Launchpad bugs in three
+The test corpus is 47 recorded fixtures from real Launchpad bugs in six
 languages, with provenance in `tests/fixtures/MANIFEST.md`. The lexer is held
-at **100% coverage over 29,037 lines of real apt logs across twelve traces**:
+at **100% coverage over 40,404 lines of real apt logs across sixteen traces**:
 not 99.9%, because an unrecognised line is a silently dropped fact rather than
 a visible error.
+
+One trace is held out of that gate, and it is the only one. LP#2168919's
+`apt.log` carries four lines of the upgrader's *own* user-facing error,
+interleaved by `_stopAptResolverLog()` restoring stdout before `view.error`
+runs. That is upgrader prose rather than an apt verb, in a gettext domain that
+is not installed on a machine which merely has apt, so the forward-translation
+that handles every other translated message cannot reach it — and enumerating
+prose in ninety languages is the one repair this codebase refuses. The
+exclusion is pinned by a test asserting the gap is exactly those four lines, so
+it cannot absorb a new one. The honest fix is to classify an interleaved
+upgrader block as *not a resolver verb*, and it is not written yet.
 
 Ground truth for the recorded bugs is checked against outcomes that are
 independent of this tool: the upstream fix, the bug's resolution, the log read
 by hand, in that order. Triager tags are the weakest evidence and sometimes
 wrong. Bug 2155743 is tagged `third-party-packages` and has 46 foreign packages
-installed, none of which is the cause.
+installed, none of which is the cause. Bug 2169214 is the same inversion
+produced by the tool itself: it was diagnosed `third_party_pin` and flagged
+candidate-Invalid on a machine with 139 foreign packages, when the cause was a
+`kubuntu-desktop` metapackage the upgrader could not install.
 
 `.opencode/skills/triage-new-bug/` holds the workflow for validating the tool
 against a new bug, including the ordered checks that have to pass before a

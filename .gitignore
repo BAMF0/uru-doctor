@@ -4,15 +4,22 @@
 
 # Downloaded bug logs. These are other people's machines -- never commit them.
 # Redacted fixtures under tests/fixtures/ are the exception and are committed.
-bugs/
-logs/
+#
+# Anchored with a leading slash. Unanchored, `logs/` matches at any depth and
+# swallowed tests/fixtures/logs/ entirely -- so every recorded main.log,
+# apt-term.log and history.log fixture was absent from the repository while
+# the comment above claimed otherwise. The failure is silent: `fixture_text`
+# calls `pytest.skip`, so a fresh clone quietly skipped the main.log half of
+# the ground-truth suite rather than failing.
+/bugs/
+/logs/
 
 # Generated reports, exports and retitle proposals.
-out/
+/out/
 
 # Build artefacts. `uv build` writes here.
-dist/
-build/
+/dist/
+/build/
 
 # Python
 __pycache__/

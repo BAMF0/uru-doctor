@@ -23,6 +23,7 @@ from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Confidence, Finding, LogSource, Severity
 from uru_doctor.parsers.apportmeta import parse_apport_meta
 from uru_doctor.rules.registry import RULES, all_rules, rule, rules_digest
+from uru_doctor.title import propose_title
 
 from .conftest import FIXTURES, fixture_text, ingest_one
 
@@ -658,8 +659,358 @@ class TestHeldOutBugs:
             assert attachment_source(title) is None
 
 
+class TestMissingMetapackage:
+    """Three reports of one fault that came back with three different causes.
+
+    When no known desktop metapackage is installed, ``_installMetaPkgs``
+    guesses one from its key dependencies, marks it, and aborts the upgrade if
+    the mark fails. The metapackage is then broken by a single unsatisfiable
+    dependency, so it strands nothing and loses every ranking by consequence --
+    while the roots apt had already resolved and moved past strand dozens and
+    win. LP#2168863, LP#2168909 and LP#2168919 are the same fault and were
+    diagnosed ``holdback_blocks_new_dep``, ``update_failed`` and
+    ``transitional_breaks`` respectively. None of the three was right and no
+    two of them clustered.
+    """
+
+    def test_the_upgraders_own_conclusion_is_the_cause(self, interner: Interner) -> None:
+        """``failed to mark '%s' for install`` names the package and the failure.
+
+        Ground truth for LP#2168919 is on the bug: comment 2 identifies the
+        ``pipewire-audio``/``pulseaudio`` conflict, reached by hand from the
+        same log. LP#2168909's ground truth is its own title, which is the
+        upstream ``_("It was impossible to install a required package")``
+        string -- the user-visible half of this very log record.
+        """
+        for bug_id, package in (("2168919", "kubuntu-desktop"), ("2168909", "lubuntu-desktop")):
+            run = ingest_one(
+                {
+                    LogSource.APT: fixture_text(f"apt/lp{bug_id}-apt.log"),
+                    LogSource.MAIN: fixture_text(f"logs/lp{bug_id}-main.log"),
+                },
+                interner,
+                bug_id=int(bug_id),
+            )
+            result = diagnose(run, interner)
+            assert result.primary.cause is Cause.META_PACKAGE_UNINSTALLABLE, bug_id
+            assert result.primary.detail["package"] == package
+            assert result.primary.rule == "upgrader.metapkg-install-failed"
+
+    def test_it_outranks_a_root_apt_had_already_resolved(self, interner: Interner) -> None:
+        """LP#2168919's old answer is still in the log, and must stay beneath.
+
+        ``libgstreamer-plugins-good1.0-0`` really does conflict with its own
+        replacement and really does strand six packages -- in the *first* of
+        two resolver passes, which apt finished. Ranked on blast radius it beat
+        a metapackage that strands nothing, which is the same error LP#2150245
+        forced a fix for, arriving by a different route.
+        """
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2168919-apt.log"),
+                LogSource.MAIN: fixture_text("logs/lp2168919-main.log"),
+            },
+            interner,
+            bug_id=2168919,
+        )
+        result = diagnose(run, interner)
+        transitional = next(f for f in result.findings if f.cause is Cause.TRANSITIONAL_BREAKS)
+        assert transitional.cascade_size >= 6
+        assert result.findings.index(result.primary) < result.findings.index(transitional)
+
+    def test_a_truncated_log_stays_hedged(self, interner: Interner) -> None:
+        """LP#2168863 is the same fault and must *not* get the same answer.
+
+        Its ``main.log`` stops while building the error dialog, before the
+        upgrader wrote its conclusion, so the record that proves the cause does
+        not exist in this report. The rule therefore requires complete
+        evidence: a log that stops mid-run cannot support a claim about why the
+        run ended. Only the apt-side analysis can reach this one, and until it
+        can, admitting to not knowing is the correct output.
+        """
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2168863-apt.log"),
+                LogSource.MAIN: fixture_text("logs/lp2168863-main.log"),
+            },
+            interner,
+            bug_id=2168863,
+        )
+        result = diagnose(run, interner)
+        assert not run.evidence_complete
+        assert result.primary.cause is not Cause.META_PACKAGE_UNINSTALLABLE
+        assert "upgrader.metapkg-install-failed" in result.skipped_incomplete
+        assert not propose_title(run, result, interner).confident
+
+    def test_it_is_not_mistaken_for_a_third_party_fault(self, interner: Interner) -> None:
+        """LP#2169214 is the expensive version of this mistake.
+
+        Diagnosed ``third_party_pin`` with ``candidate_invalid`` set, on a
+        machine with 139 foreign packages, none of which is a root. The tool
+        was pointing a triager at closing a legitimate bug Invalid -- and the
+        upgrader *guessing* a metapackage that cannot then be installed is
+        arguably its own bug, not the reporter's PPAs.
+
+        The same inversion as LP#2155743, reached from a different direction:
+        having third-party packages installed is not evidence of being the
+        cause. Refusing to name a cause is cheap; naming the wrong one on the
+        Invalid path is not.
+        """
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2169214-apt.log"),
+                LogSource.MAIN: fixture_text("logs/lp2169214-main.log"),
+            },
+            interner,
+            bug_id=2169214,
+        )
+        result = diagnose(run, interner)
+        assert len(run.third_party) >= 100
+        assert result.primary.cause is Cause.META_PACKAGE_UNINSTALLABLE
+        assert result.primary.detail["package"] == "kubuntu-desktop"
+        assert not result.is_candidate_invalid
+
+    def test_a_livelock_still_wins_on_a_real_log(self, interner: Interner) -> None:
+        """LP#2169286 has both signals, and the ordering decides correctly.
+
+        Its ``main.log`` carries ``failed to mark 'kubuntu-desktop' for
+        install`` *and* its ``apt.log`` holds a terminal ``mutter-common``
+        livelock. The livelock keeps the title because it explains the failed
+        mark: apt never converged, so nothing it was asked to do succeeded.
+
+        Recorded because the tier ordering was decided on three other bugs and
+        this is an independent log that exercises its losing side. The
+        synthetic version of this comparison is in
+        :class:`TestUpgraderConclusionRanking`; this one proves it holds on
+        real evidence.
+        """
+        main = fixture_text("logs/lp2169286-main.log")
+        assert "failed to mark 'kubuntu-desktop' for install" in main
+
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2169286-apt.log"),
+                LogSource.MAIN: main,
+            },
+            interner,
+            bug_id=2169286,
+        )
+        result = diagnose(run, interner)
+        assert result.primary.cause is Cause.RESOLVER_LIVELOCK
+
+        # The metapackage finding is still reported -- it is true, and a
+        # triager needs it -- just never as the headline.
+        metapkg = next(f for f in result.findings if f.cause is Cause.META_PACKAGE_UNINSTALLABLE)
+        assert result.findings.index(result.primary) < result.findings.index(metapkg)
+
+    def test_the_apt_evidence_is_present_but_silent(self, interner: Interner) -> None:
+        """Why the graph could not answer this, recorded so it is not re-tried.
+
+        ``kubuntu-desktop`` and ``pipewire-audio`` are both *in* the conflict
+        graph. apt emits ``Considering pipewire-audio ... as a solution to
+        kubuntu-desktop`` three times and then stops, with no decision verb --
+        no ``Holding Back``, no ``Removing``, no ``MarkDelete`` -- so there is
+        no blame edge, no cascade, and ``roots.classify`` produces no finding
+        for the node that actually ended the upgrade.
+
+        This is the open half of the fault. Asserting it keeps the limitation
+        legible: the fix is to emit a root for a terminal ``Broken`` block that
+        drew only ``Considering``, and that is apt-side work this change does
+        not attempt.
+        """
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2168919-apt.log"),
+                LogSource.MAIN: fixture_text("logs/lp2168919-main.log"),
+            },
+            interner,
+            bug_id=2168919,
+        )
+        names = {interner.package_label(p) for p in run.graphs[0].nodes.ids}
+        assert {"kubuntu-desktop", "pipewire-audio", "pulseaudio"} <= names
+
+        result = diagnose(run, interner)
+        resolver_findings = [f for f in result.findings if f.graph_index is not None]
+        blamed = {interner.package_label(p) for f in resolver_findings for p in f.root_pkgs}
+        assert "kubuntu-desktop" not in blamed
+        assert "pipewire-audio" not in blamed
+
+
+class TestRecoveredUpdateFailure:
+    """``doUpdate() failed completely`` is logged by a call that may fail."""
+
+    def test_a_recovered_pre_rewrite_update_is_not_the_cause(self, interner: Interner) -> None:
+        """LP#2168909 failed its first update and succeeded at its second.
+
+        ``DistUpgradeController.py:2020`` runs ``doUpdate(showErrors=False,
+        forceRetries=1)`` before the sources rewrite and throws the result
+        away, because -- in upstream's own words -- "the (unmodified)
+        sources.list of the user may contain bad/unreachable entries". Only
+        the call at :2042 is guarded by ``abort()``.
+
+        So any reporter with one dead PPA logs this message on every upgrade,
+        including the ones that work. Because ``UPDATE_FAILED`` is an
+        environment cause and the environment outranks the packages, it took
+        the headline on a run whose real failure was ninety seconds later.
+        """
+        run = ingest_one(
+            {
+                LogSource.APT: fixture_text("apt/lp2168909-apt.log"),
+                LogSource.MAIN: fixture_text("logs/lp2168909-main.log"),
+            },
+            interner,
+            bug_id=2168909,
+        )
+        messages = [interner.render(e.template_id, e.args) for e in run.events]
+        # The log really does contain the string; the rule must look past it.
+        assert any("doUpdate() failed completely" in m for m in messages)
+        assert any("running doUpdate() (showErrors=False)" in m for m in messages)
+        assert any("running doUpdate() (showErrors=True)" in m for m in messages)
+
+        result = diagnose(run, interner)
+        assert result.primary.cause is not Cause.UPDATE_FAILED
+        assert "net.update-failed" not in result.fired
+
+    @pytest.mark.parametrize(
+        ("show_errors", "fires"),
+        [("True", True), ("False", False)],
+    )
+    def test_the_gate_is_the_show_errors_flag(self, show_errors: str, fires: bool) -> None:
+        """Unit-level, so the gate is tested apart from one bug's log."""
+        from uru_doctor.rules.upgrader import _update_failure_was_fatal
+
+        messages = [
+            "openCache()",
+            f"running doUpdate() (showErrors={show_errors})",
+            "doUpdate() failed completely",
+        ]
+        assert _update_failure_was_fatal(messages, 2) is fires
+
+    def test_an_unannounced_failure_still_counts(self) -> None:
+        """Absent the DEBUG line, keep the rule rather than lose it.
+
+        Conservative in the same direction as
+        :func:`uru_doctor.ingest.is_terminal_error`: over-reporting a failure
+        the run survived is recoverable, silently dropping a real one is not.
+        """
+        from uru_doctor.rules.upgrader import _update_failure_was_fatal
+
+        assert _update_failure_was_fatal(["doUpdate() failed completely"], 0) is True
+
+    def test_a_genuine_update_failure_still_fires(self, interner: Interner) -> None:
+        """The gate must not disarm the rule it guards."""
+        run = ingest_one(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 00:00:00,000 INFO release-upgrader version '26.04.1' started\n"
+                    "2026-01-01 00:00:01,000 DEBUG Upgrading from noble to resolute\n"
+                    "2026-01-01 00:00:02,000 DEBUG running doUpdate() (showErrors=True)\n"
+                    "2026-01-01 00:00:03,000 ERROR doUpdate() failed completely\n"
+                )
+            },
+            interner,
+            bug_id=None,
+        )
+        result = diagnose(run, interner)
+        assert result.primary.cause is Cause.UPDATE_FAILED
+        assert "net.update-failed" in result.fired
+
+    def test_the_non_fatal_mark_warning_is_not_a_cause(self, interner: Interner) -> None:
+        """``Can't mark '%s' for upgrade`` sits beside the error and is benign.
+
+        Fourteen lines above the record this change acts on,
+        ``_installMetaPkgs`` logs that at WARNING with the comment "warn here,
+        but don't fail, its possible that meta-packages conflict (like
+        ubuntu-desktop vs xubuntu-desktop) LP: #775411". Matching the upstream
+        family rather than the line seen is usually right; here one half of the
+        pair must stay inert, so the rule reads ``ERROR`` records only.
+        """
+        run = ingest_one(
+            {
+                LogSource.MAIN: (
+                    "2026-01-01 00:00:00,000 INFO release-upgrader version '26.04.1' started\n"
+                    "2026-01-01 00:00:01,000 DEBUG Upgrading from noble to resolute\n"
+                    "2026-01-01 00:00:02,000 WARNING Can't mark 'ubuntu-desktop' for upgrade "
+                    "(E:Broken packages)\n"
+                )
+            },
+            interner,
+            bug_id=None,
+        )
+        result = diagnose(run, interner)
+        assert "upgrader.metapkg-install-failed" not in result.fired
+        # Nothing else should claim it either: a benign warning is not a cause,
+        # and the honest answer to a log containing only one is no answer.
+        assert result.primary is None or result.primary.cause is not (
+            Cause.META_PACKAGE_UNINSTALLABLE
+        )
+
+
+class TestUpgraderConclusionRanking:
+    """Where the new tier sits, and why it sits on both sides of something."""
+
+    @staticmethod
+    def _finding(cause: Cause, rule_name: str, cascade: int = 0) -> Finding:
+        return Finding(
+            rule=rule_name,
+            cause=cause,
+            summary="",
+            severity=Severity.HIGH,
+            confidence=Confidence.STRONG,
+            cascade_size=cascade,
+        )
+
+    def test_a_livelock_outranks_a_failed_metapackage_mark(self) -> None:
+        """The livelock explains the failed mark, so it keeps the title.
+
+        If apt never converged then nothing it was asked to do succeeded, and
+        the metapackage failing to mark is a symptom of that. This is the one
+        comparison the new tier must lose.
+        """
+        livelock = self._finding(Cause.RESOLVER_LIVELOCK, "resolver.livelock")
+        metapkg = self._finding(Cause.META_PACKAGE_UNINSTALLABLE, "upgrader.metapkg-install-failed")
+        ranked = rank_findings([metapkg, livelock])
+        assert ranked[0] is livelock
+
+    def test_a_failed_metapackage_mark_outranks_any_resolver_root(self) -> None:
+        """And this is the comparison it must win, at any blast radius.
+
+        A root with fifty victims that apt resolved explains nothing about an
+        upgrade that stopped because a metapackage could not be installed.
+        Blast radius decides between roots, not between a root and the
+        upgrader's own conclusion.
+        """
+        metapkg = self._finding(Cause.META_PACKAGE_UNINSTALLABLE, "upgrader.metapkg-install-failed")
+        root = self._finding(Cause.TRANSITIONAL_BREAKS, "resolver.roots", cascade=50)
+        ranked = rank_findings([root, metapkg])
+        assert ranked[0] is metapkg
+
+    def test_an_environment_failure_still_outranks_it(self) -> None:
+        """A full disk is not explained by a metapackage."""
+        disk = self._finding(Cause.NOT_ENOUGH_DISK_SPACE, "env.disk-space")
+        metapkg = self._finding(Cause.META_PACKAGE_UNINSTALLABLE, "upgrader.metapkg-install-failed")
+        assert rank_findings([metapkg, disk])[0] is disk
+
+    def test_a_completed_upgrade_demotes_it(self) -> None:
+        """``_installMetaPkgs`` runs long before dpkg.
+
+        If the upgrade went on to write packages then the metapackage was
+        marked successfully, so a complaint about it belongs to some earlier
+        attempt and cannot explain a machine that broke afterwards. Same
+        argument as the resolver findings, which is why it joined
+        ``_PRE_COMMIT_ONLY_CAUSES``.
+        """
+        from uru_doctor.diagnose import _tier
+
+        metapkg = self._finding(Cause.META_PACKAGE_UNINSTALLABLE, "upgrader.metapkg-install-failed")
+        assert _tier(metapkg, completed=False) < _tier(metapkg, completed=True)
+
+
 class TestNewGrammarShapes:
     """Shapes the held-out logs contained and the corpus did not."""
+
+    #: The one log with a known, bounded gap. See :data:`tests.conftest.APT_FIXTURES`.
+    KNOWN_GAP = "lp2168919-apt.log"
 
     def test_full_coverage_including_the_new_logs(self) -> None:
         """Any unlexed line is a verb the analysis cannot see."""
@@ -667,6 +1018,8 @@ class TestNewGrammarShapes:
 
         total = matched = 0
         for path in sorted((FIXTURES / "apt").glob("*.log")):
+            if path.name == self.KNOWN_GAP:
+                continue
             stats = LexStats()
             list(lex(path.read_text().splitlines(), stats))
             assert stats.coverage == 1.0, f"{path.name}: {stats.top_unknown(3)}"
@@ -675,6 +1028,41 @@ class TestNewGrammarShapes:
         assert matched == total
         # Guards against the corpus shrinking to the point of proving nothing.
         assert total > 18_000
+
+    def test_the_known_gap_is_exactly_the_upgrader_prose(self) -> None:
+        """The one excluded log's gap is bounded, and this is what bounds it.
+
+        ``lp2168919-apt.log`` is the only fixture excluded from the coverage
+        gate, so the exclusion has to assert *what* is missing or it becomes a
+        place for new gaps to hide. All four unlexed lines are one upgrader
+        error block interleaved into ``apt.log`` by
+        ``DistUpgradeCache.py:897-901``, which ``_stopAptResolverLog()``
+        lets through because it restores stdout before ``view.error`` runs.
+
+        Deliberately not fixed by matching the prose: it is not an apt verb,
+        the ``ubuntu-release-upgrader`` gettext domain is absent on a machine
+        with only apt, and three of the four lines carry no
+        translation-surviving anchor. The honest repair is to classify an
+        interleaved upgrader block as *not a resolver verb*; until that
+        exists, this test keeps the debt visible and sized.
+
+        The diagnosis does not depend on closing it. The same conclusion is
+        available from ``main.log``'s ``failed to mark 'kubuntu-desktop' for
+        install``, which is what ``upgrader.metapkg-install-failed`` reads.
+        """
+        from uru_doctor.apt.lexer import LexStats, lex
+
+        stats = LexStats()
+        list(lex(fixture_text(f"apt/{self.KNOWN_GAP}").splitlines(), stats))
+
+        assert stats.unmatched == 4
+        shapes = {shape for shape, _ in stats.top_unknown(10)}
+        assert all(
+            "kubuntu-desktop" in s or "ubuntu-bug" in s or "Paket" in s or "Fehler" in s
+            for s in shapes
+        ), shapes
+        # One block, so no shape may repeat.
+        assert all(count == 1 for _, count in stats.top_unknown(10))
 
     def test_the_reinstated_score_variant(self) -> None:
         """``Re-Instated <pkg> (N vs N)``.

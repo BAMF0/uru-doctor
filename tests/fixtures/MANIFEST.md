@@ -120,6 +120,46 @@ xorg_fixup.log, the trivial case: two INFO lines and no xorg.conf. Present so th
 
 apt history.log with single lines of several hundred kilobytes listing two thousand packages.
 
+## `apt/lp2168919-apt.log`
+
+LP#2168919 'Release Ubuntu 24.04.5 LTS auf 26.04 LTS'; locale de_DE, apt 2.8.3, noble->resolute. Two resolver passes in one Log time: section, and the fault is in the SECOND: the trace's last word is 'Broken kubuntu-desktop Haengt ab von on pipewire-audio < none | ... @un umH >', held because pipewire-audio conflicts with the installed pulseaudio. apt emits no decision verb for it, so root analysis produces no finding at all and the headline was libgstreamer-plugins-good1.0-0 -- a transitional Breaks from the first pass, which apt resolved and moved past. Ground truth is on the bug itself (comment 2 names the pipewire-audio/pulseaudio conflict). Also the open lexer gap: four lines of untranslatable upgrader prose from DistUpgradeCache.py:898.
+
+## `logs/lp2168919-main.log`
+
+LP#2168919 main.log. Holds the two records that settle the diagnosis: "failed to mark 'kubuntu-desktop' for install" and 'Dist-upgrade failed' carrying apt's held-broken-packages message. Both in German.
+
+## `apt/lp2168909-apt.log`
+
+LP#2168909; locale de_DE, apt 2.8.3, noble->resolute. The same missing-metapackage fault with a different blocker: the final pass ends on 'Broken lubuntu-desktop Haengt ab von on lubuntu-desktop-minimal @un umH' plus five lxqt-* dependencies in @ii umR, i.e. scheduled for removal.
+
+## `logs/lp2168909-main.log`
+
+LP#2168909 main.log; the recovered-update false positive. Three PPAs have no Release file, so the pre-rewrite doUpdate(showErrors=False) at DistUpgradeController.py:2020 logs 'doUpdate() failed completely' at 23:18:16 -- then the real doUpdate succeeds at 23:18:35 and the run dies at 23:19:20 on lubuntu-desktop. Diagnosed update_failed until net.update-failed learned to check showErrors. The reporter's own bug title is the upstream _('It was impossible to install a required package') string, which is independent confirmation.
+
+## `apt/lp2168863-apt.log`
+
+LP#2168863; locale es_AR, apt 2.8.3, noble->resolute. Third report of the kubuntu-desktop/pipewire-audio fault, in Spanish ('Depende on'), with THREE resolver passes of 6, 17 and 84 broken. Kept as the case that must stay hedged: its main.log stops before the error is written, so evidence_complete is false and upgrader.metapkg-install-failed must not fire. Only the apt-side work can reach this one.
+
+## `logs/lp2168863-main.log`
+
+LP#2168863 main.log, truncated mid-run: it records "guessing 'kubuntu-desktop' as missing meta-pkg" and marked_install -> True, then stops while building the error dialog. The upgrader's conclusion was never written, which is the honest reason this bug cannot be diagnosed from main.log alone.
+
+## `apt/lp2169214-apt.log`
+
+LP#2169214; locale de_DE, apt 2.8.3, noble->resolute. The same kubuntu-desktop fault, kept because of what it was diagnosed as instead: third_party_pin, with candidate_invalid TRUE. 139 foreign packages are installed and not one of them is the cause, so the tool was steering a triager toward closing a legitimate bug Invalid -- the LP#2155743 trap arriving from a new direction, and the most expensive mistake this tool can make.
+
+## `logs/lp2169214-main.log`
+
+LP#2169214 main.log; "failed to mark 'kubuntu-desktop' for install" at 22:01:37, nine hundred lines after a doUpdate(showErrors=False) that succeeded. The ordinary shape of this fault.
+
+## `apt/lp2169286-apt.log`
+
+LP#2169286; locale de_DE, apt 2.8.3, noble->resolute. The only log in the corpus carrying BOTH a failed kubuntu-desktop mark and a terminal livelock (mutter-common on libmutter-14-0, 16 reversals at 99.9%). It is the real-log proof of the losing side of the upgrader-conclusion tier: the livelock must keep the title, because apt never converging is why nothing it was asked to do succeeded. Recorded separately from the three bugs the tier was designed on, so the ordering is checked against a log that did not inform it.
+
+## `logs/lp2169286-main.log`
+
+LP#2169286 main.log; holds the failed kubuntu-desktop mark that must *not* become the headline here.
+
 ## `lp/bug2150245.json`
 
 LP#2150245 apport metadata. ProblemType: Bug, and Uname reports the third-party kernel 6.18.7-surface-1 -- independent evidence of the unsupported PPA, available even when no apt log is attached.

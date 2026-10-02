@@ -291,8 +291,20 @@ class TestLexerCoverageAcrossLanguages:
         assert stats.coverage == 1.0, stats.top_unknown(4)
 
     def test_the_whole_corpus_lexes_completely(self) -> None:
+        """Every recorded apt log, bar one bounded and documented exception.
+
+        ``lp2168919-apt.log`` carries four lines of the upgrader's own German
+        error prose interleaved into ``apt.log`` by ``DistUpgradeCache.py:898``
+        -- not an apt verb, and not reachable by forward-translation because
+        the ``ubuntu-release-upgrader`` gettext domain is absent on a machine
+        with only apt installed. It is excluded here and pinned exactly by
+        ``TestNewGrammarShapes.test_the_known_gap_is_exactly_the_upgrader_prose``,
+        so the exclusion cannot absorb a new gap.
+        """
         total = matched = 0
         for path in sorted((FIXTURES / "apt").glob("*.log")):
+            if path.name == "lp2168919-apt.log":
+                continue
             stats = LexStats()
             list(lex(path.read_text().splitlines(), stats))
             assert stats.coverage == 1.0, f"{path.name}: {stats.top_unknown(3)}"

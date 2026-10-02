@@ -1,0 +1,259 @@
+2026-04-25 10:49:36,277 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-04-25 10:49:36,277 INFO uname information: 'Linux redacted-host 6.8.0-107-generic #107-Ubuntu SMP PREEMPT_DYNAMIC Fri Mar 13 19:51:50 UTC 2026 x86_64'
+2026-04-25 10:49:36,540 INFO apt version: '2.8.3'
+2026-04-25 10:49:36,540 INFO python version: '3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]'
+2026-04-25 10:49:36,544 INFO release-upgrader version '26.04.18' started
+2026-04-25 10:49:36,551 INFO locale: 'en_US' 'UTF-8'
+2026-04-25 10:49:36,555 INFO screen could not be run
+2026-04-25 10:49:36,578 DEBUG Using 'DistUpgradeViewText' view
+2026-04-25 10:49:36,579 DEBUG enable dpkg --force-overwrite
+2026-04-25 10:49:36,592 ERROR failed to import AptClone
+2026-04-25 10:49:36,593 DEBUG Upgrading from noble to resolute
+2026-04-25 10:49:36,593 DEBUG _pythonSymlinkCheck run
+2026-04-25 10:49:36,593 DEBUG openCache()
+2026-04-25 10:49:36,593 DEBUG running Quirks.PreCacheOpen
+2026-04-25 10:49:37,024 DEBUG Comparing 6.8.0-107 with
+2026-04-25 10:49:37,024 DEBUG Comparing 6.8.0-110 with 6.8.0-107
+2026-04-25 10:49:37,090 DEBUG /openCache(), new cache size 103198
+2026-04-25 10:49:37,090 DEBUG need_server_mode(): run in 'desktop' mode, (because of pkg 'ubuntu-desktop')
+2026-04-25 10:49:37,090 DEBUG checkViewDepends()
+2026-04-25 10:49:37,092 DEBUG running doUpdate() (showErrors=False)
+2026-04-25 10:49:39,118 DEBUG openCache()
+2026-04-25 10:49:39,551 DEBUG Comparing 6.8.0-107 with
+2026-04-25 10:49:39,551 DEBUG Comparing 6.8.0-110 with 6.8.0-107
+2026-04-25 10:49:39,635 DEBUG /openCache(), new cache size 103198
+2026-04-25 10:49:39,635 DEBUG doPostInitialUpdate
+2026-04-25 10:49:39,635 DEBUG running Quirks.PostInitialUpdate
+2026-04-25 10:49:39,636 DEBUG RVA23 check: No ISA information
+2026-04-25 10:49:39,902 DEBUG flatpak will be marked as manually installed
+2026-04-25 10:49:39,918 INFO cache.commit()
+2026-04-25 10:49:42,727 DEBUG Snap core24 is installed
+2026-04-25 10:49:43,042 DEBUG Snap firmware-updater is installed
+2026-04-25 10:49:43,042 DEBUG Snap firmware-updater is not tracking the release channel
+2026-04-25 10:49:43,340 DEBUG Snap gnome-46-2404 is installed
+2026-04-25 10:49:43,340 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-04-25 10:49:43,769 DEBUG Snap mesa-2404 is installed
+2026-04-25 10:49:43,769 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-04-25 10:49:43,999 DEBUG Snap gtk-common-themes is installed
+2026-04-25 10:49:43,999 DEBUG Snap gtk-common-themes is not tracking the release channel
+2026-04-25 10:49:44,372 DEBUG Snap snap-store is installed
+2026-04-25 10:49:44,372 DEBUG Snap snap-store is not tracking the release channel
+2026-04-25 10:49:44,685 DEBUG Snap snapd-desktop-integration is installed
+2026-04-25 10:49:46,208 DEBUG Snap aws-cli is installed
+2026-04-25 10:49:46,208 DEBUG Snap aws-cli is not tracking the release channel
+2026-04-25 10:49:46,429 DEBUG Snap bare is installed
+2026-04-25 10:49:46,430 DEBUG Snap bare is not tracking the release channel
+2026-04-25 10:49:46,655 DEBUG Snap btop is installed
+2026-04-25 10:49:46,655 DEBUG Snap btop is not tracking the release channel
+2026-04-25 10:49:47,036 DEBUG Snap canonical-livepatch is installed
+2026-04-25 10:49:47,036 DEBUG Snap canonical-livepatch is not tracking the release channel
+2026-04-25 10:49:47,265 DEBUG Snap cheese is installed
+2026-04-25 10:49:47,265 DEBUG Snap cheese is not tracking the release channel
+2026-04-25 10:49:47,495 DEBUG Snap core is installed
+2026-04-25 10:49:47,495 DEBUG Snap core is not tracking the release channel
+2026-04-25 10:49:47,742 DEBUG Snap core20 is installed
+2026-04-25 10:49:47,742 DEBUG Snap core20 is not tracking the release channel
+2026-04-25 10:49:48,052 DEBUG Snap core22 is installed
+2026-04-25 10:49:48,052 DEBUG Snap core22 is not tracking the release channel
+2026-04-25 10:49:48,271 DEBUG Snap gnome-42-2204 is installed
+2026-04-25 10:49:48,271 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-04-25 10:49:48,749 DEBUG Snap kubectl is installed
+2026-04-25 10:49:48,749 DEBUG Snap kubectl is not tracking the release channel
+2026-04-25 10:49:49,076 DEBUG Snap snapd is installed
+2026-04-25 10:49:49,076 DEBUG Snap snapd is not tracking the release channel
+2026-04-25 10:49:51,918 DEBUG MetaPkgs: ubuntu-desktop
+2026-04-25 10:49:52,043 DEBUG Obsolete: libprocps8 mime-support postgresql-client-14 postgresql-client-15 trickle
+2026-04-25 10:49:52,044 DEBUG updateDeb822Sources()
+2026-04-25 10:49:52,047 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,047 DEBUG examining: '# Written by ubuntu-pro-client
+Types: deb
+URIs: https://esm.ubuntu.com/infra/ubuntu
+Suites: noble-infra-updates noble-infra-security
+Components: main
+Signed-By: /usr/share/keyrings/ubuntu-pro-esm-infra.gpg'
+2026-04-25 10:49:52,047 DEBUG verifySourcesListEntry: # Written by ubuntu-pro-client
+Types: deb
+URIs: https://esm.ubuntu.com/infra/ubuntu
+Suites: resolute-infra-updates resolute-infra-security
+Components: main
+Signed-By: /usr/share/keyrings/ubuntu-pro-esm-infra.gpg
+2026-04-25 10:49:52,047 DEBUG url_downloadable: https://esm.ubuntu.com/infra/ubuntu/dists/resolute-infra-updates/Release
+2026-04-25 10:49:52,047 DEBUG s='https' n='esm.ubuntu.com' p='/infra/ubuntu/dists/resolute-infra-updates/Release' q='' f=''
+2026-04-25 10:49:52,337 DEBUG url_downloadable: https://esm.ubuntu.com/infra/ubuntu/dists/resolute-infra-security/Release
+2026-04-25 10:49:52,337 DEBUG s='https' n='esm.ubuntu.com' p='/infra/ubuntu/dists/resolute-infra-security/Release' q='' f=''
+2026-04-25 10:49:52,452 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,453 DEBUG examining: '# Written by ubuntu-pro-client
+Types: deb
+URIs: https://esm.ubuntu.com/apps/ubuntu
+Suites: noble-apps-updates noble-apps-security
+Components: main
+Signed-By: /usr/share/keyrings/ubuntu-pro-esm-apps.gpg'
+2026-04-25 10:49:52,453 DEBUG verifySourcesListEntry: # Written by ubuntu-pro-client
+Types: deb
+URIs: https://esm.ubuntu.com/apps/ubuntu
+Suites: resolute-apps-updates resolute-apps-security
+Components: main
+Signed-By: /usr/share/keyrings/ubuntu-pro-esm-apps.gpg
+2026-04-25 10:49:52,454 DEBUG url_downloadable: https://esm.ubuntu.com/apps/ubuntu/dists/resolute-apps-updates/Release
+2026-04-25 10:49:52,454 DEBUG s='https' n='esm.ubuntu.com' p='/apps/ubuntu/dists/resolute-apps-updates/Release' q='' f=''
+2026-04-25 10:49:52,564 DEBUG url_downloadable: https://esm.ubuntu.com/apps/ubuntu/dists/resolute-apps-security/Release
+2026-04-25 10:49:52,564 DEBUG s='https' n='esm.ubuntu.com' p='/apps/ubuntu/dists/resolute-apps-security/Release' q='' f=''
+2026-04-25 10:49:52,666 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,667 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYov84BEADSrLhiWvqL3JJ3fTxjCGD4+viIUBS4eLSc7+Q7SyHm/wWfYNwT
+ EqEvMMM9brWQyC7xyE2JBlVk5/yYHkAQz3f8rbkv6ge3J8Z7G4ZwHziI45xJKJ0M
+ 9SgJH24WlGxmbbFfK4SGFNlg9x1Z0m5liU3dUSfhvTQdmBNqwRCAjJLZSiS03IA0
+ 56V9r3ACejwpNiXzOnTsALZC2viszGiI854kqhUhFIJ/cnWKSbAcg6cy3ZAsne6K
+ vxJVPsdEl12gxU6zENZ/4a4DV1HkxIHtpbh1qub1lhpGR41ZBXv+SQhwuMLFSNeu
+ UjAAClC/g1pJ0gzI0ko1vcQFv+Q486jYY/kv+k4szzcB++nLILmYmgzOH0NEqT57
+ XtdiBWhlb6oNfF/nYZAaToBU/QjtWXq3YImG2NiCUrCj9zAKHdGUsBU0FxN7HkVB
+ B8aF0VYwB0I2LRO4Af6Ry1cqMyCQnw3FVh0xw7Vz4gQ57acUYeAJpT68q8E2XcUx
+ riEP65/MBPoFlANLVMSrnsePEXmVzdysmXKnFVefeQ4E3dIDufXUIhrfmL1pMdTG
+ anhmDEjY7I3pQQQIaLpnNhhSDZKDSk9C/Ax/8gEUgnnmd6BwZxh8Q7oDXcm2tyeu
+ n2m9wCZI/eJI9P9G8ON8AkKvG4xFR+eqhowwzu7TLDr3feliG+UN+mJ8jwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBNb3ppbGxhIFRlYW2JAk4EEwEKADgWIQRzi+uT
+ IdGq7BPqk5GuvfSBm+IYZwUCZii/zgIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRCuvfSBm+IYZ38/D/46eEIyG7Gb65sxt3QnlIN0+90kUjz83QpCnIyALZDc
+ H2wPYBCMbyJFMG+rqVE8Yoh6WF0Rqy76LG+Y/xzO9eKIJGxVcSU75ifoq/M7pI1p
+ aiqA9T8QcFBmo83FFoPvnid67aqg/tFsHl+YF9rUxMZndGRE9Hk96lkH1Y2wHMEs
+ mAa582RELVEDDD2ellOPmQr69fRPa5IdJHkXjqGtoNQy5hAp49ofMLmeQ82d2OA+
+ kpzgiuSw8Nh1VrMZludcUArSQDCHoXuiPG/7Wn9Vy6fvKkTQK3mCW8i5HgCa0qxe
+ vOKlDMz4virEEADMBs79iIyM6w1xm8JOD4734sgii2MPcQgmAlbu5LyBM5FfuO0u
+ rTMvZM0btSWQX3nIsxQ3far9MJvUT4nebhTo59cED+1EjkD14mReTHwtWt1aye/b
+ I8Rvor15RFiB8Ku6c41YmNKarSCzJDs4VEfsos4oMieEqA98J4ZOX67IT++ortcB
+ uXmDJgvzGWEeyVOMoc/4oDJHNQjJg9XRGy8b/J3AVhk2BE/CD4lKhX3hWGbufrQz
+ E8ENWuT4m3igQnBmOsrGlBPYIOKZvczQxri01vcKY95dKXb1jtnR9yR+JKgEP388
+ 1B/8dEohynhMnzEqR9TIMEEy9Y8RKZ+Jiy+/Lg2XGrChiLsouUetfMQww6BTK+++
+ pw==
+ =tIux
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-04-25 10:49:52,669 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/
+Suites: noble
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYov84BEADSrLhiWvqL3JJ3fTxjCGD4+viIUBS4eLSc7+Q7SyHm/wWfYNwT
+ EqEvMMM9brWQyC7xyE2JBlVk5/yYHkAQz3f8rbkv6ge3J8Z7G4ZwHziI45xJKJ0M
+ 9SgJH24WlGxmbbFfK4SGFNlg9x1Z0m5liU3dUSfhvTQdmBNqwRCAjJLZSiS03IA0
+ 56V9r3ACejwpNiXzOnTsALZC2viszGiI854kqhUhFIJ/cnWKSbAcg6cy3ZAsne6K
+ vxJVPsdEl12gxU6zENZ/4a4DV1HkxIHtpbh1qub1lhpGR41ZBXv+SQhwuMLFSNeu
+ UjAAClC/g1pJ0gzI0ko1vcQFv+Q486jYY/kv+k4szzcB++nLILmYmgzOH0NEqT57
+ XtdiBWhlb6oNfF/nYZAaToBU/QjtWXq3YImG2NiCUrCj9zAKHdGUsBU0FxN7HkVB
+ B8aF0VYwB0I2LRO4Af6Ry1cqMyCQnw3FVh0xw7Vz4gQ57acUYeAJpT68q8E2XcUx
+ riEP65/MBPoFlANLVMSrnsePEXmVzdysmXKnFVefeQ4E3dIDufXUIhrfmL1pMdTG
+ anhmDEjY7I3pQQQIaLpnNhhSDZKDSk9C/Ax/8gEUgnnmd6BwZxh8Q7oDXcm2tyeu
+ n2m9wCZI/eJI9P9G8ON8AkKvG4xFR+eqhowwzu7TLDr3feliG+UN+mJ8jwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBNb3ppbGxhIFRlYW2JAk4EEwEKADgWIQRzi+uT
+ IdGq7BPqk5GuvfSBm+IYZwUCZii/zgIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRCuvfSBm+IYZ38/D/46eEIyG7Gb65sxt3QnlIN0+90kUjz83QpCnIyALZDc
+ H2wPYBCMbyJFMG+rqVE8Yoh6WF0Rqy76LG+Y/xzO9eKIJGxVcSU75ifoq/M7pI1p
+ aiqA9T8QcFBmo83FFoPvnid67aqg/tFsHl+YF9rUxMZndGRE9Hk96lkH1Y2wHMEs
+ mAa582RELVEDDD2ellOPmQr69fRPa5IdJHkXjqGtoNQy5hAp49ofMLmeQ82d2OA+
+ kpzgiuSw8Nh1VrMZludcUArSQDCHoXuiPG/7Wn9Vy6fvKkTQK3mCW8i5HgCa0qxe
+ vOKlDMz4virEEADMBs79iIyM6w1xm8JOD4734sgii2MPcQgmAlbu5LyBM5FfuO0u
+ rTMvZM0btSWQX3nIsxQ3far9MJvUT4nebhTo59cED+1EjkD14mReTHwtWt1aye/b
+ I8Rvor15RFiB8Ku6c41YmNKarSCzJDs4VEfsos4oMieEqA98J4ZOX67IT++ortcB
+ uXmDJgvzGWEeyVOMoc/4oDJHNQjJg9XRGy8b/J3AVhk2BE/CD4lKhX3hWGbufrQz
+ E8ENWuT4m3igQnBmOsrGlBPYIOKZvczQxri01vcKY95dKXb1jtnR9yR+JKgEP388
+ 1B/8dEohynhMnzEqR9TIMEEy9Y8RKZ+Jiy+/Lg2XGrChiLsouUetfMQww6BTK+++
+ pw==
+ =tIux
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-04-25 10:49:52,669 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,670 DEBUG examining: 'Types: deb
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: noble noble-backports noble-updates
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 10:49:52,670 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-04-25 10:49:52,670 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute/Release
+2026-04-25 10:49:52,670 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute/Release' q='' f=''
+2026-04-25 10:49:52,740 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute-updates/Release
+2026-04-25 10:49:52,740 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute-updates/Release' q='' f=''
+2026-04-25 10:49:52,795 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute-backports/Release
+2026-04-25 10:49:52,796 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute-backports/Release' q='' f=''
+2026-04-25 10:49:52,855 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,855 DEBUG examining: 'Types: deb-src
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates
+Components: main restricted
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 10:49:52,856 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,856 DEBUG examining: 'Types: deb-src
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 10:49:52,856 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,856 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 10:49:52,857 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,857 DEBUG examining: 'Types: deb-src
+URIs: http://security.ubuntu.com/ubuntu
+Suites: noble-security
+Components: main restricted
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-25 10:49:52,857 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,860 DEBUG examining: '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# Changes to this file will not be preserved.
+# This file will not be recreated if removed.
+X-Repolib-Name: Google Chrome
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/google-chrome.gpg'
+2026-04-25 10:49:52,861 DEBUG entry '### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# Changes to this file will not be preserved.
+# This file will not be recreated if removed.
+X-Repolib-Name: Google Chrome
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/google-chrome.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-04-25 10:49:52,861 DEBUG upgrade to development release, disabling proposed
+2026-04-25 10:49:52,861 DEBUG examining: '# This file is automatically added and configured by the 1Password package. Modifications may be overwritten.
+Types: deb
+URIs: https://downloads.1password.com/linux/debian/amd64
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg'
+2026-04-25 10:49:52,861 DEBUG entry '# This file is automatically added and configured by the 1Password package. Modifications may be overwritten.
+Types: deb
+URIs: https://downloads.1password.com/linux/debian/amd64
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-04-25 10:49:52,862 DEBUG running doUpdate() (showErrors=True)
+2026-04-25 10:49:55,388 DEBUG openCache()
+2026-04-25 10:49:55,746 DEBUG Comparing 6.8.0-107 with
+2026-04-25 10:49:55,746 DEBUG Comparing 6.8.0-110 with 6.8.0-107
+2026-04-25 10:49:55,785 DEBUG /openCache(), new cache size 81819
+2026-04-25 10:49:55,883 DEBUG Foreign (before rewriting sources): 1password 1password-cli buildah ffmpeg fig2dev firefox gh gimp gimp-data gir1.2-gst-plugins-bad-1.0 google-chrome-stable gstreamer1.0-plugins-bad imagemagick imagemagick-6-common imagemagick-6.q16 libavcodec60 libavdevice60 libavfilter9 libavformat60 libavutil58 libcjson1 libgimp2.0t64 libgstreamer-plugins-bad1.0-0 libimage-magick-perl libimage-magick-q16-perl libmagick++-6.q16-9t64 libmagickcore-6.q16-7-extra libmagickcore-6.q16-7t64 libmagickwand-6.q16-7t64 libmbedcrypto7t64 libmbedtls14t64 libmbedx509-1t64 libpostproc57 libqt5core5t64 libqt5dbus5t64 libqt5gui5t64 libqt5network5t64 libqt5widgets5t64 libswresample4 libswscale7 libvlc-bin libvlc5 libvlccore9 libzvbi-common libzvbi0t64 podman podman-docker python3-filelock python3-fonttools python3-virtualenv qt5-gtk-platformtheme vlc vlc-bin vlc-data vlc-l10n vlc-plugin-access-extra vlc-plugin-base vlc-plugin-notify vlc-plugin-qt vlc-plugin-samba vlc-plugin-skins2 vlc-plugin-video-output vlc-plugin-video-splitter vlc-plugin-visualization
+2026-04-25 10:49:55,883 DEBUG Foreign (after rewriting sources):
+2026-04-25 10:49:55,883 DEBUG running Quirks.PreDistUpgradeCache
+2026-04-25 10:49:56,344 ERROR Dist-upgrade failed: 'W:Skipping acquire of configured file 'main/binary-i386/Packages' as repository 'https://dl.google.com/linux/chrome-stable/deb stable InRelease' doesn't support architecture 'i386', E:Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.'
+2026-04-25 10:49:56,348 DEBUG abort called
+2026-04-25 10:49:56,349 DEBUG openCache()
+2026-04-25 10:49:57,552 DEBUG Comparing 6.8.0-107 with
+2026-04-25 10:49:57,552 DEBUG Comparing 6.8.0-110 with 6.8.0-107
+2026-04-25 10:49:57,628 DEBUG /openCache(), new cache size 103198

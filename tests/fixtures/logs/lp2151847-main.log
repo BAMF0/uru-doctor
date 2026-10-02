@@ -1,0 +1,174 @@
+2026-05-08 08:29:00,397 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-05-08 08:29:00,398 INFO uname information: 'Linux redacted-host 6.17.0-23-generic #23-Ubuntu SMP PREEMPT_DYNAMIC Sat Apr 11 23:29:57 UTC 2026 x86_64'
+2026-05-08 08:29:00,706 INFO apt version: '3.1.6ubuntu2'
+2026-05-08 08:29:00,706 INFO python version: '3.13.7 (main, Mar  3 2026, 12:19:54) [GCC 15.2.0]'
+2026-05-08 08:29:00,708 INFO release-upgrader version '26.04.18' started
+2026-05-08 08:29:00,710 INFO locale: 'en_US' 'UTF-8'
+2026-05-08 08:29:00,740 DEBUG Using 'DistUpgradeViewText' view
+2026-05-08 08:29:00,741 DEBUG enable dpkg --force-overwrite
+2026-05-08 08:29:00,786 ERROR failed to import AptClone
+2026-05-08 08:29:00,786 DEBUG Upgrading from questing to resolute
+2026-05-08 08:29:00,786 DEBUG _pythonSymlinkCheck run
+2026-05-08 08:29:00,787 DEBUG openCache()
+2026-05-08 08:29:00,787 DEBUG running Quirks.PreCacheOpen
+2026-05-08 08:29:01,312 DEBUG Comparing 6.17.0-22 with
+2026-05-08 08:29:01,312 DEBUG Comparing 6.17.0-23 with 6.17.0-22
+2026-05-08 08:29:01,374 DEBUG /openCache(), new cache size 105270
+2026-05-08 08:29:01,375 DEBUG need_server_mode(): run in 'desktop' mode, (because of pkg 'kubuntu-desktop')
+2026-05-08 08:29:01,375 DEBUG checkViewDepends()
+2026-05-08 08:29:01,375 DEBUG running doUpdate() (showErrors=False)
+2026-05-08 08:29:06,724 DEBUG openCache()
+2026-05-08 08:29:13,220 DEBUG Comparing 6.17.0-22 with
+2026-05-08 08:29:13,220 DEBUG Comparing 6.17.0-23 with 6.17.0-22
+2026-05-08 08:29:13,298 DEBUG /openCache(), new cache size 105270
+2026-05-08 08:29:13,298 DEBUG doPostInitialUpdate
+2026-05-08 08:29:13,298 DEBUG running Quirks.PostInitialUpdate
+2026-05-08 08:29:13,299 DEBUG RVA23 check: No ISA information
+2026-05-08 08:29:13,623 DEBUG flatpak will be marked as manually installed
+2026-05-08 08:29:13,652 DEBUG plasma-discover-backend-flatpak will be marked as manually installed
+2026-05-08 08:29:13,683 INFO cache.commit()
+2026-05-08 08:29:18,287 DEBUG Snap bare is installed
+2026-05-08 08:29:18,287 DEBUG Snap bare is not tracking the release channel
+2026-05-08 08:29:18,710 DEBUG Snap chromium is installed
+2026-05-08 08:29:18,710 DEBUG Snap chromium is not tracking the release channel
+2026-05-08 08:29:19,150 DEBUG Snap core22 is installed
+2026-05-08 08:29:19,150 DEBUG Snap core22 is not tracking the release channel
+2026-05-08 08:29:19,692 DEBUG Snap core24 is installed
+2026-05-08 08:29:19,692 DEBUG Snap core24 is not tracking the release channel
+2026-05-08 08:29:20,144 DEBUG Snap cups is installed
+2026-05-08 08:29:20,144 DEBUG Snap cups is not tracking the release channel
+2026-05-08 08:29:20,518 DEBUG Snap gnome-42-2204 is installed
+2026-05-08 08:29:20,518 DEBUG Snap gnome-42-2204 is not tracking the release channel
+2026-05-08 08:29:20,831 DEBUG Snap gnome-46-2404 is installed
+2026-05-08 08:29:20,831 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-05-08 08:29:21,191 DEBUG Snap gtk-common-themes is installed
+2026-05-08 08:29:21,191 DEBUG Snap gtk-common-themes is not tracking the release channel
+2026-05-08 08:29:21,559 DEBUG Snap mesa-2404 is installed
+2026-05-08 08:29:21,559 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-05-08 08:29:21,993 DEBUG Snap snapd is installed
+2026-05-08 08:29:21,993 DEBUG Snap snapd is not tracking the release channel
+2026-05-08 08:29:22,727 DEBUG MetaPkgs: kubuntu-desktop
+2026-05-08 08:29:22,866 DEBUG Obsolete: libdirectfb-1.7-7t64 libflac12t64 libgl1-mesa-glx libmbedcrypto7t64 libssl1.1 libzip4t64 nomachine-enterprise-client policykit-1 terraform vagrant vault webex
+2026-05-08 08:29:22,867 DEBUG updateDeb822Sources()
+2026-05-08 08:29:22,868 DEBUG upgrade to development release, disabling proposed
+2026-05-08 08:29:22,868 DEBUG examining: 'Types: deb
+URIs: http://ddebs.ubuntu.com/
+Suites: questing-updates questing
+Components: main restricted universe multiverse
+Signed-by: /usr/share/keyrings/ubuntu-dbgsym-keyring.gpg'
+2026-05-08 08:29:22,868 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://ddebs.ubuntu.com/
+Suites: resolute resolute-updates
+Components: main restricted universe multiverse
+Signed-by: /usr/share/keyrings/ubuntu-dbgsym-keyring.gpg
+2026-05-08 08:29:22,868 DEBUG url_downloadable: http://ddebs.ubuntu.com//dists/resolute/Release
+2026-05-08 08:29:22,868 DEBUG s='http' n='ddebs.ubuntu.com' p='//dists/resolute/Release' q='' f=''
+2026-05-08 08:29:22,965 DEBUG url_downloadable: http://ddebs.ubuntu.com//dists/resolute-updates/Release
+2026-05-08 08:29:22,965 DEBUG s='http' n='ddebs.ubuntu.com' p='//dists/resolute-updates/Release' q='' f=''
+2026-05-08 08:29:23,061 DEBUG upgrade to development release, disabling proposed
+2026-05-08 08:29:23,062 DEBUG examining: 'Types: deb
+URIs: https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/
+Suites: questing
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYov84BEADSrLhiWvqL3JJ3fTxjCGD4+viIUBS4eLSc7+Q7SyHm/wWfYNwT
+ EqEvMMM9brWQyC7xyE2JBlVk5/yYHkAQz3f8rbkv6ge3J8Z7G4ZwHziI45xJKJ0M
+ 9SgJH24WlGxmbbFfK4SGFNlg9x1Z0m5liU3dUSfhvTQdmBNqwRCAjJLZSiS03IA0
+ 56V9r3ACejwpNiXzOnTsALZC2viszGiI854kqhUhFIJ/cnWKSbAcg6cy3ZAsne6K
+ vxJVPsdEl12gxU6zENZ/4a4DV1HkxIHtpbh1qub1lhpGR41ZBXv+SQhwuMLFSNeu
+ UjAAClC/g1pJ0gzI0ko1vcQFv+Q486jYY/kv+k4szzcB++nLILmYmgzOH0NEqT57
+ XtdiBWhlb6oNfF/nYZAaToBU/QjtWXq3YImG2NiCUrCj9zAKHdGUsBU0FxN7HkVB
+ B8aF0VYwB0I2LRO4Af6Ry1cqMyCQnw3FVh0xw7Vz4gQ57acUYeAJpT68q8E2XcUx
+ riEP65/MBPoFlANLVMSrnsePEXmVzdysmXKnFVefeQ4E3dIDufXUIhrfmL1pMdTG
+ anhmDEjY7I3pQQQIaLpnNhhSDZKDSk9C/Ax/8gEUgnnmd6BwZxh8Q7oDXcm2tyeu
+ n2m9wCZI/eJI9P9G8ON8AkKvG4xFR+eqhowwzu7TLDr3feliG+UN+mJ8jwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBNb3ppbGxhIFRlYW2JAk4EEwEKADgWIQRzi+uT
+ IdGq7BPqk5GuvfSBm+IYZwUCZii/zgIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRCuvfSBm+IYZ38/D/46eEIyG7Gb65sxt3QnlIN0+90kUjz83QpCnIyALZDc
+ H2wPYBCMbyJFMG+rqVE8Yoh6WF0Rqy76LG+Y/xzO9eKIJGxVcSU75ifoq/M7pI1p
+ aiqA9T8QcFBmo83FFoPvnid67aqg/tFsHl+YF9rUxMZndGRE9Hk96lkH1Y2wHMEs
+ mAa582RELVEDDD2ellOPmQr69fRPa5IdJHkXjqGtoNQy5hAp49ofMLmeQ82d2OA+
+ kpzgiuSw8Nh1VrMZludcUArSQDCHoXuiPG/7Wn9Vy6fvKkTQK3mCW8i5HgCa0qxe
+ vOKlDMz4virEEADMBs79iIyM6w1xm8JOD4734sgii2MPcQgmAlbu5LyBM5FfuO0u
+ rTMvZM0btSWQX3nIsxQ3far9MJvUT4nebhTo59cED+1EjkD14mReTHwtWt1aye/b
+ I8Rvor15RFiB8Ku6c41YmNKarSCzJDs4VEfsos4oMieEqA98J4ZOX67IT++ortcB
+ uXmDJgvzGWEeyVOMoc/4oDJHNQjJg9XRGy8b/J3AVhk2BE/CD4lKhX3hWGbufrQz
+ E8ENWuT4m3igQnBmOsrGlBPYIOKZvczQxri01vcKY95dKXb1jtnR9yR+JKgEP388
+ 1B/8dEohynhMnzEqR9TIMEEy9Y8RKZ+Jiy+/Lg2XGrChiLsouUetfMQww6BTK+++
+ pw==
+ =tIux
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-05-08 08:29:23,063 DEBUG entry 'Types: deb
+URIs: https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/
+Suites: questing
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ mQINBGYov84BEADSrLhiWvqL3JJ3fTxjCGD4+viIUBS4eLSc7+Q7SyHm/wWfYNwT
+ EqEvMMM9brWQyC7xyE2JBlVk5/yYHkAQz3f8rbkv6ge3J8Z7G4ZwHziI45xJKJ0M
+ 9SgJH24WlGxmbbFfK4SGFNlg9x1Z0m5liU3dUSfhvTQdmBNqwRCAjJLZSiS03IA0
+ 56V9r3ACejwpNiXzOnTsALZC2viszGiI854kqhUhFIJ/cnWKSbAcg6cy3ZAsne6K
+ vxJVPsdEl12gxU6zENZ/4a4DV1HkxIHtpbh1qub1lhpGR41ZBXv+SQhwuMLFSNeu
+ UjAAClC/g1pJ0gzI0ko1vcQFv+Q486jYY/kv+k4szzcB++nLILmYmgzOH0NEqT57
+ XtdiBWhlb6oNfF/nYZAaToBU/QjtWXq3YImG2NiCUrCj9zAKHdGUsBU0FxN7HkVB
+ B8aF0VYwB0I2LRO4Af6Ry1cqMyCQnw3FVh0xw7Vz4gQ57acUYeAJpT68q8E2XcUx
+ riEP65/MBPoFlANLVMSrnsePEXmVzdysmXKnFVefeQ4E3dIDufXUIhrfmL1pMdTG
+ anhmDEjY7I3pQQQIaLpnNhhSDZKDSk9C/Ax/8gEUgnnmd6BwZxh8Q7oDXcm2tyeu
+ n2m9wCZI/eJI9P9G8ON8AkKvG4xFR+eqhowwzu7TLDr3feliG+UN+mJ8jwARAQAB
+ tB5MYXVuY2hwYWQgUFBBIGZvciBNb3ppbGxhIFRlYW2JAk4EEwEKADgWIQRzi+uT
+ IdGq7BPqk5GuvfSBm+IYZwUCZii/zgIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIX
+ gAAKCRCuvfSBm+IYZ38/D/46eEIyG7Gb65sxt3QnlIN0+90kUjz83QpCnIyALZDc
+ H2wPYBCMbyJFMG+rqVE8Yoh6WF0Rqy76LG+Y/xzO9eKIJGxVcSU75ifoq/M7pI1p
+ aiqA9T8QcFBmo83FFoPvnid67aqg/tFsHl+YF9rUxMZndGRE9Hk96lkH1Y2wHMEs
+ mAa582RELVEDDD2ellOPmQr69fRPa5IdJHkXjqGtoNQy5hAp49ofMLmeQ82d2OA+
+ kpzgiuSw8Nh1VrMZludcUArSQDCHoXuiPG/7Wn9Vy6fvKkTQK3mCW8i5HgCa0qxe
+ vOKlDMz4virEEADMBs79iIyM6w1xm8JOD4734sgii2MPcQgmAlbu5LyBM5FfuO0u
+ rTMvZM0btSWQX3nIsxQ3far9MJvUT4nebhTo59cED+1EjkD14mReTHwtWt1aye/b
+ I8Rvor15RFiB8Ku6c41YmNKarSCzJDs4VEfsos4oMieEqA98J4ZOX67IT++ortcB
+ uXmDJgvzGWEeyVOMoc/4oDJHNQjJg9XRGy8b/J3AVhk2BE/CD4lKhX3hWGbufrQz
+ E8ENWuT4m3igQnBmOsrGlBPYIOKZvczQxri01vcKY95dKXb1jtnR9yR+JKgEP388
+ 1B/8dEohynhMnzEqR9TIMEEy9Y8RKZ+Jiy+/Lg2XGrChiLsouUetfMQww6BTK+++
+ pw==
+ =tIux
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-05-08 08:29:23,063 DEBUG upgrade to development release, disabling proposed
+2026-05-08 08:29:23,063 DEBUG examining: 'Types: deb
+URIs: http://ch.archive.ubuntu.com/ubuntu/
+Suites: questing-backports questing-updates questing
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-05-08 08:29:23,064 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://ch.archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-05-08 08:29:23,064 DEBUG url_downloadable: http://ch.archive.ubuntu.com/ubuntu//dists/resolute/Release
+2026-05-08 08:29:23,064 DEBUG s='http' n='ch.archive.ubuntu.com' p='/ubuntu//dists/resolute/Release' q='' f=''
+2026-05-08 08:29:23,128 DEBUG url_downloadable: http://ch.archive.ubuntu.com/ubuntu//dists/resolute-updates/Release
+2026-05-08 08:29:23,129 DEBUG s='http' n='ch.archive.ubuntu.com' p='/ubuntu//dists/resolute-updates/Release' q='' f=''
+2026-05-08 08:29:23,188 DEBUG url_downloadable: http://ch.archive.ubuntu.com/ubuntu//dists/resolute-backports/Release
+2026-05-08 08:29:23,188 DEBUG s='http' n='ch.archive.ubuntu.com' p='/ubuntu//dists/resolute-backports/Release' q='' f=''
+2026-05-08 08:29:23,253 DEBUG upgrade to development release, disabling proposed
+2026-05-08 08:29:23,253 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu
+Suites: questing-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-05-08 08:29:23,255 DEBUG running doUpdate() (showErrors=True)
+2026-05-08 08:29:28,945 DEBUG openCache()
+2026-05-08 08:29:29,494 DEBUG Comparing 6.17.0-22 with
+2026-05-08 08:29:29,494 DEBUG Comparing 6.17.0-23 with 6.17.0-22
+2026-05-08 08:29:29,555 DEBUG /openCache(), new cache size 103453
+2026-05-08 08:29:29,699 DEBUG Foreign (before rewriting sources): firefox thunderbird thunderbird-locale-en thunderbird-locale-en-us
+2026-05-08 08:29:29,699 DEBUG Foreign (after rewriting sources):
+2026-05-08 08:29:29,699 DEBUG running Quirks.PreDistUpgradeCache
+2026-05-08 08:29:29,728 DEBUG Marking 'kubuntu-desktop' for upgrade
+2026-05-08 08:29:30,305 WARNING Can't mark 'kubuntu-desktop' for upgrade (E:Unable to correct problems, you have held broken packages.)
+2026-05-08 08:29:31,174 ERROR Dist-upgrade failed: 'E:Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.'
+2026-05-08 08:29:31,177 DEBUG abort called
+2026-05-08 08:29:31,178 DEBUG openCache()
+2026-05-08 08:29:32,685 DEBUG Comparing 6.17.0-22 with
+2026-05-08 08:29:32,685 DEBUG Comparing 6.17.0-23 with 6.17.0-22
+2026-05-08 08:29:32,758 DEBUG /openCache(), new cache size 105270

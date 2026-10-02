@@ -188,6 +188,15 @@ def render_detail(finding: Finding, interner: Interner, *, run: UpgradeRun | Non
         case Cause.UPDATE_FAILED:
             return "refreshing the package lists failed"
 
+        case Cause.META_PACKAGE_UNINSTALLABLE:
+            # The metapackage is named from ``detail`` rather than from
+            # ``primary``: this finding has no root package, because it comes
+            # from the upgrader's own log rather than from the conflict graph.
+            package = detail.get("package", "")
+            if package:
+                return f"the {package} metapackage cannot be installed"
+            return "a required metapackage cannot be installed"
+
         case Cause.CACHE_LOCK_FAILED:
             return "another package manager holds the apt lock"
 

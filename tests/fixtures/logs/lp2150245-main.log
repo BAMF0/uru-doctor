@@ -1,0 +1,227 @@
+2026-04-24 11:29:55,593 INFO Using config files '['./DistUpgrade.cfg', '/etc/update-manager/release-upgrades.d/ubuntu-advantage-upgrades.cfg']'
+2026-04-24 11:29:55,593 INFO uname information: 'Linux redacted-host 6.18.7-surface-1 #1 SMP PREEMPT_DYNAMIC Mon Jan 26 00:16:20 UTC 2026 x86_64'
+2026-04-24 11:29:56,072 INFO apt version: '2.8.3'
+2026-04-24 11:29:56,072 INFO python version: '3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]'
+2026-04-24 11:29:56,076 INFO release-upgrader version '26.04.18' started
+2026-04-24 11:29:56,091 INFO locale: 'en_US' 'UTF-8'
+2026-04-24 11:29:56,099 INFO screen could not be run
+2026-04-24 11:29:56,144 DEBUG Using 'DistUpgradeViewText' view
+2026-04-24 11:29:56,146 DEBUG enable dpkg --force-overwrite
+2026-04-24 11:29:56,173 ERROR failed to import AptClone
+2026-04-24 11:29:56,173 DEBUG Upgrading from noble to resolute
+2026-04-24 11:29:56,173 DEBUG _pythonSymlinkCheck run
+2026-04-24 11:29:56,174 DEBUG openCache()
+2026-04-24 11:29:56,174 DEBUG running Quirks.PreCacheOpen
+2026-04-24 11:29:56,968 DEBUG Comparing 6.17.0-22 with
+2026-04-24 11:29:57,080 DEBUG /openCache(), new cache size 103150
+2026-04-24 11:29:57,080 DEBUG need_server_mode(): run in 'desktop' mode, (because of pkg 'ubuntu-desktop')
+2026-04-24 11:29:57,080 DEBUG checkViewDepends()
+2026-04-24 11:29:57,084 DEBUG running doUpdate() (showErrors=False)
+2026-04-24 11:29:58,272 DEBUG openCache()
+2026-04-24 11:29:59,062 DEBUG Comparing 6.17.0-22 with
+2026-04-24 11:29:59,187 DEBUG /openCache(), new cache size 103150
+2026-04-24 11:29:59,187 DEBUG doPostInitialUpdate
+2026-04-24 11:29:59,187 DEBUG running Quirks.PostInitialUpdate
+2026-04-24 11:29:59,189 DEBUG RVA23 check: No ISA information
+2026-04-24 11:30:01,672 DEBUG Snap core24 is installed
+2026-04-24 11:30:02,400 DEBUG Snap firmware-updater is installed
+2026-04-24 11:30:02,877 DEBUG Snap gnome-46-2404 is installed
+2026-04-24 11:30:02,877 DEBUG Snap gnome-46-2404 is not tracking the release channel
+2026-04-24 11:30:03,489 DEBUG Snap mesa-2404 is installed
+2026-04-24 11:30:03,489 DEBUG Snap mesa-2404 is not tracking the release channel
+2026-04-24 11:30:04,061 DEBUG Snap gtk-common-themes is installed
+2026-04-24 11:30:04,604 DEBUG Snap snap-store is installed
+2026-04-24 11:30:05,070 DEBUG Snap snapd-desktop-integration is installed
+2026-04-24 11:30:05,070 DEBUG Snap snapd-desktop-integration is not tracking the release channel
+2026-04-24 11:30:06,485 DEBUG Snap firefox is installed
+2026-04-24 11:30:06,485 DEBUG Snap firefox is not tracking the release channel
+2026-04-24 11:30:06,894 DEBUG Snap thunderbird is installed
+2026-04-24 11:30:06,894 DEBUG Snap thunderbird is not tracking the release channel
+2026-04-24 11:30:07,197 DEBUG Snap bare is installed
+2026-04-24 11:30:07,197 DEBUG Snap bare is not tracking the release channel
+2026-04-24 11:30:07,609 DEBUG Snap codium is installed
+2026-04-24 11:30:07,610 DEBUG Snap codium is not tracking the release channel
+2026-04-24 11:30:08,019 DEBUG Snap core20 is installed
+2026-04-24 11:30:08,019 DEBUG Snap core20 is not tracking the release channel
+2026-04-24 11:30:08,333 DEBUG Snap core22 is installed
+2026-04-24 11:30:08,333 DEBUG Snap core22 is not tracking the release channel
+2026-04-24 11:30:08,736 DEBUG Snap discord is installed
+2026-04-24 11:30:08,736 DEBUG Snap discord is not tracking the release channel
+2026-04-24 11:30:09,145 DEBUG Snap gnome-42-2204 is installed
+2026-04-24 11:30:09,669 DEBUG Snap remmina is installed
+2026-04-24 11:30:09,669 DEBUG Snap remmina is not tracking the release channel
+2026-04-24 11:30:10,169 DEBUG Snap snapd is installed
+2026-04-24 11:30:10,170 DEBUG Snap snapd is not tracking the release channel
+2026-04-24 11:30:10,578 DEBUG Snap spotify is installed
+2026-04-24 11:30:10,578 DEBUG Snap spotify is not tracking the release channel
+2026-04-24 11:30:14,328 DEBUG MetaPkgs: ubuntu-desktop
+2026-04-24 11:30:14,524 DEBUG Obsolete:
+2026-04-24 11:30:14,525 DEBUG migrateToDeb822Sources()
+2026-04-24 11:30:14,526 DEBUG Could not migrate # Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources from /etc/apt/sources.list, disabling instead.
+2026-04-24 11:30:14,526 DEBUG Could not migrate deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/ubuntu/24.04/prod noble main from /etc/apt/sources.list.d/microsoft-prod.list, disabling instead.
+2026-04-24 11:30:14,526 DEBUG Could not migrate # This file is automatically added and configured by the 1Password package. Modifications may be overwritten. from /etc/apt/sources.list.d/1password.list, disabling instead.
+2026-04-24 11:30:14,526 DEBUG Could not migrate # deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main from /etc/apt/sources.list.d/1password.list, disabling instead.
+2026-04-24 11:30:14,527 DEBUG updateDeb822Sources()
+2026-04-24 11:30:14,528 DEBUG upgrade to development release, disabling proposed
+2026-04-24 11:30:14,528 DEBUG examining: 'Types: deb
+URIs: https://pkg.surfacelinux.com/debian
+Suites: release
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ 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
+ JcYSQaEgtpWZ3OhD14QVf5museDuNdfluQ==
+ -----END PGP PUBLIC KEY BLOCK-----'
+2026-04-24 11:30:14,529 DEBUG entry 'Types: deb
+URIs: https://pkg.surfacelinux.com/debian
+Suites: release
+Components: main
+Signed-By: -----BEGIN PGP PUBLIC KEY BLOCK-----
+ .
+ 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
+ JcYSQaEgtpWZ3OhD14QVf5museDuNdfluQ==
+ -----END PGP PUBLIC KEY BLOCK-----
+Enabled: no' was disabled (unknown mirror)
+2026-04-24 11:30:14,529 DEBUG upgrade to development release, disabling proposed
+2026-04-24 11:30:14,529 DEBUG examining: '# This file is automatically added and configured by the 1Password package. Modifications may be overwritten.
+Types: deb
+URIs: https://downloads.1password.com/linux/debian/amd64
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg'
+2026-04-24 11:30:14,530 DEBUG entry '# This file is automatically added and configured by the 1Password package. Modifications may be overwritten.
+Types: deb
+URIs: https://downloads.1password.com/linux/debian/amd64
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/1password-archive-keyring.gpg
+Enabled: no' was disabled (unknown mirror)
+2026-04-24 11:30:14,530 DEBUG upgrade to development release, disabling proposed
+2026-04-24 11:30:14,530 DEBUG examining: 'Types: deb
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-24 11:30:14,530 DEBUG verifySourcesListEntry: Types: deb
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates resolute-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+2026-04-24 11:30:14,530 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute/Release
+2026-04-24 11:30:14,530 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute/Release' q='' f=''
+2026-04-24 11:30:14,600 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute-updates/Release
+2026-04-24 11:30:14,600 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute-updates/Release' q='' f=''
+2026-04-24 11:30:14,672 DEBUG url_downloadable: http://us.archive.ubuntu.com/ubuntu//dists/resolute-backports/Release
+2026-04-24 11:30:14,672 DEBUG s='http' n='us.archive.ubuntu.com' p='/ubuntu//dists/resolute-backports/Release' q='' f=''
+2026-04-24 11:30:14,740 DEBUG upgrade to development release, disabling proposed
+2026-04-24 11:30:14,741 DEBUG examining: 'Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg'
+2026-04-24 11:30:14,742 DEBUG running doUpdate() (showErrors=True)
+2026-04-24 11:31:01,665 DEBUG openCache()
+2026-04-24 11:31:02,345 DEBUG Comparing 6.17.0-22 with
+2026-04-24 11:31:02,422 DEBUG /openCache(), new cache size 81518
+2026-04-24 11:31:02,605 DEBUG Foreign (before rewriting sources): iptsd libwacom-bin-surface libwacom-common-surface libwacom-surface libwacom2-surface libwacom9-surface linux-headers-6.18.7-surface-1 linux-headers-surface linux-image-6.18.7-surface-1 linux-image-surface linux-surface-secureboot-mok packages-microsoft-prod powershell
+2026-04-24 11:31:02,605 DEBUG Foreign (after rewriting sources):
+2026-04-24 11:31:02,606 DEBUG running Quirks.PreDistUpgradeCache
+2026-04-24 11:31:03,511 DEBUG Marking 'ubuntu-desktop' for upgrade
+2026-04-24 11:31:04,056 WARNING Can't mark 'ubuntu-desktop' for upgrade (W:Ignoring file 'microsoft-prod.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file '1password.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file 'linux-surface.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file 'microsoft-prod.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file '1password.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file 'linux-surface.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file 'microsoft-prod.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file '1password.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, W:Ignoring file 'linux-surface.list.migrate' in directory '/etc/apt/sources.list.d/' as it has an invalid filename extension, E:Unable to correct problems, you have held broken packages.)
+2026-04-24 11:31:04,897 ERROR Dist-upgrade failed: 'E:Error, pkgProblemResolver::Resolve generated breaks, this may be caused by held packages.'
+2026-04-24 11:31:04,907 DEBUG abort called
+2026-04-24 11:31:04,909 DEBUG openCache()
+2026-04-24 11:31:07,448 DEBUG Comparing 6.17.0-22 with
+2026-04-24 11:31:07,571 DEBUG /openCache(), new cache size 103150
