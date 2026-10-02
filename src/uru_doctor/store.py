@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """SQLite persistence: the interning tables, the records, and the caches.
 
 The store is a cache in the strict sense -- deleting it loses nothing that
@@ -677,7 +678,16 @@ class Store:
 
         return {
             "runs": count("runs"),
-            "bugs": len({r["bug_id"] for r in self._conn.execute("SELECT bug_id FROM runs")}),
+            # Distinct *real* bug ids. A set over the raw column counts ``None``
+            # as a member, so a store holding nothing but local directories --
+            # every one of which has no bug id -- reported "1 bug".
+            "bugs": len(
+                {
+                    r["bug_id"]
+                    for r in self._conn.execute("SELECT bug_id FROM runs")
+                    if r["bug_id"] is not None
+                }
+            ),
             "strings": count("strings"),
             "packages": count("packages"),
             "templates": count("templates"),

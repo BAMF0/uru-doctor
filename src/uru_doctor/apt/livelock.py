@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Detecting resolver livelock.
 
 apt's problem resolver can get stuck alternating between two contradictory
@@ -215,7 +216,14 @@ def detect_oscillations(
         for pkg_id, keep_count in keeps.items()
         if keep_count >= min_reversals and upgrades.get(pkg_id, 0) >= min_reversals
     ]
-    found.sort(key=lambda o: (-o.reversals, -o.keeps, o.pkg_id))
+    # Tie-broken by name, not by ``pkg_id``. Interned ids are assigned in the
+    # order packages are first seen, so they differ between a log read on its
+    # own and the same log read after others in a shared interner. On LP#2150339
+    # ``gedit`` and ``gir1.2-peas-1.0`` both reverse 19 times, so the id decided
+    # which came first -- and the rule reports the first as *the* oscillating
+    # package, which put a different name in the bug title depending on what
+    # had been ingested beforehand.
+    found.sort(key=lambda o: (-o.reversals, -o.keeps, interner.package_label(o.pkg_id)))
     return tuple(found)
 
 

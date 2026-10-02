@@ -1,10 +1,24 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Configuration: a TOML file loaded into a frozen Pydantic tree.
 
 Defaults live in the code, not in the file, so a missing ``uru-doctor.toml``
-behaves identically to a complete one. The checked-in ``uru-doctor.toml``
-contains every default written out with a comment explaining it, and a test
-asserts the two agree -- otherwise the documented defaults drift away from the
-real ones, which is worse than having no file at all.
+behaves identically to a complete one.
+
+The checked-in ``uru-doctor.toml`` writes out every default **that something
+actually reads**, with a comment explaining it. Options defined here but not
+yet consulted are listed in that file as unimplemented rather than presented as
+settings, because a documented option that silently does nothing is worse than
+an undocumented one: it invites someone to change it and conclude the tool is
+broken. ``tests/test_config.py`` enforces both directions -- no documented
+option may be inert, and no field may be absent from both lists -- so adding a
+field forces a decision instead of quietly becoming a third kind of thing.
+
+That guard exists because the alternative happened. A ``wanted_attachments``
+list lived in :class:`LaunchpadConfig`, was read by nothing, and three of its
+entries named attachments that
+:func:`~uru_doctor.parsers.apportmeta.is_irrelevant_attachment` classifies as
+worthless. Two tables of attachment names disagreed for as long as neither was
+used.
 
 API keys are never stored here. The config names the *environment variable* to
 read, and a validator rejects anything that looks like a key pasted into the
@@ -260,40 +274,35 @@ class LaunchpadConfig(BaseModel):
     )
     """Identifies the client. Launchpad is a shared service; be nameable."""
 
-    concurrency: int = Field(2, ge=1, le=8)
-    """Deliberately low. Launchpad returns 429 readily and attachments are large."""
-
     max_retries: int = Field(5, ge=0)
     backoff_base_s: float = Field(2.0, gt=0)
     """Exponential backoff base. Observed 429s need tens of seconds, not milliseconds."""
 
-    max_attachment_bytes: int = Field(32 * 1024 * 1024, ge=1024)
+    min_interval_s: float = Field(3.0, ge=0.0)
+    """Minimum gap between requests.
 
-    wanted_attachments: tuple[str, ...] = (
-        "VarLogDistupgradeAptlog",
-        "VarLogDistupgradeMainlog",
-        "VarLogDistupgradeApttermlog",
-        "VarLogDistupgradeAptHistorylog",
-        "VarLogDistupgradeHistorylog",
-        "VarLogDistupgradeTermlog",
-        "VarLogDistupgradeScreenlog",
-        "VarLogDistupgradeXorgFixuplog",
-        "VarLogDistupgradeXorgfixup",
-        "VarLogDistupgradeLspcitxt",
-        "Dependencies",
-        "ProcCpuinfoMinimal",
-    )
-    """Attachment basenames worth downloading.
-
-    Both spellings of the history and xorg logs are listed on purpose. apport
-    attaches the same files under different identifiers depending on which code
-    path filed the bug -- the package hook calls ``history.log``
-    ``VarLogDistupgradeAptHistorylog`` while ``DistUpgradeApport`` calls it
-    ``VarLogDistupgradeHistorylog`` -- and both occur in the wild.
-
-    ``VarLogDistupgradeAptclonesystemstate.tar.gz`` is excluded: it is large,
-    and the questions it answers are better answered by the resolver trace.
+    Measured, not guessed: below roughly two seconds the API starts answering
+    429, and recovering from one costs about a minute. Spacing requests is
+    cheaper than retrying them, which is also why there is no concurrency
+    setting -- parallel requests against this API are slower than serial ones
+    once the 429s start.
     """
+
+    max_attachment_bytes: int = Field(32 * 1024 * 1024, ge=1024)
+    """Cap on a single attachment.
+
+    ``VarLogDistupgradeAptclonesystemstate.tar.gz`` can be tens of megabytes
+    and answers nothing the resolver trace does not answer better.
+    """
+
+    # There is deliberately no ``wanted_attachments`` list. One lived here and
+    # disagreed with the code: its last three entries -- ``Dependencies``,
+    # ``ProcCpuinfoMinimal`` and ``VarLogDistupgradeLspcitxt`` -- are all
+    # classified irrelevant by ``apportmeta.is_irrelevant_attachment``, which
+    # is what the fetcher actually consults. Two tables of attachment names
+    # that disagree is worse than one, so the mapping lives only in
+    # :mod:`uru_doctor.parsers.apportmeta`, next to the code that reads the
+    # files it names.
 
 
 class ReportConfig(BaseModel):

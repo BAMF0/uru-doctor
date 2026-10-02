@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Rules for failures the apt resolver has nothing to say about.
 
 Every pattern here is an upstream string from
@@ -20,6 +21,7 @@ from collections.abc import Sequence
 from typing import Final
 
 from uru_doctor.i18n import catalogue_for
+from uru_doctor.ingest import is_terminal_error
 from uru_doctor.models import (
     Cause,
     Confidence,
@@ -583,6 +585,72 @@ def truncated_evidence(context: RuleContext) -> Sequence[Finding]:
             summary=f"no failure was recorded -- {reason}",
             severity=Severity.INFO,
             confidence=Confidence.CERTAIN,
+            detail={
+                "terminal_phase": run.terminal_phase.name,
+                "logs_present": ", ".join(s.value for s in run.logs_present),
+            },
+        ),
+    )
+
+
+@rule(
+    "upgrader.no-failure",
+    Cause.UPGRADE_SUCCEEDED,
+    priority=901,
+    severity=Severity.INFO,
+    confidence=Confidence.STRONG,
+    phase_hint="DONE",
+    provenance="main.log reaching POST_UPGRADE or later with no terminal error",
+    remedy="Nothing to fix in the upgrade itself; if the reporter has a "
+    "complaint it is about the resulting system, not the upgrade",
+)
+def no_failure(context: RuleContext) -> Sequence[Finding]:
+    """Say so when the upgrade worked.
+
+    The counterpart to :func:`truncated_evidence`, and necessary for the same
+    reason: without a positive finding, the absence of a failure is filled in
+    by whatever else the log happens to contain.
+
+    A successful resolve is not a quiet one. apt breaks and repairs packages
+    as it searches, so the trace of a working upgrade still holds holdbacks,
+    unsatisfiable virtuals and near-tied decisions -- all real, none of them a
+    fault. Running this tool against a healthy machine's
+    ``/var/log/dist-upgrade`` reported ``libqt5core5t64 could not be resolved``
+    about an upgrade that had completed days earlier, because the largest
+    piece of transient churn was the only thing claiming to be an answer.
+
+    Unlike ``NO_FAILURE_RECORDED`` this is not a caveat. It is the answer, and
+    it has to outrank the resolver findings rather than sit beside them, so it
+    gets its own cause instead of reusing that one.
+
+    Deliberately conservative about what counts as success: dpkg must have
+    written packages, the upgrader must have passed ``POST_UPGRADE``, and there
+    must be no terminal error and no apt error anywhere. A post-upgrade
+    failure such as a broken maintainer script leaves an error behind and is
+    matched by a rule of its own, so this stays silent for those.
+    """
+    run = context.run
+    if not run.evidence_complete:
+        return ()
+    if not (run.reached_dpkg and run.terminal_phase >= Phase.POST_UPGRADE):
+        return ()
+    if context.apt_errors:
+        return ()
+    if any(is_terminal_error(message) for message in context.error_messages):
+        return ()
+
+    return (
+        context.finding(
+            rule="upgrader.no-failure",
+            cause=Cause.UPGRADE_SUCCEEDED,
+            summary=(
+                f"the upgrade completed: {run.counts.upgraded:,} upgraded, "
+                f"{run.counts.installed:,} installed, "
+                f"{run.counts.removed:,} removed, and no error was recorded"
+            ),
+            severity=Severity.INFO,
+            confidence=Confidence.STRONG,
+            phase=run.terminal_phase,
             detail={
                 "terminal_phase": run.terminal_phase.name,
                 "logs_present": ", ".join(s.value for s in run.logs_present),

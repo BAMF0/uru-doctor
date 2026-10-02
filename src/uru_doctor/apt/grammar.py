@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """The ``apt.log`` line grammar.
 
 The upgrader enables exactly three apt debug streams and no others

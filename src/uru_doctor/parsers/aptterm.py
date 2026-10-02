@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Parsing ``apt-term.log``, dpkg's own terminal output.
 
 The authority on whether anything was written to the system, and the only place

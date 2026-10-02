@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.dedup` and :mod:`uru_doctor.title`.
 
 The headline test is :class:`TestTwoReportersOneBug`, which uses the only
@@ -628,3 +629,76 @@ class TestSignatureStability:
         backward = Interner(Store.open(Path(tempfile.mkdtemp())))
         second = {b: self._signature(b, backward) for b in ("2150339", "2150245")}
         assert first == second
+
+    def test_victim_order_is_independent_of_ingest_order(self) -> None:
+        """Not just the signature: everything a reader sees.
+
+        The victim *set* was already stable while its *order* was not. Cascade
+        order is breadth-first from the root, which is meaningful, but the order
+        within one depth was edge-storage order -- node-index order, which is
+        sorted interned-id order, which is first-seen order. Reports show only
+        the first dozen victims, so two people reading the same bug saw
+        different packages.
+        """
+        import tempfile
+        from pathlib import Path
+
+        from uru_doctor.store import Store
+
+        def victims(bug_id: str, preload: tuple[str, ...]) -> tuple[str, ...]:
+            interner = Interner(Store.open(Path(tempfile.mkdtemp())))
+            for other in preload:
+                ingest(
+                    interner,
+                    apt=f"lp{other}-apt.log",
+                    main=f"lp{other}-main.log",
+                    bug_id=other,
+                )
+            run, result = ingest(
+                interner,
+                apt=f"lp{bug_id}-apt.log",
+                main=f"lp{bug_id}-main.log",
+                bug_id=bug_id,
+            )
+            assert result.primary is not None
+            del run
+            return tuple(interner.package_label(p) for p in result.primary.victim_pkgs)
+
+        alone = victims("2150245", ())
+        after_one = victims("2150245", ("2150339",))
+        after_two = victims("2150245", ("2169197", "2150339"))
+        assert alone == after_one == after_two
+        assert alone, "expected a cascade to order"
+
+    def test_oscillating_package_is_independent_of_ingest_order(self) -> None:
+        """The livelock tie-break reached the bug title.
+
+        ``detect_oscillations`` tie-broke equal reversal counts on ``pkg_id``.
+        On LP#2150339 ``gedit`` and ``gir1.2-peas-1.0`` both reverse 19 times,
+        so which one the title named depended on which was interned first.
+        """
+        import tempfile
+        from pathlib import Path
+
+        from uru_doctor.store import Store
+        from uru_doctor.title import propose_title
+
+        def title_of(preload: tuple[str, ...]) -> str:
+            interner = Interner(Store.open(Path(tempfile.mkdtemp())))
+            for other in preload:
+                ingest(
+                    interner,
+                    apt=f"lp{other}-apt.log",
+                    main=f"lp{other}-main.log",
+                    bug_id=other,
+                )
+            run, result = ingest(
+                interner,
+                apt="lp2150339-apt.log",
+                main="lp2150339-main.log",
+                bug_id="2150339",
+            )
+            return propose_title(run, result, interner).title
+
+        assert title_of(()) == title_of(("2150245",)) == title_of(("2169251", "2155743"))
+        assert "gedit" in title_of(())

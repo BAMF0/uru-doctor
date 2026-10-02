@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.report`.
 
 A report is the one artefact a human reads, so these tests are mostly about
@@ -31,7 +32,7 @@ from uru_doctor.report import (
     RunEntry,
     _elide,
     _packages,
-    _plural,
+    plural,
     render_corpus,
     render_run,
 )
@@ -291,11 +292,11 @@ class TestCountsAreDistinguished:
         assert "Nothing recorded" in text
         assert "Broken, as apt last reported it: 0" not in text
 
-    def test_plural(self) -> None:
-        assert _plural(1, "package") == "1 package"
-        assert _plural(2, "package") == "2 packages"
-        assert _plural(1500, "run") == "1,500 runs"
-        assert _plural(1, "relation") == "1 relation"
+    def testplural(self) -> None:
+        assert plural(1, "package") == "1 package"
+        assert plural(2, "package") == "2 packages"
+        assert plural(1500, "run") == "1,500 runs"
+        assert plural(1, "relation") == "1 relation"
 
 
 class TestCandidateInvalid:

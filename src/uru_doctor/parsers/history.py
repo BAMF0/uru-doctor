@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Parsing ``history.log``, apt's record of what it actually did.
 
 The authoritative answer to "were packages written to this system". ``main.log``

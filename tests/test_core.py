@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for sectioning, the CSR graph, interning, the store and sanitising.
 
 The invariants here are the ones that make the rest of the tool trustworthy:

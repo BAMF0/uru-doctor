@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Rules for apt resolver failures.
 
 These are the common case -- a 24.04 to 26.04 upgrade that never starts --
@@ -426,17 +427,27 @@ def resolver_livelock(context: RuleContext) -> Sequence[Finding]:
     for pkg_id, reversals, blocked_by, forced_by in context.run.oscillations:
         grouped.setdefault(blocked_by or pkg_id, []).append((pkg_id, reversals, forced_by))
 
+    # Every ordering below is by name, never by interned id. Ids are assigned
+    # in first-seen order, so any ``sorted`` or set iteration that falls back
+    # to one makes the output depend on what was ingested beforehand -- and
+    # these choices are not internal: the first name in each list is what the
+    # title says.
     out: list[Finding] = []
     ordered = sorted(
         grouped.items(),
-        key=lambda item: (-len(item[1]), -max(r for _, r, _ in item[1]), item[0]),
+        key=lambda item: (
+            -len(item[1]),
+            -max(r for _, r, _ in item[1]),
+            context.label(item[0]),
+        ),
     )
 
     for blocker, members in ordered:
-        stuck_names = context.labels(pkg for pkg, _, _ in members)
+        ranked_members = sorted(members, key=lambda m: (-m[1], context.label(m[0])))
+        stuck_names = context.labels(pkg for pkg, _, _ in ranked_members)
         blocker_name = context.label(blocker)
-        worst_reversals = max(reversals for _, reversals, _ in members)
-        forcers = context.labels({f for _, _, f in members if f})
+        worst_reversals = max(reversals for _, reversals, _ in ranked_members)
+        forcers = tuple(sorted(context.labels({f for _, _, f in ranked_members if f})))
 
         shown = ", ".join(stuck_names[:2]) + (
             f" and {len(stuck_names) - 2} more" if len(stuck_names) > 2 else ""

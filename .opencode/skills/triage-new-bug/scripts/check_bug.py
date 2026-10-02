@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Run uru-doctor over fetched bugs and print every verification gate.
 
     uv run .opencode/skills/triage-new-bug/scripts/check_bug.py 2169197 [...]

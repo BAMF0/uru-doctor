@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Parsing apport metadata and recognising which log an attachment holds.
 
 Two jobs, both of which are about tolerating names and formats we do not

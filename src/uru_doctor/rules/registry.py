@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """The rule registry.
 
 A rule maps evidence to a :class:`~uru_doctor.models.Cause`. Rules are plain

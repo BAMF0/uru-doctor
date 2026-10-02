@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Generating accurate bug titles from findings.
 
 Titles are derived from the diagnosis, which is derived from the logs. Nothing
@@ -228,6 +229,20 @@ def render_detail(finding: Finding, interner: Interner, *, run: UpgradeRun | Non
                 return "the attached logs record no failure"
             return f"logs end during {phase} with no failure recorded"
 
+        case Cause.UPGRADE_SUCCEEDED:
+            return "the upgrade completed with no error recorded"
+
+        case Cause.UNKNOWN:
+            # "could not be resolved" was what this said, which asserts a
+            # mechanism the tool has precisely failed to identify. The
+            # fallback has to describe the evidence, not guess at a cause:
+            # ``UNKNOWN`` comes from ``apt.roots.classify`` declining to
+            # categorise a root, so what is actually known is that apt made a
+            # decision about this package and that the shape of it was not
+            # recognised.
+            tail = f" affecting {_count(victims)}" if victims else ""
+            return f"an unrecognised resolver decision about {primary}{tail}"
+
         case _:
             tail = f", affecting {_count(victims)}" if victims else ""
             return f"{primary} could not be resolved{tail}"
@@ -277,7 +292,11 @@ def propose_title(
 
     # A diagnosis drawn from truncated logs is offered, never asserted. The
     # caveat stays attached so the report can show why.
-    confident = run.evidence_complete and primary.cause is not Cause.NO_FAILURE_RECORDED
+    # ``needs_human`` rather than a literal comparison, so that
+    # ``Cause.UNKNOWN`` is covered too. It was not: an unclassifiable resolver
+    # root produced a fully confident title asserting a cause the tool had
+    # explicitly failed to determine.
+    confident = run.evidence_complete and not primary.cause.needs_human
     if not confident and primary.cause is not Cause.NO_FAILURE_RECORDED:
         detail = f"{detail} (unconfirmed: logs incomplete)"
 

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Running the rules and ranking what they produce.
 
 Diagnosis is a pure function of an ingested record. That is deliberate: it
@@ -209,6 +210,24 @@ ADVISORY_RULES: frozenset[str] = frozenset({"resolver.fragile-decision"})
 MAX_FINDINGS: int = 12
 
 
+def _is_resolver_finding(finding: Finding) -> bool:
+    """Whether a finding describes a decision apt made while planning.
+
+    Tested structurally, by whether the finding came from a conflict graph,
+    rather than by enumerating causes. The cause list missed
+    :attr:`Cause.UNKNOWN`, which ``apt.roots.classify`` returns for a root it
+    cannot categorise: such a finding is produced by a resolver rule, carries a
+    ``graph_index``, and is every bit as pre-commit as a classified one -- but
+    being absent from ``RESOLVER_CAUSES`` it escaped the demotion below and
+    became the headline on a successful upgrade.
+
+    ``graph_index`` is set only by the rules in
+    :mod:`uru_doctor.rules.resolver`, so it is an exact marker rather than a
+    proxy.
+    """
+    return finding.graph_index is not None or finding.cause in _PRE_COMMIT_ONLY_CAUSES
+
+
 def _tier(finding: Finding, *, completed: bool = False) -> int:
     """Which band a finding sits in. Lower is more authoritative.
 
@@ -220,7 +239,7 @@ def _tier(finding: Finding, *, completed: bool = False) -> int:
         return 99
     if finding.rule in ADVISORY_RULES:
         return 50
-    if completed and finding.cause in _PRE_COMMIT_ONLY_CAUSES:
+    if completed and _is_resolver_finding(finding):
         return 40
     if finding.cause in PRECONDITION_CAUSES:
         return 0
@@ -379,13 +398,29 @@ def diagnose(
     *,
     meta: ApportMeta | None = None,
     term: TermLog | None = None,
+    enabled: Sequence[str] = (),
+    disabled: Sequence[str] = (),
 ) -> DiagnosisResult:
-    """Run every eligible rule over ``run`` and rank the results."""
+    """Run every eligible rule over ``run`` and rank the results.
+
+    ``enabled``, when non-empty, restricts the run to exactly those rule names;
+    ``disabled`` removes names from whatever is left. Both exist for bisecting
+    a surprising verdict -- turning one rule off and seeing what the ranking
+    says instead is the quickest way to find out whether a finding is the cause
+    or merely the loudest thing in the log. Unknown names are ignored rather
+    than rejected, so a config written against a newer version still works.
+    """
     context = RuleContext(run=run, interner=interner, meta=meta, term=term)
 
     collected: list[Finding] = []
     fired: list[str] = []
     eligible = list(rules_for(run))
+    if enabled:
+        allowed = set(enabled)
+        eligible = [r for r in eligible if r.name in allowed]
+    if disabled:
+        refused = set(disabled)
+        eligible = [r for r in eligible if r.name not in refused]
 
     for candidate in eligible:
         produced = candidate(context)

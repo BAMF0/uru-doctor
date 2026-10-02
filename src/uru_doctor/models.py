@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """The domain model: enums, the conflict graph, and the per-run record.
 
 Everything in this module is frozen and either a small scalar, an interned
@@ -488,6 +489,20 @@ class Cause(StrEnum):
     #: The log ends without recording an outcome. Distinct from UNKNOWN: there
     #: is no failure to explain, only missing evidence.
     NO_FAILURE_RECORDED = "no_failure_recorded"
+    #: The upgrade finished and recorded no error.
+    #:
+    #: Distinct from both of the above, and not a caveat. ``UNKNOWN`` means a
+    #: failure happened that could not be classified;
+    #: ``NO_FAILURE_RECORDED`` means the evidence ran out before the ending.
+    #: This means the evidence is complete and the ending was success.
+    #:
+    #: It exists because the resolver trace of a *successful* upgrade still
+    #: contains conflicts -- apt breaks and repairs packages as it searches --
+    #: and without a positive finding for "nothing went wrong" the largest
+    #: piece of that transient churn became the headline. Running this tool on
+    #: a healthy machine reported ``libqt5core5t64 could not be resolved`` on
+    #: an upgrade that had completed days earlier.
+    UPGRADE_SUCCEEDED = "upgrade_succeeded"
 
     @property
     def is_resolver(self) -> bool:

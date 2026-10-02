@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Turning ``apt.log`` lines into tokens, depth and all.
 
 The scan is one pass, and it does three things per line that the rest of the

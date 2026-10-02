@@ -10,6 +10,10 @@ logs/
 # Generated reports, exports and retitle proposals.
 out/
 
+# Build artefacts. `uv build` writes here.
+dist/
+build/
+
 # Python
 __pycache__/
 *.py[cod]

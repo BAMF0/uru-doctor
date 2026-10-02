@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Render a diagnosis as Markdown.
 
 This module is the product. Everything upstream of it exists to make these
@@ -31,6 +32,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 from typing import Final
 
 from uru_doctor.config import ReportConfig
@@ -40,7 +42,7 @@ from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Decision, Finding, UpgradeRun
 from uru_doctor.title import ProposedTitle, phase_note, propose_title
 
-__all__ = ["RunEntry", "render_corpus", "render_run"]
+__all__ = ["MAX_QUOTE_CHARS", "RunEntry", "plural", "render_corpus", "render_run"]
 
 _RULE: Final = "---"
 
@@ -120,9 +122,19 @@ class RunEntry:
 
     @property
     def label(self) -> str:
-        """Short human reference: the bug number when there is one."""
+        """Short human reference.
+
+        The bug number when there is one, otherwise the directory's own name:
+        a corpus ingested from disk is organised by the person who ingested it,
+        so ``2150339`` or ``customer-42`` means more to them than
+        ``dir:/long/path/to/it#0``. Collisions are resolved by
+        :func:`_display_labels`, which falls back to the full key.
+        """
         if self.run.bug_id is not None:
             return f"LP#{self.run.bug_id}"
+        if self.run.source_dir:
+            name = PurePosixPath(self.run.source_dir).name or self.run.source_dir
+            return f"{name}#{self.run.attempt}" if self.run.attempt else name
         return self.key
 
 
@@ -140,9 +152,12 @@ def _code(text: str) -> str:
     return f"`{cleaned}`" if cleaned else "_none_"
 
 
-def _plural(count: int, singular: str, plural: str = "") -> str:
-    """``3 packages`` / ``1 package``, with a thousands separator."""
-    word = singular if count == 1 else (plural or f"{singular}s")
+def plural(count: int, singular: str, irregular: str = "") -> str:
+    """``3 packages`` / ``1 package``, with a thousands separator.
+
+    ``irregular`` supplies a plural that is not formed by adding ``s``.
+    """
+    word = singular if count == 1 else (irregular or f"{singular}s")
     return f"{count:,} {word}"
 
 
@@ -404,7 +419,7 @@ def _finding_block(
     if finding.cascade_size:
         victims = _packages(finding.victim_pkgs, interner)
         lines += [
-            f"**Blast radius: {_plural(finding.cascade_size, 'package')}** "
+            f"**Blast radius: {plural(finding.cascade_size, 'package')}** "
             "reachable from this root in the blame graph.",
             "",
         ]
@@ -461,8 +476,8 @@ def _provenance(
         seen_graphs.add(finding.graph_index)
     lines += [
         f"Evidence: resolver section {graph.section_index} of `apt.log`, from "
-        f"line {graph.first_line:,} ({_plural(len(graph.nodes), 'package')}, "
-        f"{_plural(len(graph.edges), 'relation')}). Every root below is drawn "
+        f"line {graph.first_line:,} ({plural(len(graph.nodes), 'package')}, "
+        f"{plural(len(graph.edges), 'relation')}). Every root below is drawn "
         "from this section.",
         "",
     ]
@@ -627,7 +642,7 @@ def _third_party(entry: RunEntry, interner: Interner, config: ReportConfig) -> l
 
     if foreign:
         lines += [
-            f"The upgrader listed {_plural(len(foreign), 'package')} not from "
+            f"The upgrader listed {plural(len(foreign), 'package')} not from "
             "Ubuntu on this system:",
             "",
             _listing(sorted(foreign), config.top_packages),
@@ -802,7 +817,7 @@ def _cluster_block(
     lines = [
         f"### {heading}",
         "",
-        f"{_plural(cluster.size, 'run')}, matched on **{cluster.tier}**. "
+        f"{plural(cluster.size, 'run')}, matched on **{cluster.tier}**. "
         f"Suggested master: {names.get(cluster.representative, cluster.representative)}.",
         "",
     ]
@@ -843,9 +858,9 @@ def render_corpus(
     lines = [
         "# Upgrade failure digest",
         "",
-        f"{_plural(len(entries), 'run')} diagnosed. "
-        f"{_plural(stats['clusters'], 'cluster')} covering "
-        f"{_plural(stats['duplicates'], 'candidate duplicate')}; "
+        f"{plural(len(entries), 'run')} diagnosed. "
+        f"{plural(stats['clusters'], 'cluster')} covering "
+        f"{plural(stats['duplicates'], 'candidate duplicate')}; "
         f"largest cluster {stats['largest']:,}.",
         "",
         "Clusters are built from log-derived structure only -- the root-cause "
@@ -880,7 +895,7 @@ def render_corpus(
             "",
             "No other run in this corpus shares their structure. That is not "
             "evidence of uniqueness: a corpus of "
-            f"{_plural(len(entries), 'run')} will not find a pair for "
+            f"{plural(len(entries), 'run')} will not find a pair for "
             "everything, and these may well match something outside it.",
             "",
         ]

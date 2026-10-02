@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.parsers.history` and
 :mod:`uru_doctor.parsers.aptterm`."""
 

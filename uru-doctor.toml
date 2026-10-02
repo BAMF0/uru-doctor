@@ -1,0 +1,196 @@
+# uru-doctor configuration
+#
+# Every option below is read by the code. A total absence of this file is a
+# perfectly valid configuration -- these are the defaults, written out so that
+# they can be read and argued with.
+#
+# Options the config model defines but nothing yet consults are deliberately
+# absent, and listed at the bottom of this file instead. A documented setting
+# that silently does nothing is worse than an undocumented one, because it
+# invites someone to change it and conclude the tool is broken.
+# `tests/test_config.py` asserts that this file and the code agree, in both
+# directions: no option here may be inert, and no implemented option may be
+# missing.
+#
+# Place this at the root of a corpus directory, or pass --config.
+
+
+[paths]
+
+# Where the record store lives: the SQLite database holding interned strings,
+# diagnosed runs, clusters and the attachment cache.
+#
+# `diagnose` and `title` never write here. Interning is a write, but a command
+# that only answers a question about a directory uses a throwaway store rather
+# than creating this one wherever you happened to be standing. `ingest`,
+# `fetch`, `dedup`, `show` and `stats` use it.
+state_dir = ".uru-doctor"
+
+
+[ingest]
+
+# Remove hostnames, usernames, home paths, emails, IPs and MAC addresses while
+# reading logs.
+#
+# Leave this on. The Markdown report quotes log lines verbatim so they can be
+# pasted into a public bug, and `uname information:` carries the machine's
+# hostname. Redaction is idempotent, so it costs nothing on logs that have
+# already been through it, and it does not affect the diagnosis: the release
+# pair, the kernel version and lexer coverage are identical either way.
+#
+# Turning it off is reasonable for a private corpus you never export.
+redact = true
+
+
+[dedup]
+
+# How precisely to compare version constraints when fingerprinting a root
+# cause: "exact", "upstream", "major" or "operator".
+#
+# "operator" keeps the relationship (`>=`, `=`, `<`) and discards the version.
+# That is deliberately coarse: two reporters hit the same archive bug from
+# different starting versions, so comparing exact versions splits one fault
+# into as many groups as there are machines.
+version_granularity = "operator"
+
+# The band within which an evidence-similarity score is treated as undecided.
+#
+# Only tier 2 -- weighted Jaccard over event templates -- produces scores at
+# all. Tiers 0 and 1 are structural: an identical root-cause subgraph, or the
+# same causes and roots at the same phase. Those are either equal or not.
+ambiguous_low = 0.55
+ambiguous_high = 0.80
+
+# How many root packages two runs must share before a score is even computed.
+min_shared_roots = 1
+
+# Refuse to report a cluster larger than this. A cluster of five hundred is
+# much more likely to be a signature that collapsed than five hundred reports
+# of one fault.
+max_cluster_size = 500
+
+
+[title]
+
+# Longest proposed title. Launchpad does not enforce a limit; this one exists
+# because a title is read in a list, and the useful part of these titles -- the
+# package that is actually at fault -- belongs in the first eighty characters.
+#
+# Titles are trimmed at a word boundary and marked as truncated.
+max_length = 120
+
+
+[rules]
+
+# Restrict diagnosis to exactly these rule names. Empty means all of them.
+# `uru-doctor rules` lists the names.
+#
+# Both of these exist for bisecting a surprising verdict: turning one rule off
+# and seeing what the ranking says instead is the quickest way to find out
+# whether a finding is the cause or merely the loudest thing in the log.
+# Unknown names are ignored, so a config written against a newer version still
+# works.
+enabled = []
+
+# Remove these rule names from whatever `enabled` leaves.
+disabled = []
+
+
+[launchpad]
+
+# The read-only API. There is no code in this tool that can write to
+# Launchpad, and no credentials are ever used.
+api_base = "https://api.launchpad.net/devel"
+
+# Identify yourself. Launchpad is a shared service; be nameable.
+user_agent = "uru-doctor/0.1 (+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
+
+# Minimum gap between requests, in seconds.
+#
+# Measured, not guessed: below roughly two seconds the API starts answering
+# 429, and recovering from one costs about a minute. Spacing requests out is
+# cheaper than retrying them, which is also why there is no concurrency
+# setting -- parallel requests against this API are slower than serial ones
+# once the 429s start.
+min_interval_s = 3.0
+
+# Retries, and the base of the exponential backoff between them. Observed 429s
+# need tens of seconds, not milliseconds. A `Retry-After` header, when sent,
+# overrides the computed wait.
+max_retries = 5
+backoff_base_s = 2.0
+
+# Cap on a single attachment. The apt-clone system-state tarball can be tens of
+# megabytes and answers nothing the resolver trace does not answer better. When
+# an attachment exceeds this, the *tail* is kept: a truncated upgrade log is
+# interesting at the end, because that is where it stopped.
+max_attachment_bytes = 33554432
+
+
+[report]
+
+# Clusters listed in a corpus digest before eliding.
+max_clusters = 50
+
+# Members listed per cluster before eliding.
+max_members_shown = 20
+
+# Victims listed per root before eliding. A forty-victim cascade needs a count,
+# not forty lines.
+max_cascade_shown = 12
+
+# Packages listed in the third-party section and in `uru-doctor stats`.
+top_packages = 20
+
+# Route third-party findings to their own candidate-Invalid section.
+#
+# One PPA can account for a dozen bugs -- the linux-surface packages did
+# exactly that -- and they are all closed for the same reason, so they are
+# worth dispatching together. The section is named for what it contains rather
+# than for the conclusion: whether a bug is Invalid is a human's call.
+#
+# Note that these are not grouped by origin, because the logs do not record
+# one. The upgrader writes a flat `Foreign` list with no PPA attached, so
+# grouping would mean guessing from package-name suffixes.
+separate_third_party = true
+
+# Disclose near-tied resolver decisions. apt sometimes chooses between
+# options whose scores differ by one, which makes the bug depend on incidental
+# system state: irreproducible on a clean install, and prone to duplicates that
+# look inconsistent with each other. That is a property of the fault, not of
+# the reports, and saying so saves a triager rediscovering it.
+show_fragile_section = true
+
+# Include the caveats section: rules withheld for lack of evidence, and
+# findings that amount to "I cannot explain this".
+show_needs_human = true
+
+
+# ---------------------------------------------------------------------------
+# Defined but not yet honoured
+# ---------------------------------------------------------------------------
+#
+# These exist in `uru_doctor.config` and are read by nothing. They are design
+# intent, not configuration, and setting them has no effect. They are listed
+# here rather than silently omitted so the gap is visible; the test that guards
+# this file knows about them and will fail if one becomes implemented without
+# being documented, or if a new option appears in neither list.
+#
+#   paths.out_dir                 -- reports go to stdout or --out
+#   ingest.max_log_bytes          -- superseded by per-source caps in ingest.py,
+#                                    which differ per log and are better informed
+#   ingest.keep_archived_attempts -- use `diagnose --all-attempts`
+#   ingest.screenlog_fallback     -- screenlog.0 is read but nothing parses it
+#   apt.grammar                   -- the dialect is detected from the log
+#   apt.dedupe_sections           -- always on; `read_sections(dedupe=False)` is
+#                                    reachable only from code
+#   apt.max_graph_nodes           -- no graph has come close
+#   apt.keep_autoinstall_edges    -- always kept; blame edges are a narrower set
+#   rules.fragile_score_margin    -- `roots.analyse` takes it, config cannot reach it
+#   rules.min_cascade_for_high    -- likewise
+#   rules.third_party_origins     -- third-party packages come from main.log's
+#                                    `Foreign` list, which names no origin
+#   title.include_cascade_size    -- the title format is fixed per cause
+#   title.include_fragile_marker  -- likewise
+#   title.llm_polish              -- the llm subsystem is not built
+#   llm.*                         -- likewise

@@ -3,6 +3,16 @@ name = "uru-doctor"
 version = "0.1.0"
 description = "Diagnose, deduplicate and retitle Ubuntu Release Upgrader bugs from their upgrade logs"
 readme = "README.md"
+# Matching ubuntu-release-upgrader, which this exists to triage bugs for. Its
+# debian/copyright declares GPL-2+ for everything except one imported test
+# helper, and upstream's own files carry the "version 2 ... or (at your option)
+# any later version" notice. Keeping the same terms is what allows code to move
+# in either direction between the two.
+#
+# A PEP 639 SPDX expression rather than the deprecated "License ::" classifier,
+# which must not be used alongside it.
+license = "GPL-2.0-or-later"
+license-files = ["LICENSE"]
 authors = [
     { name = "Simon Johnsson", email = "simon.johnsson@canonical.com" }
 ]

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.phases` and :mod:`uru_doctor.parsers.mainlog`."""
 
 from __future__ import annotations

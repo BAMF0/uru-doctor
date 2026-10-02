@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for root-cause extraction.
 
 These are the tests that say what the tool is *for*. The claims are checked

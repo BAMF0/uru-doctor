@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Turning a directory of logs into one or more :class:`UpgradeRun` records.
 
 This module owns the *order* in which parsers run, and that order is not
@@ -313,8 +314,22 @@ def discover(root: Path) -> Iterator[tuple[int, Path]]:
     yield from enumerate(archived, start=1)
 
 
-def read_log_set(directory: Path, attempt: int = 0) -> LogSet:
-    """Read and clean every recognised log in one directory."""
+def read_log_set(directory: Path, attempt: int = 0, *, redact: bool = True) -> LogSet:
+    """Read and clean every recognised log in one directory.
+
+    ``redact`` defaults to on, and did not used to. The Launchpad path has
+    always redacted -- it is the default in :func:`read_log` -- so a bug fetched
+    from the web had its hostname and home directory removed while the same
+    logs read from ``/var/log/dist-upgrade`` kept them, with no comment saying
+    why and with ``IngestConfig.redact`` claiming otherwise.
+
+    That mattered because the record is persisted and the Markdown report
+    quotes log lines verbatim for pasting into a public bug. ``uname
+    information:`` carries the hostname and is an ordinary event, so whether it
+    reached the page depended only on whether a finding happened to match that
+    line. Redaction is idempotent, so the safe default costs nothing on logs
+    that have already been through it.
+    """
     log_set = LogSet(source_dir=str(directory), attempt=attempt)
     for name, source in LOG_FILENAMES.items():
         path = directory / name
@@ -327,7 +342,7 @@ def read_log_set(directory: Path, attempt: int = 0) -> LogSet:
         cap = _SIZE_CAPS.get(source)
         if cap is not None and len(data) > cap:
             log_set.truncated.add(source)
-        text = read_log(data, redacted=False, max_bytes=cap)
+        text = read_log(data, redacted=redact, max_bytes=cap)
         # An existing but empty log is itself evidence, so the key is recorded
         # even when the text is blank.
         log_set.texts[source] = text
@@ -656,11 +671,12 @@ def ingest_directory(
     *,
     meta: ApportMeta | None = None,
     bug_id: int | None = None,
+    redact: bool = True,
 ) -> IngestResult:
     """Ingest every attempt in a ``dist-upgrade`` directory."""
     result = IngestResult()
     for attempt, directory in discover(root):
-        log_set = read_log_set(directory, attempt)
+        log_set = read_log_set(directory, attempt, redact=redact)
         if not log_set.texts:
             result.skipped.append(f"{directory} (no recognised logs)")
             continue

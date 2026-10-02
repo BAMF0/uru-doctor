@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Cleaning log text: terminal escapes, progress spam, and personal data.
 
 Two separate jobs that both have to happen before a log is useful.

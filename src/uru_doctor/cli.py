@@ -1,0 +1,766 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""Command line interface.
+
+Six commands, split along one line: whether they write to the record store.
+
+``diagnose``, ``title`` and ``rules`` answer a question about something you
+hand them and leave nothing behind. ``ingest`` builds the corpus, and
+``dedup``, ``show`` and ``stats`` read it back. Interning is a write -- it has
+to be, since the point of the store is that template and package ids are stable
+across runs -- so a command that only answers a question uses a throwaway store
+rather than creating ``.uru-doctor/`` in whatever directory you happened to be
+standing in.
+
+Nothing here writes to Launchpad. The tool proposes titles and duplicate
+groupings; a human applies them. That is not timidity about the code, it is
+that the judgement "this bug is Invalid" belongs to someone accountable for it,
+and a tool that acted on its own verdicts would have to be right far more often
+than this one can promise.
+
+Exit codes are meant for scripts: ``0`` success, ``1`` a real failure, ``2``
+bad usage, and ``3`` for ``--strict`` when the logs parsed but not perfectly.
+Three is separate because "I could not read part of this log" is a different
+answer from "this bug has no diagnosis", and a corpus run wants to tell them
+apart.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Annotated, Final
+
+import typer
+from rich.console import Console
+from rich.table import Table
+
+import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
+from uru_doctor import __version__
+from uru_doctor.apt.lexer import LexStats
+from uru_doctor.config import Config, load_config
+from uru_doctor.dedup import build_signature, cluster_runs, summarise
+from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
+from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
+from uru_doctor.intern import Interner
+from uru_doctor.lp.read import Launchpad, LaunchpadError, RateLimited
+from uru_doctor.models import Signature, UpgradeRun
+from uru_doctor.parsers.apportmeta import parse_apport_meta
+from uru_doctor.report import RunEntry, plural, render_corpus, render_run
+from uru_doctor.rules.registry import all_rules
+from uru_doctor.store import Store, run_key_for
+from uru_doctor.title import ProposedTitle, propose_title
+
+EXIT_OK: Final = 0
+EXIT_FAIL: Final = 1
+EXIT_USAGE: Final = 2
+EXIT_IMPERFECT: Final = 3
+"""``--strict`` found a log it could not fully parse.
+
+Distinct from a failure because the diagnosis may still be sound; it means the
+grammar has a gap and the result deserves a human's eye.
+"""
+
+app = typer.Typer(
+    name="uru-doctor",
+    help=(
+        "Diagnose, deduplicate and retitle Ubuntu Release Upgrader bugs from their upgrade logs."
+    ),
+    no_args_is_help=True,
+    add_completion=False,
+)
+
+out = Console()
+err = Console(stderr=True)
+
+
+# -- shared plumbing ---------------------------------------------------------
+
+
+def _fail(message: str, code: int = EXIT_FAIL) -> None:
+    """Report a problem on stderr and stop.
+
+    On stderr so that ``uru-doctor diagnose … --markdown > report.md`` produces
+    a report or an empty file, never a file with an error message in the middle
+    of it.
+    """
+    err.print(f"[bold red]error:[/] {message}")
+    raise typer.Exit(code)
+
+
+def _config(path: Path | None) -> Config:
+    try:
+        return load_config(path)
+    except FileNotFoundError:
+        _fail(f"no such config file: {path}")
+    except (ValueError, TypeError) as exc:
+        # Config models are ``extra="forbid"``, so a typo'd key lands here
+        # rather than being silently ignored.
+        _fail(f"invalid config: {exc}")
+    raise AssertionError("unreachable")
+
+
+@contextmanager
+def _scratch_store() -> Iterator[Store]:
+    """A store that exists for one command and is then thrown away.
+
+    Interning cannot be done without writing, but a question about one
+    directory should not leave state behind in the current working directory.
+    The cost is that corpus-wide template frequencies are unavailable, which
+    only affects evidence-similarity scoring -- and that needs a corpus, so it
+    was never going to work on a single run anyway.
+    """
+    with (
+        tempfile.TemporaryDirectory(prefix="uru-doctor-") as temporary,
+        Store.open(Path(temporary)) as store,
+    ):
+        yield store
+
+
+@contextmanager
+def _state_store(config: Config) -> Iterator[Store]:
+    try:
+        with Store.open(config.paths.state_dir) as store:
+            yield store
+    except typer.Exit:
+        # ``typer.Exit`` subclasses ``RuntimeError``, so the handler below
+        # caught every deliberate exit raised inside the ``with`` body and
+        # re-reported it -- ``uru-doctor dedup`` on an empty store printed its
+        # real message and then "error: 1", the stringified exit code.
+        raise
+    except RuntimeError as exc:
+        # Raised when the store was written by a newer schema version.
+        _fail(str(exc))
+
+
+def _diagnose_run(
+    run: UpgradeRun, interner: Interner, config: Config
+) -> tuple[DiagnosisResult, ProposedTitle, Signature]:
+    result = diagnose(
+        run,
+        interner,
+        enabled=config.rules.enabled,
+        disabled=config.rules.disabled,
+    )
+    title = propose_title(run, result, interner, max_length=config.title.max_length)
+    signature = build_signature(
+        run,
+        result.findings,
+        interner,
+        granularity=config.dedup.version_granularity,
+    )
+    return (result, title, signature)
+
+
+def _ingest(root: Path, interner: Interner, config: Config) -> IngestResult:
+    if not root.exists():
+        _fail(f"no such path: {root}")
+    if not root.is_dir():
+        _fail(f"not a directory: {root}\nPoint me at a dist-upgrade log directory.")
+    result = ingest_directory(root, interner, redact=config.ingest.redact)
+    if not result.runs:
+        _fail(
+            f"no upgrade logs found under {root}\n"
+            "Expected at least one of main.log or apt.log, either there or in "
+            "a dated subdirectory such as 20260623-1109."
+        )
+    return result
+
+
+def _key_for(run: UpgradeRun) -> str:
+    return run_key_for(run.bug_id, run.attempt, run.source_dir)
+
+
+# -- terminal rendering ------------------------------------------------------
+
+
+def _verdict_table(run: UpgradeRun, result: DiagnosisResult, title: ProposedTitle) -> Table:
+    """The compact answer, for a terminal.
+
+    Not the Markdown page rendered narrow. A terminal reader wants the verdict
+    and the three or four facts that qualify it; the page exists for pasting
+    into a bug, where the evidence and the provenance matter.
+    """
+    table = Table(show_header=False, box=None, pad_edge=False)
+    table.add_column(style="dim", no_wrap=True)
+    table.add_column(overflow="fold")
+
+    primary = result.primary
+    table.add_row("proposed title", f"[bold]{title.title}[/]")
+    if primary is not None:
+        table.add_row("cause", primary.cause.value)
+        table.add_row(
+            "confidence",
+            f"{primary.confidence.name.lower()}"
+            + (", corroborated by apt" if primary.cause in result.corroborated else ""),
+        )
+        if primary.cascade_size:
+            table.add_row("blast radius", plural(primary.cascade_size, "package"))
+        if primary.fragile:
+            table.add_row("fragile", "yes -- near-tied resolver scores")
+    else:
+        table.add_row("cause", "[yellow]no rule matched[/]")
+
+    table.add_row("release", run.release_pair)
+    table.add_row("stopped at", run.terminal_phase.name)
+    table.add_row(
+        "wrote to system",
+        {True: "yes", False: "no", None: "unknown"}[run.dpkg_wrote],
+    )
+    table.add_row("logs", ", ".join(s.value for s in run.logs_present) or "none")
+    if not run.evidence_complete:
+        table.add_row("evidence", "[yellow]incomplete -- some rules withheld[/]")
+    if result.is_candidate_invalid:
+        table.add_row("third party", "[yellow]candidate Invalid[/]")
+    return table
+
+
+def _print_run(
+    run: UpgradeRun,
+    result: DiagnosisResult,
+    title: ProposedTitle,
+    *,
+    lex: LexStats | None = None,
+) -> None:
+    # The heading is kept short because Rich truncates a rule's title to the
+    # terminal width, silently and from the right. With the attempt number
+    # appended, a long temporary path pushed it off the end -- so the one thing
+    # distinguishing two reports of the same directory was the thing that
+    # disappeared. Anything load-bearing goes in the table, which wraps.
+    if run.bug_id:
+        heading = f"LP#{run.bug_id}"
+    elif run.source_dir:
+        heading = Path(run.source_dir).name or run.source_dir
+    else:
+        heading = "run"
+    out.print()
+    out.rule(f"[bold]{heading}[/]")
+    if run.attempt:
+        out.print(f"[yellow]archived attempt {run.attempt}[/] -- not the most recent run")
+    if run.source_dir and not run.bug_id and run.source_dir != heading:
+        out.print(f"[dim]{run.source_dir}[/]")
+    out.print(_verdict_table(run, result, title))
+    if lex is not None and lex.lines:
+        style = "green" if lex.unmatched == 0 else "yellow"
+        out.print(
+            f"[{style}]lexer coverage {lex.coverage:.4%}"
+            f"  ({lex.unmatched:,} of {lex.lines:,} lines unrecognised)[/]"
+        )
+    for note in result.notes:
+        out.print(f"[dim]note: {note}[/]")
+
+
+def _json_record(
+    run: UpgradeRun,
+    result: DiagnosisResult,
+    title: ProposedTitle,
+    signature: Signature,
+    interner: Interner,
+) -> dict[str, object]:
+    """A machine-readable triage record.
+
+    Deliberately not ``UpgradeRun.model_dump()``: that carries packed byte
+    arrays and interned integers, which are meaningless without the store that
+    produced them. This is the subset that survives being written to a file and
+    read somewhere else.
+    """
+    primary = result.primary
+    return {
+        "key": _key_for(run),
+        "bug_id": run.bug_id,
+        "attempt": run.attempt,
+        "from_series": run.from_series,
+        "to_series": run.to_series,
+        "title": title.title,
+        "title_confident": title.confident,
+        "cause": primary.cause.value if primary else None,
+        "severity": primary.severity.name.lower() if primary else None,
+        "confidence": primary.confidence.name.lower() if primary else None,
+        "root_packages": list(interner.package_names(primary.root_pkgs)) if primary else [],
+        "cascade_size": primary.cascade_size if primary else 0,
+        "fragile": bool(primary and primary.fragile),
+        "candidate_invalid": result.is_candidate_invalid,
+        "corroborated": sorted(c.value for c in result.corroborated),
+        "terminal_phase": run.terminal_phase.name,
+        "evidence_complete": run.evidence_complete,
+        "dpkg_wrote": run.dpkg_wrote,
+        "upgrade_completed": result.upgrade_completed,
+        "logs_present": [s.value for s in run.logs_present],
+        # Both broken counts, named. They differ by an order of magnitude and
+        # a consumer that sees one unlabelled "broken" will misreport it.
+        "apt_broken_count": run.apt_broken_count,
+        "observed_broken_count": run.counts.broken,
+        "rules_fired": list(result.fired),
+        "rules_withheld": list(result.skipped_incomplete),
+        "notes": list(result.notes),
+        "signature": {
+            "root_graph": signature.root_graph.hex() if signature.root_graph else None,
+            "cause_tuple": signature.cause_tuple.hex() if signature.cause_tuple else None,
+        },
+    }
+
+
+def _write(text: str, destination: Path | None, *, label: str) -> None:
+    if destination is None:
+        out.file.write(text)
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(text, encoding="utf-8")
+    err.print(f"[green]wrote[/] {label} to {destination}")
+
+
+# -- commands ----------------------------------------------------------------
+
+ConfigOption = Annotated[
+    Path | None,
+    typer.Option("--config", "-c", help="Path to uru-doctor.toml. Default: search upward."),
+]
+OutOption = Annotated[
+    Path | None,
+    typer.Option("--out", "-o", help="Write to this file instead of stdout."),
+]
+
+
+@app.command("diagnose")
+def diagnose_cmd(
+    path: Annotated[
+        Path,
+        typer.Argument(
+            metavar="DIRECTORY",
+            help="A dist-upgrade log directory, e.g. /var/log/dist-upgrade.",
+        ),
+    ],
+    markdown: Annotated[
+        bool, typer.Option("--markdown", "-m", help="Emit the full Markdown report.")
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable record.")
+    ] = False,
+    strict: Annotated[
+        bool,
+        typer.Option("--strict", help=f"Exit {EXIT_IMPERFECT} if any log parsed imperfectly."),
+    ] = False,
+    all_attempts: Annotated[
+        bool,
+        typer.Option("--all-attempts", help="Also report archived earlier attempts."),
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Diagnose an upgrade failure from its logs.
+
+    Reads the directory, leaves nothing behind, and says what stopped the
+    upgrade and which package to blame. Use --markdown for a page suitable for
+    pasting into a bug report.
+    """
+    if markdown and as_json:
+        _fail("choose one of --markdown or --json", EXIT_USAGE)
+    config = _config(config_path)
+
+    with _scratch_store() as store:
+        interner = Interner(store)
+        result = _ingest(path, interner, config)
+        runs = result.runs if all_attempts else [r for r in result.runs if r.is_primary]
+        store.commit()
+
+        documents: list[str] = []
+        records: list[dict[str, object]] = []
+        imperfect: list[str] = []
+
+        for run in runs:
+            diagnosis, title, signature = _diagnose_run(run, interner, config)
+            lex = result.lex_stats.get(run.attempt)
+            if lex is not None and lex.unmatched:
+                imperfect.append(f"attempt {run.attempt}: {lex.unmatched:,} unrecognised lines")
+
+            if markdown:
+                documents.append(
+                    render_run(
+                        run,
+                        diagnosis,
+                        interner,
+                        config=config.report,
+                        title=title,
+                        key=_key_for(run),
+                    )
+                )
+            elif as_json:
+                records.append(_json_record(run, diagnosis, title, signature, interner))
+            else:
+                _print_run(run, diagnosis, title, lex=lex)
+
+        for skipped in result.skipped:
+            err.print(f"[dim]skipped {skipped}[/]")
+
+        if markdown:
+            _write("\n\n".join(documents), out_path, label="report")
+        elif as_json:
+            payload = records[0] if len(records) == 1 else records
+            _write(json.dumps(payload, indent=2) + "\n", out_path, label="record")
+
+    if strict and imperfect:
+        for line in imperfect:
+            err.print(f"[yellow]imperfect parse:[/] {line}")
+        err.print(
+            "[dim]The diagnosis above may still be correct; --strict reports "
+            "that the grammar has a gap.[/]"
+        )
+        raise typer.Exit(EXIT_IMPERFECT)
+
+
+@app.command()
+def title(
+    path: Annotated[Path, typer.Argument(metavar="DIRECTORY")],
+    config_path: ConfigOption = None,
+) -> None:
+    """Print just the proposed bug title.
+
+    One line on stdout and nothing else, so it can be piped.
+    """
+    config = _config(config_path)
+    with _scratch_store() as store:
+        interner = Interner(store)
+        result = _ingest(path, interner, config)
+        run = result.primary or result.runs[0]
+        _, proposed, _ = _diagnose_run(run, interner, config)
+        store.commit()
+    print(proposed.title)
+    if not proposed.confident:
+        err.print("[yellow]low confidence: the logs do not clearly name a cause[/]")
+
+
+@app.command()
+def ingest(
+    paths: Annotated[
+        list[Path],
+        typer.Argument(metavar="DIRECTORY...", help="One or more dist-upgrade directories."),
+    ],
+    config_path: ConfigOption = None,
+) -> None:
+    """Add upgrade logs to the record store, for corpus-wide work.
+
+    Unlike diagnose, this persists: the store accumulates the template and
+    package vocabulary that duplicate detection needs, and holds the diagnosed
+    runs that dedup and show read back.
+    """
+    config = _config(config_path)
+    with _state_store(config) as store:
+        interner = Interner(store)
+        added = 0
+        for path in paths:
+            result = _ingest(path, interner, config)
+            for run in result.runs:
+                diagnosis, _, signature = _diagnose_run(run, interner, config)
+                store.put_run(run.with_findings(diagnosis.findings, signature))
+                added += 1
+            for skipped in result.skipped:
+                err.print(f"[dim]skipped {skipped}[/]")
+        store.commit()
+        totals = store.stats()
+    held = f"store now holds {plural(totals['runs'], 'run')}"
+    if totals["bugs"]:
+        held += f" across {plural(totals['bugs'], 'bug')}"
+    out.print(f"[green]stored {plural(added, 'run')}[/]; {held}")
+    out.print(f"[dim]{config.paths.state_dir}[/]")
+
+
+@app.command()
+def fetch(
+    bugs: Annotated[
+        list[int],
+        typer.Argument(metavar="BUG_ID...", help="Launchpad bug numbers."),
+    ],
+    save: Annotated[
+        bool, typer.Option("--save/--no-save", help="Add the runs to the record store.")
+    ] = True,
+    config_path: ConfigOption = None,
+) -> None:
+    """Fetch bugs from Launchpad and diagnose them.
+
+    Anonymous and read-only: this cannot write to Launchpad, and no
+    credentials are ever used. Proposed titles and duplicate groupings are for
+    a human to apply.
+
+    Launchpad answers 429 readily and takes about a minute to forgive one, so
+    requests are spaced rather than parallelised and ETags are cached. A bug
+    with four logs costs six requests; expect a few seconds each.
+    """
+    config = _config(config_path)
+    store_ctx = _state_store(config) if save else _scratch_store()
+    with store_ctx as store:
+        interner = Interner(store)
+        cache = config.paths.state_dir / "attachments" if save else None
+        fetched = 0
+        with Launchpad(config=config.launchpad, store=store, cache_dir=cache) as client:
+            for bug_id in bugs:
+                try:
+                    attachments, record = client.logs(bug_id)
+                except RateLimited as exc:
+                    # Stop rather than march through the rest collecting the
+                    # same refusal.
+                    _fail(f"{exc}\nWait a minute and retry.")
+                except LaunchpadError as exc:
+                    err.print(f"[yellow]skipped LP#{bug_id}:[/] {exc}")
+                    continue
+
+                meta = parse_apport_meta(record.description, tags=record.tags)
+                run = ingest_attachments(attachments, interner, meta=meta, bug_id=bug_id)
+                run = run.model_copy(
+                    update={
+                        "current_title": record.title,
+                        "tags": record.tags,
+                        "duplicate_of": record.duplicate_of,
+                    }
+                )
+                diagnosis, proposed, signature = _diagnose_run(run, interner, config)
+                if save:
+                    store.put_run(run.with_findings(diagnosis.findings, signature))
+                if not attachments:
+                    err.print(f"[yellow]LP#{bug_id} has no usable logs attached[/]")
+                _print_run(run, diagnosis, proposed)
+                fetched += 1
+        store.commit()
+
+    # Individual failures are warnings, because one unreachable bug should not
+    # abandon a corpus fetch. Every bug failing is a different situation: the
+    # command did nothing, and a script needs to hear about it.
+    if not fetched:
+        _fail(f"fetched none of the {plural(len(bugs), 'bug')} requested")
+
+
+@app.command()
+def dedup(
+    out_path: OutOption = None,
+    markdown: Annotated[
+        bool, typer.Option("--markdown", "-m", help="Emit the Markdown digest.")
+    ] = False,
+    config_path: ConfigOption = None,
+) -> None:
+    """Group stored runs that report the same fault.
+
+    Grouping uses log-derived structure only -- the root-cause subgraph, the
+    causes, the phase -- and never titles, tags or descriptions. The tier is
+    always reported, because the tiers are not equally strong: root-graph means
+    an identical root-cause subgraph, while evidence-similarity is a score.
+    """
+    config = _config(config_path)
+    with _state_store(config) as store:
+        interner = Interner(store)
+        entries: list[RunEntry] = []
+        signatures: dict[str, Signature] = {}
+        for run in store.iter_runs(primary_only=True):
+            # Findings are on the stored run; re-diagnosing would be wasteful
+            # and could drift from what was recorded.
+            result = DiagnosisResult(findings=run.findings)
+            entries.append(
+                RunEntry(
+                    key=_key_for(run),
+                    run=run,
+                    result=result,
+                    title=propose_title(run, result, interner, max_length=config.title.max_length),
+                )
+            )
+            signatures[_key_for(run)] = run.signature
+
+        if not entries:
+            _fail("the store is empty; run `uru-doctor ingest` first")
+
+        clusters = cluster_runs(
+            signatures,
+            config=config.dedup,
+            oldest_first=sorted(signatures),
+        )
+        store.replace_clusters(
+            (
+                cluster.tier,
+                cluster.representative or None,
+                [(member, 0, 1.0) for member in cluster.members],
+            )
+            for cluster in clusters
+        )
+        store.commit()
+
+        if markdown:
+            _write(
+                render_corpus(entries, clusters, config=config.report),
+                out_path,
+                label="digest",
+            )
+            return
+
+        stats = summarise(clusters)
+        out.print(
+            f"{plural(len(entries), 'run')}: {plural(stats['clusters'], 'cluster')} "
+            f"covering {plural(stats['duplicates'], 'candidate duplicate')}"
+        )
+        table = Table(box=None, pad_edge=False)
+        table.add_column("tier", style="dim")
+        table.add_column("master")
+        table.add_column("duplicates", overflow="fold")
+        labels = {entry.key: entry.label for entry in entries}
+        for cluster in clusters[: config.report.max_clusters]:
+            table.add_row(
+                cluster.tier,
+                labels.get(cluster.representative, cluster.representative),
+                ", ".join(labels.get(k, k) for k in cluster.duplicates),
+            )
+        if clusters:
+            out.print(table)
+        else:
+            out.print("[dim]no two runs share a structure[/]")
+
+
+@app.command()
+def show(
+    key: Annotated[
+        str,
+        typer.Argument(help="Run key, e.g. lp:2150245#0, or a bare bug number."),
+    ],
+    markdown: Annotated[
+        bool, typer.Option("--markdown", "-m", help="Emit the full Markdown report.")
+    ] = True,
+    config_path: ConfigOption = None,
+) -> None:
+    """Show a stored run's report."""
+    config = _config(config_path)
+    with _state_store(config) as store:
+        interner = Interner(store)
+        candidates: list[UpgradeRun] = []
+        if key.isdigit():
+            candidates = store.get_runs_for_bug(int(key))
+        else:
+            found = store.get_run(key)
+            if found is not None:
+                candidates = [found]
+        if not candidates:
+            known = store.run_keys(primary_only=True)[:10]
+            hint = ("\nknown keys: " + ", ".join(known)) if known else ""
+            _fail(f"no stored run matches {key!r}{hint}")
+
+        for run in candidates:
+            result = DiagnosisResult(findings=run.findings)
+            proposed = propose_title(run, result, interner, max_length=config.title.max_length)
+            if markdown:
+                out.file.write(
+                    render_run(
+                        run,
+                        result,
+                        interner,
+                        config=config.report,
+                        title=proposed,
+                        key=_key_for(run),
+                    )
+                )
+            else:
+                _print_run(run, result, proposed)
+
+
+@app.command()
+def rules(
+    rule_name: Annotated[
+        str | None,
+        typer.Option("--explain", "-e", metavar="NAME", help="Explain one rule in full."),
+    ] = None,
+) -> None:
+    """List the diagnostic rules, or explain one.
+
+    Every finding names the rule that produced it, so this is how to find out
+    what a verdict was based on.
+    """
+    if rule_name is not None:
+        found = explain(rule_name)
+        if found is None:
+            _fail(f"no such rule: {rule_name}\nRun `uru-doctor rules` for the list.")
+            return
+        out.print(f"[bold]{found.name}[/]")
+        out.print(f"  cause       {found.cause.value}")
+        out.print(f"  severity    {found.severity.name.lower()}")
+        out.print(f"  confidence  {found.confidence.name.lower()}")
+        if found.phase_hint:
+            out.print(f"  phase       {found.phase_hint}")
+        if found.provenance:
+            out.print(f"  derived from\n    {found.provenance}")
+        if found.remedy:
+            out.print(f"  remedy\n    {found.remedy}")
+        if not found.requires_complete_evidence:
+            out.print("  [dim]runs even on truncated logs[/]")
+        return
+
+    table = Table(box=None, pad_edge=False)
+    table.add_column("rule")
+    table.add_column("cause", style="dim")
+    table.add_column("needs full logs", justify="center")
+    for item in all_rules():
+        table.add_row(
+            item.name,
+            item.cause.value,
+            "yes" if item.requires_complete_evidence else "[dim]no[/]",
+        )
+    out.print(table)
+    out.print(f"[dim]{len(all_rules())} rules. `--explain NAME` for detail.[/]")
+
+
+@app.command()
+def stats(config_path: ConfigOption = None) -> None:
+    """Summarise the record store."""
+    config = _config(config_path)
+    with _state_store(config) as store:
+        interner = Interner(store)
+        totals = store.stats()
+        causes = store.cause_histogram()
+        # Labelled, not keyed: the store holds the canonical ``name:arch`` form
+        # so that the two spellings of a package intern to one id, but
+        # ``libpeas-1.0-1:amd64`` is not how anyone refers to it.
+        blamed = [
+            (interner.package_label(pkg_id), count)
+            for pkg_id, _, count in store.top_blaming_packages(limit=config.report.top_packages)
+        ]
+
+    out.print(f"[bold]{config.paths.state_dir}[/]")
+    table = Table(show_header=False, box=None, pad_edge=False)
+    table.add_column(style="dim")
+    table.add_column(justify="right")
+    for name in ("runs", "bugs", "clusters", "packages", "templates", "strings"):
+        table.add_row(name, f"{totals[name]:,}")
+    table.add_row("size", f"{totals['db_bytes'] / 1e6:,.1f} MB")
+    out.print(table)
+
+    if causes:
+        out.print("\n[bold]causes[/]")
+        for cause, count in causes:
+            out.print(f"  {count:>5,}  {cause}")
+    if blamed:
+        out.print("\n[bold]most blamed packages[/]")
+        for name, count in blamed:
+            out.print(f"  {count:>5,}  {name}")
+
+
+@app.callback(invoke_without_command=True)
+def main(
+    version: Annotated[bool, typer.Option("--version", help="Show the version and exit.")] = False,
+) -> None:
+    if version:
+        out.print(f"uru-doctor {__version__}")
+        raise typer.Exit(EXIT_OK)
+
+
+def run(argv: Sequence[str] | None = None) -> int:
+    """Entry point that returns an exit code instead of raising.
+
+    Useful in tests, and makes ``python -m uru_doctor`` behave.
+    """
+    try:
+        app(args=list(argv) if argv is not None else None, standalone_mode=False)
+    except typer.Exit as exit_:
+        return int(exit_.exit_code)
+    except typer.BadParameter as bad:
+        err.print(f"[bold red]usage:[/] {bad}")
+        return EXIT_USAGE
+    return EXIT_OK
+
+
+if __name__ == "__main__":
+    sys.exit(run())

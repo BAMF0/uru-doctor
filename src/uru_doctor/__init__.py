@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """uru-doctor -- triage for Ubuntu Release Upgrader bugs.
 
 Parses the logs that ``ubuntu-release-upgrader`` leaves in

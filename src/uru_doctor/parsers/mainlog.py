@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Parsing ``main.log``, the upgrader's own narrative of the run.
 
 Three things in this file are less obvious than they look.

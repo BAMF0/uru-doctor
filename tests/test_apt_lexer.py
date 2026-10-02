@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for the ``apt.log`` lexer and grammar.
 
 The central test here is :class:`TestRealLogCoverage`, which asserts that every

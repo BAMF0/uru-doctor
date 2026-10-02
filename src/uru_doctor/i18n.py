@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Recognising localised log messages.
 
 Ubuntu's upgrade logs are not reliably English, and which parts are translated

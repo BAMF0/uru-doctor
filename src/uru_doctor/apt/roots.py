@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Finding root causes in the conflict graph.
 
 A failing LTS-to-LTS resolve reports a lot of broken packages and very few
@@ -31,7 +32,7 @@ still recorded in the detail map.
 from __future__ import annotations
 
 from collections import Counter, deque
-from collections.abc import Collection
+from collections.abc import Callable, Collection
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
@@ -252,18 +253,34 @@ class _Blame:
         return len(self.reverse.get(node, ()))
 
 
-def _reachable(blame: _Blame, start: int) -> tuple[int, ...]:
+def _reachable(
+    blame: _Blame, start: int, name_of: Callable[[int], str] | None = None
+) -> tuple[int, ...]:
     """Breadth-first victims of ``start``, excluding itself.
 
     Iterative rather than recursive: real cascades run eleven or twelve deep,
     but a pathological log should not be able to exhaust the stack.
+
+    ``name_of`` makes the order reproducible. Breadth-first depth is meaningful
+    -- it is distance from the root -- but the order *within* a depth was
+    whatever order the edges happened to be stored in, which is node-index
+    order, which is sorted interned-id order, which is first-seen order. So the
+    same bug produced a differently ordered victim list depending on what had
+    been ingested before it, and since the report shows only the first dozen,
+    two readers of the same bug saw different packages. Sorting each frontier
+    by name keeps the depth information and removes the accident.
+
+    Callers that only need the reachable *set* may omit it.
     """
     seen: set[int] = {start}
     order: list[int] = []
     queue: deque[int] = deque([start])
     while queue:
         node = queue.popleft()
-        for edge in blame.forward.get(node, ()):
+        successors = blame.forward.get(node, ())
+        if name_of is not None:
+            successors = sorted(successors, key=lambda edge: name_of(edge.dst))
+        for edge in successors:
             if edge.dst in seen:
                 continue
             seen.add(edge.dst)
@@ -509,9 +526,12 @@ def analyse(
     victims = set(blame.reverse)
     ids = graph.nodes.ids
 
+    def name_of(index: int) -> str:
+        return interner.package_label(ids[index])
+
     roots: list[Root] = []
     for node in root_nodes:
-        cascade = _reachable(blame, node)
+        cascade = _reachable(blame, node, name_of)
         cause, severity, detail = classify(graph, interner, blame, node, cascade)
         out = blame.forward.get(node, [])
         remedy, margin, fragile = _remedy_for(blame, node, fragile_margin=fragile_margin)

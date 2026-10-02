@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Ubuntu release metadata, read from ``distro-info-data``.
 
 The alternative is a hardcoded table of codenames, which is wrong the moment a

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Diagnostic rules.
 
 Importing this package registers every rule, which is what

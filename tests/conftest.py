@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Shared fixtures.
 
 Two things live here: access to the recorded logs, and builders for synthetic

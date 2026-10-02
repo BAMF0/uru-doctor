@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for apt's package-state blob.
 
 The flag format is one apt explicitly reserves the right to change, and it

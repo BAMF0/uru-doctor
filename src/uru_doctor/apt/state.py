@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Decoding apt's package-state blob, conservatively.
 
 Every package reference in ``apt.log`` carries a state expression:

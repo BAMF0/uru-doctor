@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Global interning of strings, package names and log-line templates.
 
 Three tables, one purpose: turn repeated text into small integers once, so that

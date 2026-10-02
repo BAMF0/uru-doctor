@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Deduplication on log evidence alone.
 
 **Nothing in this module reads a bug title, description or comment.** That is

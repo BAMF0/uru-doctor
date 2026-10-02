@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Mapping ``main.log`` markers onto :class:`~uru_doctor.models.Phase`.
 
 The upgrader does not announce its phases. It logs incidental progress

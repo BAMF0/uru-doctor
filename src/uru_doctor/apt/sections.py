@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Splitting ``apt.log`` into resolver sections, and collapsing the duplicates.
 
 ``apt.log`` is not one log. The upgrader opens the file once and redirects apt's

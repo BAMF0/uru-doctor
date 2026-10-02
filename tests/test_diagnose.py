@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.diagnose`, the rule registry and livelock detection."""
 
 from __future__ import annotations

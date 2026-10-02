@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """What a rule is allowed to see.
 
 A single object rather than a pile of parameters, for two reasons.

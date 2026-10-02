@@ -256,6 +256,23 @@ changed an earlier bug's answer.
   and 6 with `BREAKS` and `UNSATISFIABLE`. Membership tests across two enums are
   always a bug even when the result looks sensible. `Cause` and `LogSource` are
   safe here only because they are `StrEnum`.
+- **Interned ids must never be a sort key or a tie-break.** Ids are assigned
+  in first-seen order, so any ordering that falls back to one depends on what
+  was ingested beforehand. This has now bitten four times: `canonical_digest`
+  sorting node indices, `Root.cascade`'s BFS frontier, `detect_oscillations`
+  tie-breaking equal reversal counts on `pkg_id` (which decided whether the
+  title said `gedit` or `gir1.2-peas-1.0`), and a `set` of forcing packages
+  indexed with `[0]`. Sort by name. The giveaway is output that is stable in
+  *content* but not in *order* — check the order explicitly, because a set
+  comparison will pass.
+- **A successful upgrade needs a positive finding.** A clean resolve is not a
+  quiet one: apt breaks and repairs packages as it searches, so a working
+  upgrade's trace still holds holdbacks and unsatisfiable virtuals. Without
+  `upgrader.no-failure` emitting `UPGRADE_SUCCEEDED`, the largest piece of that
+  churn became the answer, and pointing the tool at a healthy
+  `/var/log/dist-upgrade` reported `libqt5core5t64 could not be resolved` about
+  an upgrade that had finished days earlier. Run it on a machine that worked;
+  that is the first thing anyone evaluating it will do.
 - **A line that matches is not a line that is evidence.** The upgrader logs its
   whole working set on single lines — `Upgrade:` and nine others listed in
   `BULK_LIST_PREFIXES` — so a substring search for any package matches all of

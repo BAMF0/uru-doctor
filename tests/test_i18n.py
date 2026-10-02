@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.i18n` and non-English log handling.
 
 Ubuntu's upgrade logs are not reliably English, and which parts are translated

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Building the conflict graph, and canonicalising it for deduplication.
 
 The output is compressed sparse row: a sorted vertex array plus an offsets
