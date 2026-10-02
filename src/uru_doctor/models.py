@@ -1002,6 +1002,57 @@ class PackageDelta(Frozen):
         return unpack_u32(getattr(self, field))
 
 
+class LexCoverage(Frozen):
+    """How much of the resolver trace the lexer actually recognised.
+
+    Persisted with the run rather than recomputed, because the measurement is
+    the tool's own statement about how much to trust the diagnosis above it,
+    and it has to survive being written down. An unrecognised line is not a
+    visible error -- it is a verb the conflict graph cannot see, and the
+    failure mode is a *confident* diagnosis of partial evidence. That is why
+    the triage procedure's first gate is coverage at exactly 100% rather than
+    99.9%, and why that gate has caught every grammar gap found so far.
+
+    ``unknown_shapes`` holds masked templates rather than raw lines, so ten
+    thousand variations of one unrecognised shape appear as a single entry with
+    a count. That is what makes a gap legible instead of drowning the report,
+    and it is also what lets ``uru-doctor`` be asked which shapes the corpus
+    has never understood.
+    """
+
+    lines: int = 0
+    matched: int = 0
+    blank: int = 0
+    oversized: int = 0
+    unknown_shapes: tuple[tuple[str, int], ...] = ()
+    """``(masked_template, count)``, most frequent first."""
+
+    @property
+    def unmatched(self) -> int:
+        return self.lines - self.matched - self.blank - self.oversized
+
+    @property
+    def coverage(self) -> float:
+        """Fraction recognised, ``1.0`` for a trace with no lines to read.
+
+        An absent ``apt.log`` is not an imperfect parse -- there was nothing to
+        parse -- so a bug with no resolver trace must not be reported as a
+        grammar gap. This is the same trap as ``jaccard([], []) == 1.0``,
+        resolved the other way round: there, absence of evidence was wrongly
+        read as similarity; here, absence of lines genuinely is full coverage,
+        and the thing that distinguishes the two is whether ``lines`` is zero,
+        which every consumer can see.
+        """
+        countable = self.lines
+        if countable <= 0:
+            return 1.0
+        return (self.matched + self.blank + self.oversized) / countable
+
+    @property
+    def perfect(self) -> bool:
+        return self.unmatched == 0
+
+
 class PackageCounts(Frozen):
     """Cardinalities of :class:`PackageDelta`, stored separately.
 
@@ -1226,6 +1277,14 @@ class UpgradeRun(Frozen):
     origins: tuple[OriginRef, ...] = ()
     graphs: tuple[ConflictGraph, ...] = ()
 
+    lex: LexCoverage = LexCoverage()
+    """How much of this run's resolver trace the lexer recognised.
+
+    Set by ingest. Carried on the run so that every command can report it and
+    so that corpus-wide coverage is a query rather than a re-ingest -- see
+    :class:`LexCoverage` for why the number is load-bearing.
+    """
+
     apt_broken_count: int = 0
     """apt's own ``broken count: N``, the worst reported in the primary section.
 
@@ -1286,6 +1345,41 @@ class UpgradeRun(Frozen):
     reported_at: datetime | None = None
     duplicate_of: int | None = None
     """Launchpad's own verdict, when known. Free ground truth for tests."""
+
+    duplicate_count: int = 0
+    """How many bugs Launchpad has already marked as duplicates of this one.
+
+    Launchpad's ``number_of_duplicates``, carried because it is the cheapest
+    available signal that a fault is an archive-wide one rather than one
+    machine's misconfiguration -- thirteen duplicates means thirteen reporters
+    met the same thing. It was being fetched into
+    :class:`~uru_doctor.lp.read.BugRecord` and then dropped before reaching the
+    run.
+
+    Never an input to a diagnosis or a signature. It describes how a bug was
+    *triaged*, not what the logs say, and the whole design rests on not
+    learning from prior triage; see
+    :data:`~uru_doctor.dedup.EXCLUDED_FROM_SIGNATURES`.
+    """
+
+    # -- provenance of the diagnosis ----------------------------------------
+    tool_version: str = ""
+    """Which release of uru-doctor produced ``findings`` and ``signature``.
+
+    Signatures are persisted and compared across sessions, so a cluster that
+    drops a tier between two runs of the corpus has two possible explanations:
+    the logs describe different faults, or the tool changed underneath. Without
+    this they are indistinguishable, and the first question anyone asks about a
+    verdict they disagree with is which version produced it.
+    """
+
+    rules_digest: str = ""
+    """Digest over the registered rules at the time of diagnosis.
+
+    A release number is too coarse: most changes that move a verdict are rule
+    changes between releases. See
+    :func:`~uru_doctor.rules.registry.rules_digest`.
+    """
 
     @property
     def key(self) -> tuple[int | None, int]:

@@ -25,7 +25,7 @@ from uru_doctor.models import Arch, Frontend, LogSource, Phase, ProblemType
 from uru_doctor.parsers.apportmeta import ApportMeta, parse_apport_meta
 from uru_doctor.parsers.mainlog import parse_main_log
 
-from .conftest import FIXTURES, fixture_text
+from .conftest import FIXTURES, fixture_text, ingest_one
 
 
 def lp_meta(bug_id: str) -> ApportMeta:
@@ -37,7 +37,7 @@ def lp_run(bug_id: str, interner: Interner, *, with_main: bool = True):
     attachments = {LogSource.APT: fixture_text(f"apt/lp{bug_id}-apt.log")}
     if with_main:
         attachments[LogSource.MAIN] = fixture_text(f"logs/lp{bug_id}-main.log")
-    return ingest_attachments(attachments, interner, meta=lp_meta(bug_id), bug_id=int(bug_id))
+    return ingest_one(attachments, interner, meta=lp_meta(bug_id), bug_id=int(bug_id))
 
 
 def write_logs(root: Path, **logs: str) -> Path:
@@ -144,14 +144,14 @@ class TestEvidenceCompleteness:
 
     def test_a_screen_reexec_is_not_complete_evidence(self, interner: Interner) -> None:
         """The run continued in a different log."""
-        run = ingest_attachments(
+        run = ingest_one(
             {LogSource.MAIN: fixture_text("logs/local-main-reexec.log")}, interner
         )
         assert run.terminal_phase is Phase.SCREEN_REEXEC
         assert not run.evidence_complete
 
     def test_a_successful_run_is_complete(self, interner: Interner) -> None:
-        run = ingest_attachments({LogSource.MAIN: fixture_text("logs/local-main.log")}, interner)
+        run = ingest_one({LogSource.MAIN: fixture_text("logs/local-main.log")}, interner)
         assert run.terminal_phase is Phase.POST_INSTALL_SCRIPTS
         assert run.evidence_complete
 
@@ -251,7 +251,7 @@ class TestCoherence:
         assert check_coherence(log_set, main) == {}
 
     def test_rejected_logs_are_dropped_from_the_run(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: (
                     "2026-06-23 11:09:38,989 INFO release-upgrader version '26.10.2' started\n"
@@ -316,7 +316,7 @@ class TestDpkgDetermination:
     """Whether packages were written cannot be read off which files exist."""
 
     def test_an_empty_apt_term_means_nothing_was_written(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n",
                 LogSource.APT_TERM: (
@@ -328,7 +328,7 @@ class TestDpkgDetermination:
         assert run.dpkg_wrote is False
 
     def test_a_non_empty_block_means_dpkg_ran(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n",
                 LogSource.APT_TERM: (
@@ -343,7 +343,7 @@ class TestDpkgDetermination:
 
     def test_absence_of_both_logs_means_nothing_was_written(self, interner: Interner) -> None:
         """The only safe inference from absence."""
-        run = ingest_attachments(
+        run = ingest_one(
             {LogSource.MAIN: "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"},
             interner,
         )
@@ -353,7 +353,7 @@ class TestDpkgDetermination:
         """LP#2150319 declares both dpkg logs as empty keys in its description."""
         meta = lp_meta("2150319")
         assert meta.dpkg_produced_no_output
-        run = ingest_attachments(
+        run = ingest_one(
             {LogSource.HISTORY: "\nStart-Date: 2026-04-25  10:49:00\n"},
             interner,
             meta=meta,
@@ -379,3 +379,109 @@ class TestFieldSafety:
         from uru_doctor.models import UpgradeRun
 
         assert "third_party" in UpgradeRun.model_fields
+
+
+class TestCoverageIsReported:
+    """Lexer coverage must reach the caller on every ingest path.
+
+    ``ingest_logs`` has taken a ``stats`` out-parameter from the beginning and
+    ``ingest_directory`` passed it, but ``ingest_attachments`` -- the path every
+    Launchpad fetch goes through -- did not. The parameter was simply absent at
+    that one call site, which is the unthreaded-parameter trap the triage skill
+    warns about, and the consequence was that ``uru-doctor fetch`` could not
+    say whether it had understood the log it had just diagnosed.
+
+    Coverage is the first gate of the triage procedure precisely because an
+    unrecognised line is not a visible error: it is a verb the conflict graph
+    cannot see, and the symptom is a confident diagnosis of partial evidence.
+    A path that cannot measure it cannot be trusted to report it.
+    """
+
+    def test_attachment_ingest_reports_coverage(self, interner: Interner) -> None:
+        result = ingest_attachments(
+            {LogSource.APT: fixture_text("apt/lp2150245-apt.log")},
+            interner,
+            bug_id=2150245,
+        )
+        stats = result.coverage_of(result.only())
+        assert stats is not None
+        assert stats.lines > 0, "a real apt.log has lines to lex"
+        assert stats.unmatched == 0
+
+    def test_coverage_is_on_the_run_itself(self, interner: Interner) -> None:
+        """Not only in the IngestResult: the run is what gets stored.
+
+        A number available solely alongside the run would be dropped by every
+        consumer that persists the run and reads it back, which is all of them.
+        """
+        run = ingest_one(
+            {LogSource.APT: fixture_text("apt/lp2150245-apt.log")},
+            interner,
+            bug_id=2150245,
+        )
+        assert run.lex.lines > 0
+        assert run.lex.perfect
+        assert run.lex.coverage == 1.0
+
+    def test_both_paths_agree_on_the_same_logs(self, interner: Interner, tmp_path: Path) -> None:
+        """The regression guard for the unthreading itself.
+
+        Identical bytes through ``ingest_attachments`` and through
+        ``ingest_directory`` must produce identical coverage. If the parameter
+        is ever dropped again, one side reports zero lines and this fails --
+        which is what "fix the layer, not the symptom" buys: the next person to
+        forget it is told immediately rather than months later by a bug whose
+        diagnosis was built on two thirds of the evidence.
+        """
+        apt = fixture_text("apt/lp2169197-apt.log")
+        main = fixture_text("logs/lp2169197-main.log")
+
+        root = write_logs(tmp_path / "d", apt_log=apt, main_log=main)
+        from_dir = ingest_directory(root, interner)
+        dir_run = from_dir.primary
+        assert dir_run is not None
+
+        from_attachments = ingest_attachments(
+            {LogSource.APT: apt, LogSource.MAIN: main}, interner
+        )
+        att_run = from_attachments.only()
+
+        assert att_run.lex.lines == dir_run.lex.lines
+        assert att_run.lex.unmatched == dir_run.lex.unmatched
+        assert att_run.lex.unknown_shapes == dir_run.lex.unknown_shapes
+
+    def test_no_trace_is_full_coverage_not_a_gap(self, interner: Interner) -> None:
+        """An absent apt.log is nothing to lex, not a grammar failure.
+
+        LP#2161332 attached two screenshots. Reporting that as imperfect
+        coverage would make every log-less bug look like a parser bug, and
+        would make ``--strict`` useless on the exact corpus pass where it is
+        meant to be informative. ``lines == 0`` is what tells the two apart,
+        so it is exposed next to the ratio rather than only the ratio.
+        """
+        run = ingest_one({LogSource.MAIN: fixture_text("logs/local-main.log")}, interner)
+        assert run.lex.lines == 0
+        assert run.lex.unmatched == 0
+        assert run.lex.coverage == 1.0
+        assert run.lex.perfect
+
+    def test_unknown_shapes_are_ordered_by_count_not_appearance(self) -> None:
+        """Ordering must not depend on where in the log a shape occurred.
+
+        ``LexStats.unknown_shapes`` is a dict, so its iteration order is
+        first-seen order -- a property of the log's layout, not of the gap.
+        Emitting that order would make the output stable in content and
+        unstable in sequence, which is the failure this codebase has already
+        hit four times with interned ids used as sort keys.
+        """
+        from uru_doctor.apt.lexer import LexStats
+        from uru_doctor.ingest import coverage_from
+
+        stats = LexStats(lines=10, matched=7)
+        stats.unknown_shapes = {"zebra shape": 1, "alpha shape": 5, "middle shape": 5}
+        frozen = coverage_from(stats)
+        assert frozen.unknown_shapes == (
+            ("alpha shape", 5),
+            ("middle shape", 5),
+            ("zebra shape", 1),
+        )

@@ -98,7 +98,8 @@ def load_fixture(run_id: str) -> tuple[dict[LogSource, str], object | None]:
 
 def report(bug_id: str, attachments: dict[LogSource, str], meta: object | None) -> dict:
     interner = Interner(Store.open(Path(tempfile.mkdtemp())))
-    run = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_of(bug_id)))
+    ingested = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_of(bug_id)))
+    run = ingested.only()
     term = (
         parse_apt_term(attachments[LogSource.APT_TERM].splitlines(), locale=run.locale)
         if LogSource.APT_TERM in attachments
@@ -110,13 +111,25 @@ def report(bug_id: str, attachments: dict[LogSource, str], meta: object | None) 
     print(f"\n{'=' * 92}\nLP#{bug_id}")
 
     # ---- GATE 1: lexing. Nothing below this means anything until it passes.
+    #
+    # Read off the run rather than re-lexed here. This used to lex the log a
+    # second time, because `ingest_attachments` dropped the stats and there was
+    # no other way to see them -- which meant this harness measured coverage
+    # over `apt.log` alone while the diagnosis above was built from every log,
+    # and the two could disagree without anyone noticing. The number below is
+    # now the same one the tool reports, which is the only version worth
+    # gating on.
+    if run.lex.lines:
+        flag = "OK " if run.lex.perfect else "FAIL"
+        print(f"  [{flag}] lexer coverage {run.lex.coverage:.4%}  unmatched={run.lex.unmatched}")
+        for shape, count in run.lex.unknown_shapes[:5]:
+            print(f"         !! {count}x {shape[:86]}")
     if LogSource.APT in attachments:
+        # The state vocabulary is not on the run: it is a property of the scan,
+        # and an undecoded flag means a new apt version rather than a bad
+        # diagnosis. Still worth a second pass to see it.
         stats = LexStats()
         list(lex(attachments[LogSource.APT].splitlines(), stats))
-        flag = "OK " if stats.coverage == 1.0 else "FAIL"
-        print(f"  [{flag}] lexer coverage {stats.coverage:.4%}  unmatched={stats.unmatched}")
-        for shape, count in stats.top_unknown(5):
-            print(f"         !! {count}x {shape[:86]}")
         unknown_flags = stats.vocabulary.unknown
         print(
             f"  [{'OK ' if not unknown_flags else 'FAIL'}] state flags: "

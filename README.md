@@ -92,6 +92,18 @@ A machine-readable record:
 uru-doctor diagnose /var/log/dist-upgrade --json
 ```
 
+Every command that answers a question can answer it to a script: `diagnose`,
+`fetch`, `ingest`, `dedup`, `related`, `history`, `coverage`, `show` and `stats`
+all take `--json`. The record carries a `schema` number so a consumer can refuse
+one it predates, and it reports lexer coverage alongside the verdict — because
+"I could not read a tenth of this log" qualifies a diagnosis, and a consumer
+that cannot see it cannot apply the check the tool applies to itself.
+
+`--strict` exits `3` when a log parsed imperfectly, on `diagnose`, `fetch`,
+`ingest` and `coverage`. It is on the collecting commands deliberately: a new
+apt version turns up in a corpus pass long before anyone points `diagnose` at
+it.
+
 Fetch bugs from Launchpad, anonymously, and build a corpus:
 
 ```sh
@@ -109,6 +121,43 @@ Those three were filed separately, by three reporters, describing three
 different packages. They are one `libpeas-1.0-1` transition, and nobody had
 linked them.
 
+Ask the corpus about a fault, or about a package:
+
+```sh
+uru-doctor related lp:2150339#0
+uru-doctor history libpeas-1.0-1
+```
+
+```
+root-graph   identical root-cause subgraph; safe to act on
+  same subgraph       LP#2151847
+cause-tuple  same causes and roots, same phase
+  same cause tuple    LP#2169028
+```
+
+`history` keeps the roles apart. `libpeas-1.0-1` is a root in three bugs across
+two different release pairs, which is what an archive transition looks like;
+`eog` turns up in three bugs and causes none of them, and gets told so:
+
+```
+never a root in this corpus -- implicated only as a victim, which is
+evidence against blaming it
+```
+
+That inversion is the thing this tool exists to correct, so the two roles are
+never summed into one number.
+
+Check how much of the corpus was actually read:
+
+```sh
+uru-doctor coverage --strict
+```
+
+The grammar-gap loop as a command. It names the run with the gap, lists the
+masked shapes a new pattern gets written from — variants of one shape collapse
+into one entry with a count — and separates a line that would not lex from one
+that lexed and no rule claimed, because those are different repairs.
+
 ### Commands
 
 | | |
@@ -118,9 +167,12 @@ linked them.
 | `ingest DIR...` | Add runs to the record store, for corpus work. |
 | `fetch BUG_ID...` | Fetch bugs from Launchpad and diagnose them. |
 | `dedup` | Group stored runs that report the same fault. |
+| `related KEY` | Stored runs reporting the same fault as this one, in tiers. |
+| `history PKG` | Which runs implicate a package, as root or as victim. |
+| `coverage` | How much of the stored corpus the lexer recognised. |
 | `show KEY` | Re-render a stored run's report. |
 | `rules` | List the diagnostic rules; `--explain NAME` for one. |
-| `stats` | Summarise the record store. |
+| `stats` | Summarise the record store, with corpus-wide lexer coverage. |
 
 Exit codes: `0` success, `1` failure, `2` bad usage, `3` for `--strict` when a
 log parsed imperfectly. Three is separate because "I could not read part of
@@ -162,6 +214,16 @@ phase. `evidence-similarity` is a weighted Jaccard score over log templates and
 is a suggestion. Collapsing them into one word called "duplicate" would throw
 away the only information that tells you how much to trust it.
 
+**A verdict names the policy that produced it.** Every diagnosed run records
+the tool version and a digest over the rules, and `dedup` says so when a
+cluster mixes them. Signatures are compared across sessions, so a cluster that
+drops a tier between two passes has two possible explanations — the logs
+describe different faults, or the tool changed underneath — and without the
+stamp they are indistinguishable. The digest covers what can change a ranking
+(priority, severity, confidence, which rules exist) and deliberately not
+prose, because a reworded remedy that looks like a policy change makes the
+warning noise.
+
 **Translated logs.** apt's error stack and all of `apt-term.log` are
 translated; the resolver verbs are not. Dependency names *are*
 (`Depèn`, `Dipende`, `Va in conflitto`), and enumerating the English ones cost
@@ -180,7 +242,13 @@ It will not guess which PPA a package came from. The upgrader writes a flat
 from package-name suffixes and presenting the inference as fact.
 
 It will not use the bug's own words. See above; this is the constraint the
-design is built around.
+design is built around. There is no model in the loop either: a `[llm]` config
+section and a `title.llm_polish` flag existed as unimplemented design intent,
+and both are now gone — a documented-but-inert option that contradicts the
+central claim is an invitation to implement it. A config file containing
+`[llm]` is refused rather than ignored, and the SQLite cache that existed to
+serve it is dropped. If a model is ever wanted here, the narrow defensible use
+is drafting prose *from* a finished finding, never producing or ranking one.
 
 It will not conflate the four things called "broken". On bug 2150245 apt
 reports 22, 434 packages were observed broken at some point during resolution,

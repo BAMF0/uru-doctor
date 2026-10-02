@@ -28,14 +28,13 @@ from uru_doctor.i18n import (
     language_of,
     localise,
 )
-from uru_doctor.ingest import ingest_attachments
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, DepType, LogSource, Phase
 from uru_doctor.parsers.apportmeta import parse_apport_meta
 from uru_doctor.parsers.aptterm import parse_apt_term
 from uru_doctor.title import propose_title
 
-from .conftest import FIXTURES, fixture_text
+from .conftest import FIXTURES, fixture_text, ingest_one
 
 #: Skip the catalogue-dependent tests where no translations are installed,
 #: which is the normal state of a minimal container.
@@ -56,7 +55,7 @@ def lp(bug_id: str, interner: Interner, *, extra: tuple[str, ...] = ()):
         attachments[LogSource.APT_TERM] = fixture_text(f"logs/lp{bug_id}-aptterm.log")
     if "history" in extra:
         attachments[LogSource.HISTORY] = fixture_text(f"logs/lp{bug_id}-history.log")
-    run = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_id))
+    run = ingest_one(attachments, interner, meta=meta, bug_id=int(bug_id))
     term = (
         parse_apt_term(attachments[LogSource.APT_TERM].splitlines(), locale=run.locale)
         if LogSource.APT_TERM in attachments

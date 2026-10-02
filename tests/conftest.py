@@ -24,8 +24,9 @@ import pytest
 
 from uru_doctor.apt.graph import build_graph
 from uru_doctor.apt.sections import SectionedLog, read_sections
+from uru_doctor.ingest import ingest_attachments
 from uru_doctor.intern import Interner
-from uru_doctor.models import ConflictGraph
+from uru_doctor.models import ConflictGraph, LogSource, UpgradeRun
 from uru_doctor.store import Store
 
 if TYPE_CHECKING:
@@ -74,6 +75,23 @@ def store(tmp_path: Path) -> Iterator[Store]:
 @pytest.fixture
 def interner(store: Store) -> Interner:
     return Interner(store)
+
+
+def ingest_one(
+    attachments: dict[LogSource, str],
+    interner: Interner,
+    **kwargs: object,
+) -> UpgradeRun:
+    """The single run from attachment ingest, discarding lexer coverage.
+
+    :func:`~uru_doctor.ingest.ingest_attachments` returns an ``IngestResult``
+    because its caller needs the coverage -- ``fetch`` could not report whether
+    it had understood a log while that was dropped. Most tests are about
+    something else, and say so by using this instead of silently indexing the
+    result. Tests that *are* about coverage call ``ingest_attachments``
+    directly; see ``TestCoverageIsReported``.
+    """
+    return ingest_attachments(attachments, interner, **kwargs).only()  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------

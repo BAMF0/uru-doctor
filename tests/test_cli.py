@@ -20,6 +20,8 @@ import pytest
 from typer.testing import CliRunner
 
 from uru_doctor.cli import EXIT_FAIL, EXIT_IMPERFECT, EXIT_OK, EXIT_USAGE, app
+from uru_doctor.models import UpgradeRun
+from uru_doctor.store import Store
 
 from .conftest import FIXTURES, fixture_text
 
@@ -97,7 +99,18 @@ class TestTopLevel:
         assert "dedup" in result.output
 
     def test_every_command_has_help(self) -> None:
-        for command in ("diagnose", "title", "ingest", "dedup", "show", "rules", "stats"):
+        for command in (
+            "diagnose",
+            "title",
+            "ingest",
+            "dedup",
+            "related",
+            "history",
+            "coverage",
+            "show",
+            "rules",
+            "stats",
+        ):
             result = runner.invoke(app, [command, "--help"])
             assert result.exit_code == EXIT_OK, command
             assert result.output.strip(), command
@@ -467,3 +480,546 @@ class TestRedaction:
         assert payload["cause"] == "third_party_pin"
         strict = runner.invoke(app, ["diagnose", str(root), "--strict"])
         assert strict.exit_code == EXIT_OK
+
+
+class TestRecordContract:
+    """The ``--json`` record is an interface, so its shape is pinned.
+
+    A consumer reading a renamed field sees absence, not an error -- the same
+    failure ``extra="forbid"`` prevents on the way in. Pinning the key set
+    means a field cannot be dropped or renamed without someone deciding to.
+    """
+
+    #: Every key the record promises. Adding one is a deliberate edit here.
+    EXPECTED: frozenset[str] = frozenset(
+        {
+            "schema",
+            "key",
+            "bug_id",
+            "attempt",
+            "from_series",
+            "to_series",
+            "title",
+            "title_confident",
+            "cause",
+            "severity",
+            "confidence",
+            "root_packages",
+            "cascade_size",
+            "fragile",
+            "candidate_invalid",
+            "corroborated",
+            "terminal_phase",
+            "evidence_complete",
+            "dpkg_wrote",
+            "upgrade_completed",
+            "logs_present",
+            "apt_broken_count",
+            "observed_broken_count",
+            "rules_fired",
+            "rules_withheld",
+            "notes",
+            "lex_lines",
+            "lex_unmatched",
+            "lex_coverage",
+            "unknown_shapes",
+            "tool_version",
+            "rules_digest",
+            "reported_at",
+            "duplicate_of",
+            "duplicate_count",
+            "signature",
+        }
+    )
+
+    def test_key_set_is_exactly_as_promised(self, logs: Path) -> None:
+        payload = json.loads(runner.invoke(app, ["diagnose", str(logs), "--json"]).stdout)
+        assert set(payload) == self.EXPECTED
+
+    def test_schema_version_is_present_and_an_integer(self, logs: Path) -> None:
+        """A consumer must be able to refuse a record it predates."""
+        payload = json.loads(runner.invoke(app, ["diagnose", str(logs), "--json"]).stdout)
+        assert isinstance(payload["schema"], int)
+        assert payload["schema"] >= 1
+
+    def test_coverage_is_in_the_record(self, logs: Path) -> None:
+        """Gate 1 of the triage procedure has to be reachable from a script.
+
+        The terminal output reported coverage and the JSON did not, so a human
+        could tell a partial parse from a complete one and a script could not.
+        Every agent and cron job driving this reads the record, which made the
+        tool's most important self-check the one thing automation could not
+        see.
+        """
+        payload = json.loads(runner.invoke(app, ["diagnose", str(logs), "--json"]).stdout)
+        assert payload["lex_lines"] > 0
+        assert payload["lex_unmatched"] == 0
+        assert payload["lex_coverage"] == 1.0
+        assert payload["unknown_shapes"] == []
+
+    def test_imperfect_parse_is_visible_in_the_record(self, tmp_path: Path) -> None:
+        """And the masked shape is named, so the gap can be fixed from it."""
+        root = tmp_path / "dirty"
+        root.mkdir()
+        (root / "main.log").write_text(fixture_text("logs/lp2150339-main.log"))
+        apt = fixture_text("apt/lp2150339-apt.log").splitlines()[:200]
+        apt.append("Blorp Fnord gibberish that no grammar matches")
+        (root / "apt.log").write_text("\n".join(apt) + "\n")
+
+        payload = json.loads(runner.invoke(app, ["diagnose", str(root), "--json"]).stdout)
+        assert payload["lex_unmatched"] == 1
+        assert payload["lex_coverage"] < 1.0
+        assert len(payload["unknown_shapes"]) == 1
+        shape = payload["unknown_shapes"][0]
+        assert shape["count"] == 1
+        assert "Blorp" in shape["template"]
+
+    def test_verdict_is_attributed_to_a_policy(self, logs: Path) -> None:
+        """Signatures are compared across sessions, so the policy is recorded.
+
+        Without this, a cluster that changes tier between two corpus passes has
+        two indistinguishable explanations: the logs describe different faults,
+        or the tool changed underneath.
+        """
+        payload = json.loads(runner.invoke(app, ["diagnose", str(logs), "--json"]).stdout)
+        assert payload["tool_version"]
+        assert payload["rules_digest"]
+
+    def test_both_broken_counts_stay_labelled(self, logs: Path) -> None:
+        """Re-asserted here because the key set above would not catch a merge."""
+        payload = json.loads(runner.invoke(app, ["diagnose", str(logs), "--json"]).stdout)
+        assert payload["apt_broken_count"] != payload["observed_broken_count"]
+        assert "broken" not in payload
+
+
+class TestMachineReadableEverywhere:
+    """Every command that answers a question can answer it to a script.
+
+    ``--json`` existed only on ``diagnose``, so anything automating the corpus
+    had to screen-scrape Rich tables -- which meant the alternative to
+    scraping was reimplementing the tool's own logic, and that is how a second,
+    disagreeing source of truth gets built.
+    """
+
+    def test_ingest_emits_records(self, tmp_path: Path, corpus: Path) -> None:
+        state = tmp_path / "state"
+        result = runner.invoke(
+            app,
+            [
+                "ingest",
+                *[str(p) for p in sorted(corpus.iterdir())],
+                "--json",
+                "--config", _conf(tmp_path, state),
+            ],
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        records = json.loads(result.stdout)
+        assert len(records) == len(LAID_OUT)
+        assert all(r["schema"] >= 1 for r in records)
+        assert all(r["rules_digest"] for r in records)
+
+    def test_dedup_emits_clusters_with_tiers(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["dedup", "--json", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        payload = json.loads(result.stdout)
+        assert payload["runs"] == len(LAID_OUT)
+        assert payload["clusters"], "the libpeas trio should cluster"
+        for cluster in payload["clusters"]:
+            # Never a bare "duplicate" boolean: root-graph is safe to act on
+            # and evidence-similarity is a suggestion, and collapsing them
+            # discards the only thing that says how much to trust it.
+            assert cluster["tier"] in {"root-graph", "cause-tuple", "evidence-similarity"}
+            assert "duplicate" not in cluster
+
+    def test_dedup_rejects_two_output_formats(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["dedup", "--json", "--markdown", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_USAGE
+
+    def test_show_emits_the_stored_record(
+        self, tmp_path: Path, ingested: Path, corpus: Path
+    ) -> None:
+        # Keyed by directory, not bug id: a run ingested from disk has no bug
+        # number, which is the whole reason run keys are not bug numbers.
+        key = f"dir:{corpus / '2150245'}#0"
+        result = runner.invoke(
+            app, ["show", key, "--json", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        payload = json.loads(result.stdout)
+        assert payload["key"] == key
+        assert payload["cause"] == "third_party_pin"
+        assert payload["root_packages"] == ["libwacom9-surface"]
+
+    def test_show_reports_the_stored_policy_not_the_current_one(
+        self, tmp_path: Path, ingested: Path, corpus: Path
+    ) -> None:
+        """``show`` reports what was recorded, including which policy made it.
+
+        Recomputing here would hide exactly the drift the stamp exists to
+        expose: a run diagnosed months ago would silently acquire today's
+        digest and look as though nothing had changed.
+        """
+        key = f"dir:{corpus / '2150245'}#0"
+        payload = json.loads(
+            runner.invoke(
+                app, ["show", key, "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        assert payload["tool_version"]
+        assert payload["rules_digest"]
+
+    def test_stats_emits_a_summary(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["stats", "--json", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        payload = json.loads(result.stdout)
+        assert payload["totals"]["runs"] == len(LAID_OUT)
+        assert payload["causes"]
+        assert payload["coverage"]["runs_with_trace"] > 0
+
+    def test_stats_reports_corpus_coverage(self, tmp_path: Path, ingested: Path) -> None:
+        """A gap in one of many stored runs is invisible in that run's report.
+
+        The corpus is where an unseen apt shape turns up first, so the
+        aggregate has to be askable without re-ingesting everything.
+        """
+        payload = json.loads(
+            runner.invoke(app, ["stats", "--json", "--config", _conf(tmp_path, ingested)]).stdout
+        )
+        coverage = payload["coverage"]
+        assert coverage["lines"] > 0
+        assert coverage["unmatched"] == 0
+        assert coverage["runs_imperfect"] == 0
+        assert coverage["coverage"] == 1.0
+        assert coverage["unknown_shapes"] == []
+
+
+class TestStrictEverywhere:
+    """``--strict`` has to work on the commands that collect, not just diagnose.
+
+    ``fetch`` and ``ingest`` are where a new apt version is met; ``diagnose``
+    is where someone looks at a single directory they already care about.
+    Having the check only on the last of those put it furthest from where it
+    was needed.
+    """
+
+    def _dirty(self, tmp_path: Path) -> Path:
+        root = tmp_path / "dirty"
+        root.mkdir()
+        (root / "main.log").write_text(fixture_text("logs/lp2150339-main.log"))
+        apt = fixture_text("apt/lp2150339-apt.log").splitlines()[:200]
+        apt.append("Blorp Fnord gibberish that no grammar matches")
+        (root / "apt.log").write_text("\n".join(apt) + "\n")
+        return root
+
+    def test_ingest_exits_three_on_a_gap(self, tmp_path: Path) -> None:
+        state = tmp_path / "state"
+        conf = _conf(tmp_path, state)
+        dirty = self._dirty(tmp_path)
+        lenient = runner.invoke(app, ["ingest", str(dirty), "--config", conf])
+        strict = runner.invoke(app, ["ingest", str(dirty), "--strict", "--config", conf])
+        assert lenient.exit_code == EXIT_OK, lenient.output
+        assert strict.exit_code == EXIT_IMPERFECT
+
+    def test_ingest_warns_even_without_strict(self, tmp_path: Path) -> None:
+        """A corpus pass is the usual way a gap first shows up.
+
+        Reporting it only under ``--strict`` means it is silent in exactly the
+        case where nobody is checking an exit code.
+        """
+        state = tmp_path / "state"
+        result = runner.invoke(
+            app, ["ingest", str(self._dirty(tmp_path)), "--config", _conf(tmp_path, state)]
+        )
+        assert result.exit_code == EXIT_OK
+        assert "imperfect parse" in result.output
+
+    def test_clean_corpus_is_silent(self, tmp_path: Path, corpus: Path) -> None:
+        state = tmp_path / "state"
+        result = runner.invoke(
+            app,
+            [
+                "ingest",
+                *[str(p) for p in sorted(corpus.iterdir())],
+                "--strict",
+                "--config", _conf(tmp_path, state),
+            ],
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert "imperfect parse" not in result.output
+
+    def test_the_warning_is_not_repeated_under_strict(self, tmp_path: Path) -> None:
+        """Said once. Printing it unconditionally and again from the strict
+        handler reported the same gap twice, which reads like two gaps."""
+        state = tmp_path / "state"
+        result = runner.invoke(
+            app,
+            ["ingest", str(self._dirty(tmp_path)), "--strict", "--config", _conf(tmp_path, state)],
+        )
+        assert result.exit_code == EXIT_IMPERFECT
+        assert result.output.count("imperfect parse") == 1
+
+
+class TestCoverageCommand:
+    """The grammar-gap loop as a command.
+
+    Gate 1 of the triage procedure lived in a script inside a skill directory,
+    which meant it could not be run over a freshly collected batch -- and a
+    batch is where an unseen apt shape turns up first.
+    """
+
+    def _dirty(self, tmp_path: Path) -> Path:
+        root = tmp_path / "dirty"
+        root.mkdir()
+        (root / "main.log").write_text(fixture_text("logs/lp2150339-main.log"))
+        apt = fixture_text("apt/lp2150339-apt.log").splitlines()[:200]
+        apt += [
+            "Blorp Fnord gibberish that no grammar matches",
+            "Zarp 12 Quux 44 numeric variant",
+            "Zarp 97 Quux 13 numeric variant",
+        ]
+        (root / "apt.log").write_text("\n".join(apt) + "\n")
+        return root
+
+    def test_clean_corpus_reports_full_coverage(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(app, ["coverage", "--config", _conf(tmp_path, ingested)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "100.0000%" in result.output
+        assert "0 lines unrecognised" in result.output
+
+    def test_clean_corpus_passes_strict(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["coverage", "--strict", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+
+    def test_a_gap_is_found_and_attributed(self, tmp_path: Path, ingested: Path) -> None:
+        config = _conf(tmp_path, ingested)
+        assert (
+            runner.invoke(app, ["ingest", str(self._dirty(tmp_path)), "--config", config]).exit_code
+            == EXIT_OK
+        )
+        result = runner.invoke(app, ["coverage", "--config", config])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "3 lines unrecognised in 1 run" in result.output
+        # The offending run is named, so the gap can be reproduced.
+        assert "dirty" in result.output
+
+    def test_variants_of_one_shape_collapse(self, tmp_path: Path, ingested: Path) -> None:
+        """Ten thousand numeric variants are one grammar gap, not ten thousand.
+
+        Masked rather than raw: this is what makes a gap legible instead of
+        drowning the report in its own volume, and the masked form is what a
+        new pattern in ``apt/grammar.py`` gets written from.
+        """
+        config = _conf(tmp_path, ingested)
+        runner.invoke(app, ["ingest", str(self._dirty(tmp_path)), "--config", config])
+        payload = json.loads(
+            runner.invoke(app, ["coverage", "--json", "--config", config]).stdout
+        )
+        shapes = {s["template"]: s["count"] for s in payload["unknown_shapes"]}
+        # The two Zarp lines differ only in their numbers.
+        collapsed = [t for t in shapes if "Zarp" in t]
+        assert len(collapsed) == 1, shapes
+        assert shapes[collapsed[0]] == 2
+
+    def test_strict_exits_three_on_a_gap(self, tmp_path: Path, ingested: Path) -> None:
+        config = _conf(tmp_path, ingested)
+        runner.invoke(app, ["ingest", str(self._dirty(tmp_path)), "--config", config])
+        result = runner.invoke(app, ["coverage", "--strict", "--config", config])
+        assert result.exit_code == EXIT_IMPERFECT
+
+    def test_worst_offender_comes_first(self, tmp_path: Path, ingested: Path) -> None:
+        """Not sorted by key: a 3,000-line gap must not sort below a one-line one."""
+        config = _conf(tmp_path, ingested)
+        runner.invoke(app, ["ingest", str(self._dirty(tmp_path)), "--config", config])
+        payload = json.loads(
+            runner.invoke(app, ["coverage", "--json", "--config", config]).stdout
+        )
+        counts = [row["unmatched"] for row in payload["imperfect"]]
+        assert counts == sorted(counts, reverse=True)
+
+    def test_empty_store_says_so(self, tmp_path: Path) -> None:
+        state = tmp_path / "empty"
+        result = runner.invoke(app, ["coverage", "--config", _conf(tmp_path, state)])
+        assert result.exit_code == EXIT_OK
+        assert "no stored run" in result.output
+
+    def test_unmeasured_runs_are_not_silently_counted(self, tmp_path: Path) -> None:
+        """A corpus stored before coverage existed must say so, not claim 100%.
+
+        The two reasons a run shows no lines -- it had no resolver trace, or
+        nobody measured one -- are opposite facts, and this codebase is careful
+        about exactly that kind of conflation elsewhere (the four things called
+        "broken"). Reported separately, with the remedy, because re-ingesting
+        is what fixes it.
+        """
+        state = tmp_path / "legacy"
+        with Store.open(state) as store:
+            store.put_run(UpgradeRun(bug_id=4242))  # no stamp, no coverage
+            store.commit()
+        result = runner.invoke(app, ["coverage", "--config", _conf(tmp_path, state)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "before coverage was recorded" in result.output
+        assert "re-ingest" in result.output
+
+        payload = json.loads(
+            runner.invoke(
+                app, ["coverage", "--json", "--config", _conf(tmp_path, state)]
+            ).stdout
+        )
+        assert payload["unmeasured"] == ["lp:4242#0"]
+        assert payload["runs_with_trace"] == 0
+
+
+class TestRelatedCommand:
+    """The triager's second question: have we seen this fault before?"""
+
+    def test_finds_the_libpeas_trio(self, tmp_path: Path, ingested: Path, corpus: Path) -> None:
+        """Three bugs, three reporters, three different packages blamed.
+
+        They are one ``libpeas-1.0-1`` transition. This is the case the whole
+        corpus side of the tool exists for.
+        """
+        key = f"dir:{corpus / '2150339'}#0"
+        payload = json.loads(
+            runner.invoke(
+                app, ["related", key, "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        found = {
+            entry["key"]
+            for tier in payload["tiers"].values()
+            for entry in tier
+        }
+        assert f"dir:{corpus / '2151847'}#0" in found
+        assert f"dir:{corpus / '2169028'}#0" in found
+
+    def test_tiers_are_reported_separately(
+        self, tmp_path: Path, ingested: Path, corpus: Path
+    ) -> None:
+        """Strongest first, and never merged into one word called "duplicate".
+
+        ``dedup`` groups the trio into a single ``root-graph`` cluster because
+        clusters extend across tiers. Pairwise from 2150339 the two neighbours
+        are *not* equally strong, and flattening that would discard the only
+        information that says how much to trust each one.
+        """
+        key = f"dir:{corpus / '2150339'}#0"
+        payload = json.loads(
+            runner.invoke(
+                app, ["related", key, "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        assert set(payload["tiers"]) == {"root-graph", "cause-tuple"}
+        # Both tiers are populated for this subject, which is the point: the
+        # two neighbours are not equally strong.
+        assert payload["tiers"]["root-graph"], payload
+        assert payload["tiers"]["cause-tuple"], payload
+        # A run cannot appear in two tiers; the stronger claim wins.
+        graph = {e["key"] for e in payload["tiers"]["root-graph"]}
+        tuples = {e["key"] for e in payload["tiers"]["cause-tuple"]}
+        assert not (graph & tuples)
+
+    def test_shared_roots_are_separate_from_the_tiers(
+        self, tmp_path: Path, ingested: Path, corpus: Path
+    ) -> None:
+        """A shared root is a lead; a shared subgraph is a verdict."""
+        key = f"dir:{corpus / '2150339'}#0"
+        payload = json.loads(
+            runner.invoke(
+                app, ["related", key, "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        stronger = {e["key"] for tier in payload["tiers"].values() for e in tier}
+        for entry in payload["shared_roots"]:
+            assert entry["key"] not in stronger
+            assert entry["shared_roots"] >= 1
+
+    def test_an_unrelated_run_has_no_neighbours(
+        self, tmp_path: Path, ingested: Path, corpus: Path
+    ) -> None:
+        key = f"dir:{corpus / '2150245'}#0"
+        result = runner.invoke(app, ["related", key, "--config", _conf(tmp_path, ingested)])
+        assert result.exit_code == EXIT_OK, result.output
+        payload = json.loads(
+            runner.invoke(
+                app, ["related", key, "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        assert not payload["tiers"]["root-graph"]
+
+    def test_unknown_key_lists_known_ones(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["related", "lp:9999999#0", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_FAIL
+        assert "known keys" in result.output
+
+
+class TestHistoryCommand:
+    """Is this package a recurring transition or a one-off?"""
+
+    def test_a_root_is_reported_as_a_root(self, tmp_path: Path, ingested: Path) -> None:
+        payload = json.loads(
+            runner.invoke(
+                app,
+                ["history", "libpeas-1.0-1", "--json", "--config", _conf(tmp_path, ingested)],
+            ).stdout
+        )
+        assert len(payload["roles"]["root"]) == 3
+        # Across different release pairs, which is what distinguishes an
+        # archive transition from one machine's misconfiguration.
+        assert len({e["release"] for e in payload["roles"]["root"]}) > 1
+
+    def test_a_victim_is_never_counted_as_a_cause(
+        self, tmp_path: Path, ingested: Path
+    ) -> None:
+        """``eog`` is implicated in three unrelated bugs and causes none.
+
+        A triager seeing it in a bug title would be misled, which is the
+        inversion this tool exists to correct -- so the two roles are reported
+        apart and never summed into one number.
+        """
+        config = _conf(tmp_path, ingested)
+        payload = json.loads(
+            runner.invoke(app, ["history", "eog", "--json", "--config", config]).stdout
+        )
+        assert "root" not in payload["roles"]
+        assert len(payload["roles"]["victim"]) == 3
+        # And said out loud, because a reader scanning a list for "root" will
+        # not notice an absence.
+        plain = runner.invoke(app, ["history", "eog", "--config", config])
+        assert "never a root" in plain.output
+
+    def test_a_bare_name_covers_every_architecture(
+        self, tmp_path: Path, ingested: Path
+    ) -> None:
+        payload = json.loads(
+            runner.invoke(
+                app,
+                ["history", "libpeas-1.0-1", "--json", "--config", _conf(tmp_path, ingested)],
+            ).stdout
+        )
+        assert payload["spellings"] == ["libpeas-1.0-1:amd64"]
+
+    def test_an_unknown_package_fails_with_a_hint(
+        self, tmp_path: Path, ingested: Path
+    ) -> None:
+        result = runner.invoke(
+            app, ["history", "no-such-package", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_FAIL
+        assert "no stored run mentions" in result.output
+
+    def test_an_explicit_architecture_narrows(self, tmp_path: Path, ingested: Path) -> None:
+        """The corpus has no i386 libpeas, so asking for one must not match amd64."""
+        result = runner.invoke(
+            app, ["history", "libpeas-1.0-1:i386", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_FAIL

@@ -192,5 +192,23 @@ show_needs_human = true
 #                                    `Foreign` list, which names no origin
 #   title.include_cascade_size    -- the title format is fixed per cause
 #   title.include_fragile_marker  -- likewise
-#   title.llm_polish              -- the llm subsystem is not built
-#   llm.*                         -- likewise
+
+
+# ---------------------------------------------------------------------------
+# Deliberately absent
+# ---------------------------------------------------------------------------
+#
+# `[llm]` and `title.llm_polish` used to be listed above as unimplemented. They
+# are now gone from the code as well, and a config file containing an `[llm]`
+# section is refused rather than ignored.
+#
+# The subsystem would have let a model rewrite a proposed title. That is
+# incompatible with the one claim this tool makes -- that everything it
+# concludes comes from the logs, and that bug prose is never an input -- and a
+# documented-but-inert option is an invitation to implement it. The SQLite
+# cache that existed to serve it is dropped in schema version 2 for the same
+# reason: an unused cache for a forbidden feature is a door left open.
+#
+# If a model is ever wanted here, the narrow defensible use is drafting prose
+# *from* a finished finding, never producing or ranking one -- and that belongs
+# behind its own command, not behind a title flag.

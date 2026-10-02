@@ -31,7 +31,7 @@ import tomllib
 from pathlib import Path
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 #: Searched for by walking up from the working directory.
 DEFAULT_CONFIG_FILENAMES: tuple[str, ...] = ("uru-doctor.toml", ".uru-doctor.toml")
@@ -48,7 +48,7 @@ class PathsConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     state_dir: Path = Path(".uru-doctor")
-    """The record store, the LLM cache, and downloaded attachments."""
+    """The record store and the downloaded attachment cache."""
 
     out_dir: Path = Path("out")
     """Generated reports, exports and retitle proposals."""
@@ -211,57 +211,6 @@ class TitleConfig(BaseModel):
     include_fragile_marker: bool = True
     """Append a fragility note when apt's score margin was small."""
 
-    llm_polish: bool = False
-    """Let a model rewrite the generated title for readability.
-
-    Off by default. When on, every package name, path and version in the
-    model's output must already appear in that record, or the proposal is
-    discarded and the deterministic title stands -- so a hallucinated package
-    name cannot reach a bug report.
-    """
-
-
-class LlmConfig(BaseModel):
-    """Optional model integration.
-
-    Scoped deliberately narrowly: titles and adjudication of genuinely
-    ambiguous duplicate pairs. Classification is never delegated, because a
-    diagnosis has to be reproducible and auditable, and a rule is both.
-    """
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    provider: Literal["none", "ollama", "anthropic", "openai", "openrouter"] = "ollama"
-    model: str = "qwen2.5:7b"
-    endpoint: str = "http://127.0.0.1:11434"
-    """Base URL. Only meaningful for ``ollama`` and OpenAI-compatible hosts."""
-
-    api_key_env: str = ""
-    """*Name* of the environment variable holding the key, never the key."""
-
-    timeout_s: float = Field(60.0, gt=0)
-    max_tokens: int = Field(512, ge=32)
-    temperature: float = Field(0.0, ge=0.0, le=2.0)
-    """Zero by default: this is extraction and phrasing, not creativity."""
-
-    cache: bool = True
-    """Cache responses against a digest of exactly the text the model saw."""
-
-    @model_validator(mode="before")
-    @classmethod
-    def _reject_inline_key(cls, data: Any) -> Any:
-        """Refuse a key pasted into the config file.
-
-        Fail loudly at load time rather than let a committed config leak a
-        credential.
-        """
-        if isinstance(data, dict) and "api_key" in data:
-            raise ValueError(
-                "[llm].api_key is not supported. Set [llm].api_key_env to the "
-                "name of an environment variable instead."
-            )
-        return data
-
 
 class LaunchpadConfig(BaseModel):
     """The optional read-only fetch path."""
@@ -341,7 +290,6 @@ class Config(BaseModel):
     rules: RulesConfig = RulesConfig()
     dedup: DedupConfig = DedupConfig()
     title: TitleConfig = TitleConfig()
-    llm: LlmConfig = LlmConfig()
     launchpad: LaunchpadConfig = LaunchpadConfig()
     report: ReportConfig = ReportConfig()
 
@@ -366,6 +314,13 @@ def load_config(path: Path | None = None, *, search: bool = True) -> Config:
     An explicit ``path`` is required to exist. Without one, the tree is searched
     upward unless ``search`` is False, and a total absence of config is a
     perfectly valid configuration.
+
+    Validation errors are re-raised without the offending *values*. Pydantic's
+    default message embeds ``input_value=``, and the CLI prints the whole
+    message to stderr -- so a config holding a credential in a section this
+    tool does not recognise would have that credential echoed into a terminal,
+    a CI log or a bug report. The field path and the reason are what a person
+    needs to fix it; the value is theirs already.
     """
     resolved = path or (find_config() if search else None)
     if resolved is None:
@@ -374,4 +329,21 @@ def load_config(path: Path | None = None, *, search: bool = True) -> Config:
         raw: dict[str, Any] = tomllib.load(handle)
     # Not settable from the file; it describes where the file was.
     raw.pop("source_path", None)
-    return Config(**raw, source_path=resolved)
+    try:
+        return Config(**raw, source_path=resolved)
+    except ValidationError as exc:
+        raise ValueError(_redacted_validation_error(exc, resolved)) from None
+
+
+def _redacted_validation_error(exc: ValidationError, source: Path) -> str:
+    """Render a validation failure as locations and reasons, never values.
+
+    ``from None`` at the call site matters as much as this function: chaining
+    the original would put pydantic's full message, values included, back into
+    the traceback that a crash report would carry.
+    """
+    lines = [f"{source} is not valid:"]
+    for error in exc.errors():
+        where = ".".join(str(part) for part in error["loc"]) or "(root)"
+        lines.append(f"  {where}: {error['msg']}")
+    return "\n".join(lines)

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 import pytest
 
@@ -17,19 +18,18 @@ from uru_doctor.diagnose import (
     diagnose,
     rank_findings,
 )
-from uru_doctor.ingest import ingest_attachments
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Confidence, Finding, LogSource, Severity
 from uru_doctor.parsers.apportmeta import parse_apport_meta
-from uru_doctor.rules.registry import RULES, all_rules, rule
+from uru_doctor.rules.registry import RULES, all_rules, rule, rules_digest
 
-from .conftest import FIXTURES, fixture_text
+from .conftest import FIXTURES, fixture_text, ingest_one
 
 
 def lp(bug_id: str, interner: Interner):
     payload = json.loads((FIXTURES / "lp" / f"bug{bug_id}.json").read_text())
     meta = parse_apport_meta(payload["description"], tags=payload["tags"])
-    run = ingest_attachments(
+    run = ingest_one(
         {
             LogSource.APT: fixture_text(f"apt/lp{bug_id}-apt.log"),
             LogSource.MAIN: fixture_text(f"logs/lp{bug_id}-main.log"),
@@ -324,13 +324,75 @@ class TestRegistry:
         assert "evidence.truncated" in names
 
 
+class TestRulesDigest:
+    """The digest attributes a verdict to a policy, so it must track policy.
+
+    Signatures are persisted and compared across sessions. A cluster that
+    changes tier between two corpus passes has two possible explanations --
+    the logs describe different faults, or the rules changed underneath -- and
+    a release number is too coarse to tell them apart, because almost every
+    change that moves a verdict is a rule change between releases.
+    """
+
+    def test_is_stable_across_calls(self) -> None:
+        assert rules_digest() == rules_digest()
+
+    def test_is_short_enough_to_read_in_a_table(self) -> None:
+        digest = rules_digest()
+        assert len(digest) == 16
+        assert all(c in "0123456789abcdef" for c in digest)
+
+    def test_changes_when_a_ranking_input_changes(self) -> None:
+        """Priority decides which of two findings becomes the title."""
+        before = rules_digest()
+        victim = next(iter(RULES))
+        original = RULES[victim]
+        RULES[victim] = replace(original, priority=original.priority + 1000)
+        try:
+            assert rules_digest() != before
+        finally:
+            RULES[victim] = original
+        assert rules_digest() == before
+
+    def test_changes_when_a_rule_is_added_or_removed(self) -> None:
+        before = rules_digest()
+        rule("test.ephemeral", Cause.UNKNOWN, priority=9999)(lambda _: ())
+        try:
+            assert rules_digest() != before
+        finally:
+            del RULES["test.ephemeral"]
+        assert rules_digest() == before
+
+    def test_is_unmoved_by_documentation(self) -> None:
+        """Rewording a remedy must not look like a policy change.
+
+        If prose moves the digest then every doc edit raises a false drift
+        warning, the warnings become noise, and the one that matters is
+        ignored. ``provenance``, ``remedy`` and ``phase_hint`` are excluded
+        for exactly that reason.
+        """
+        before = rules_digest()
+        victim = next(iter(RULES))
+        original = RULES[victim]
+        RULES[victim] = replace(
+            original,
+            remedy="reworded entirely",
+            provenance="DistUpgradeQuirks.something_else",
+            phase_hint="SOMEWHERE_ELSE",
+        )
+        try:
+            assert rules_digest() == before
+        finally:
+            RULES[victim] = original
+
+
 class TestDpkgRules:
     def test_the_cascade_yields_one_finding_not_thirty_five(self, interner: Interner) -> None:
         """``Errors were encountered while processing:`` lists all 35."""
         from uru_doctor.parsers.aptterm import parse_apt_term
 
         term = parse_apt_term(fixture_text("logs/local-aptterm-dpkgfail.log").splitlines())
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: "2026-03-30 13:45:00,000 INFO apt version: '3.2.0'\n",
                 LogSource.APT_TERM: fixture_text("logs/local-aptterm-dpkgfail.log"),
@@ -347,7 +409,7 @@ class TestDpkgRules:
         from uru_doctor.parsers.aptterm import parse_apt_term
 
         term = parse_apt_term(fixture_text("logs/local-aptterm-dpkgfail.log").splitlines())
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: "2026-03-30 13:45:00,000 INFO apt version: '3.2.0'\n",
                 LogSource.APT_TERM: fixture_text("logs/local-aptterm-dpkgfail.log"),
@@ -384,7 +446,7 @@ class TestUpgraderRules:
     def test_upstream_strings_are_recognised(
         self, message: str, cause: Cause, interner: Interner
     ) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: (
                     "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
@@ -397,7 +459,7 @@ class TestUpgraderRules:
         assert cause in {f.cause for f in result.findings}, result.findings
 
     def test_disk_space_reports_the_requirement(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: (
                     "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
@@ -412,7 +474,7 @@ class TestUpgraderRules:
         assert "/boot" in disk.summary
 
     def test_dpkg_interrupted_is_recognised_from_the_apt_error(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: (
                     "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
@@ -428,7 +490,7 @@ class TestUpgraderRules:
         assert result.primary.detail["remedy_command"] == "sudo dpkg --configure -a"
 
     def test_a_benign_error_fires_nothing(self, interner: Interner) -> None:
-        run = ingest_attachments(
+        run = ingest_one(
             {
                 LogSource.MAIN: (
                     "2026-01-01 10:00:00,000 INFO apt version: '3.2.0'\n"
@@ -532,7 +594,7 @@ class TestHeldOutBugs:
         """LP#2161332 attached two screenshots and nothing else."""
         payload = json.loads((FIXTURES / "lp" / "bug2161332.json").read_text())
         meta = parse_apport_meta(payload["description"], tags=payload["tags"])
-        run = ingest_attachments({}, interner, meta=meta, bug_id=2161332)
+        run = ingest_one({}, interner, meta=meta, bug_id=2161332)
         result = diagnose(run, interner, meta=meta)
 
         assert not run.evidence_complete

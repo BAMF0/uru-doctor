@@ -22,7 +22,6 @@ import pytest
 from uru_doctor.config import DedupConfig, ReportConfig
 from uru_doctor.dedup import build_signature, cluster_runs
 from uru_doctor.diagnose import diagnose
-from uru_doctor.ingest import ingest_attachments
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, DepType, LogSource, UpgradeRun
 from uru_doctor.parsers.apportmeta import parse_apport_meta
@@ -38,7 +37,7 @@ from uru_doctor.report import (
 )
 from uru_doctor.title import propose_title
 
-from .conftest import FIXTURES
+from .conftest import FIXTURES, ingest_one
 
 #: Recorded bugs with enough evidence to render a full page, plus the two
 #: degenerate shapes that must also render: no logs at all, and an apt log
@@ -74,7 +73,7 @@ def _load(bug_id: str, interner: Interner, *, suffix: str = "") -> tuple[Upgrade
         candidate = FIXTURES / name
         if candidate.is_file():
             attachments[source] = candidate.read_text()
-    run = ingest_attachments(attachments, interner, meta=meta, bug_id=int(bug_id))
+    run = ingest_one(attachments, interner, meta=meta, bug_id=int(bug_id))
     return (run, diagnose(run, interner, meta=meta))
 
 

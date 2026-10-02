@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import re
 import tomllib
+import traceback
 from pathlib import Path
 
 import pytest
@@ -188,12 +189,45 @@ class TestLoading:
     def test_find_returns_none_when_absent(self, tmp_path: Path) -> None:
         assert find_config(tmp_path) is None
 
-    def test_inline_api_key_is_refused(self, tmp_path: Path) -> None:
-        """Secrets belong in the environment, not in a file people commit."""
+    def test_llm_section_is_refused_outright(self, tmp_path: Path) -> None:
+        """``[llm]`` is gone from the code, so it must be an error, not ignored.
+
+        It was previously a real section carrying a model configuration, listed
+        in the shipped file as unimplemented. Silently accepting it now would
+        let someone write a config expecting a title to be rewritten and get a
+        deterministic one with no indication why.
+        """
         path = tmp_path / "uru-doctor.toml"
-        path.write_text('[llm]\napi_key = "sk-secret"\n')
-        with pytest.raises(ValueError, match="api_key"):
+        path.write_text('[llm]\nprovider = "ollama"\n')
+        with pytest.raises(ValueError, match="llm"):
             load_config(path)
+
+    def test_rejected_values_are_not_echoed(self, tmp_path: Path) -> None:
+        """A refusal must name the field, never quote what was in it.
+
+        pydantic's default message embeds ``input_value=``, and the CLI prints
+        the whole message to stderr. A credential parked in a section this tool
+        does not recognise would then be echoed into a terminal, a CI log, or a
+        bug report pasted by someone asking why their config broke. Removing
+        the ``[llm]`` model is what exposed this: the section used to have a
+        hand-written validator that deliberately did not quote the value, and
+        falling back to the generic extra-forbidden path started quoting it.
+
+        Checked against the traceback as well as the message, because
+        ``raise ... from exc`` would put the original straight back into a
+        crash report.
+        """
+        path = tmp_path / "uru-doctor.toml"
+        path.write_text('[llm]\napi_key = "sk-must-not-appear"\n')
+        with pytest.raises(ValueError) as caught:
+            load_config(path)
+        rendered = "".join(
+            traceback.format_exception(type(caught.value), caught.value, caught.value.__traceback__)
+        )
+        assert "sk-must-not-appear" not in str(caught.value)
+        assert "sk-must-not-appear" not in rendered
+        # Still useful: it has to say which field was wrong.
+        assert "llm" in str(caught.value)
 
     def test_ambiguous_band_must_be_ordered(self, tmp_path: Path) -> None:
         path = tmp_path / "uru-doctor.toml"

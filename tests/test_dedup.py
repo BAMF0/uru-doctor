@@ -26,13 +26,12 @@ from uru_doctor.dedup import (
     unresolved_causes,
 )
 from uru_doctor.diagnose import diagnose
-from uru_doctor.ingest import ingest_attachments
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Finding, LogSource, Phase, Severity, UpgradeRun
 from uru_doctor.parsers.apportmeta import parse_apport_meta
 from uru_doctor.title import MAX_TITLE, propose_title, render_detail, title_for_cluster
 
-from .conftest import FIXTURES, fixture_text
+from .conftest import FIXTURES, fixture_text, ingest_one
 
 
 def ingest(
@@ -51,7 +50,7 @@ def ingest(
     if bug_id:
         payload = json.loads((FIXTURES / "lp" / f"bug{bug_id}.json").read_text())
         meta = parse_apport_meta(payload["description"], tags=payload["tags"])
-    run = ingest_attachments(
+    run = ingest_one(
         attachments, interner, meta=meta, bug_id=int(bug_id) if bug_id else None
     )
     return (run, diagnose(run, interner, meta=meta))

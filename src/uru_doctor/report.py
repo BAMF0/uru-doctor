@@ -108,9 +108,10 @@ _DETAIL_LABELS: Final[tuple[tuple[str, str], ...]] = (
 class RunEntry:
     """One diagnosed run, ready to be written up.
 
-    Carries the title rather than recomputing it so that a caller which has
-    polished the wording -- the ``--llm`` path -- gets its version into both
-    the per-bug page and the corpus digest.
+    Carries the title rather than recomputing it so that the per-bug page and
+    the corpus digest cannot disagree about what this run should be called.
+    Recomputing in each renderer meant two code paths had to stay in step, and
+    a title is the one output a triager copies by hand.
     """
 
     key: str

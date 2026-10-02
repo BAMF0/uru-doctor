@@ -41,11 +41,17 @@ from uru_doctor.models import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Sequence
 
 #: Bumped only when a change cannot be made additively. Recorded in ``meta`` so
 #: that a store written by a newer version is refused rather than misread.
-SCHEMA_VERSION = 1
+#:
+#: 2 -- dropped ``llm_cache``. The subsystem it cached for was never built, and
+#:      the design it would have served -- a model rewriting titles -- is
+#:      incompatible with the claim this tool makes, that every conclusion comes
+#:      from the logs. Removing the table rather than leaving it empty is the
+#:      point: an unused cache for a forbidden feature is an invitation.
+SCHEMA_VERSION = 2
 
 #: Default location, relative to the working directory. Mirrors the layout the
 #: ``.gitignore`` already excludes.
@@ -101,6 +107,11 @@ CREATE TABLE IF NOT EXISTS runs (
     started_at        TEXT,
     ingested_at       TEXT    NOT NULL,
     diagnosed_at      TEXT,
+    lex_lines         INTEGER NOT NULL DEFAULT 0,
+    lex_unmatched     INTEGER NOT NULL DEFAULT 0,
+    tool_version      TEXT,
+    rules_digest      TEXT,
+    duplicate_count   INTEGER NOT NULL DEFAULT 0,
     apport_dupe       BLOB,
     root_graph        BLOB,
     cause_tuple       BLOB,
@@ -160,16 +171,6 @@ CREATE INDEX IF NOT EXISTS idx_cluster_members_run ON cluster_members(run_key);
 
 -- Caches --------------------------------------------------------------------
 
--- Keyed on a digest of exactly the text the model saw, so a prompt change
--- invalidates naturally and a re-run costs nothing.
-CREATE TABLE IF NOT EXISTS llm_cache (
-    fingerprint TEXT PRIMARY KEY,
-    kind        TEXT NOT NULL,
-    model_id    TEXT NOT NULL,
-    response    TEXT NOT NULL,
-    created_at  TEXT NOT NULL
-);
-
 -- Launchpad attachment cache. ETags let a re-fetch be a conditional GET, which
 -- matters because Launchpad rate-limits hard enough to return 429 in practice.
 CREATE TABLE IF NOT EXISTS attachments (
@@ -222,6 +223,7 @@ class Store:
         self._conn.executescript(_SCHEMA)
         self._check_version()
         self._migrate()
+        self._record_version()
         self._conn.commit()
 
     @classmethod
@@ -270,13 +272,103 @@ class Store:
                 f"Delete it and re-ingest -- it is only a cache."
             )
 
+    def _record_version(self) -> None:
+        """Record the schema the store has just been migrated to.
+
+        Called after :meth:`_migrate`, not before: a store that failed halfway
+        through a migration must not be labelled as having completed it.
+
+        Without this the recorded version never moves, and the refusal above
+        stops working in the one direction it is meant to work -- an older
+        build would read a migrated store, see its own version number, and
+        proceed against a schema it does not know. Schema 2 drops a table that
+        schema 1's ``stats()`` queries unconditionally, so that downgrade is a
+        crash rather than a wrong answer, which is luckier than it deserves.
+        """
+        self._conn.execute(
+            "INSERT INTO meta (key, value) VALUES ('schema_version', ?) "
+            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (str(SCHEMA_VERSION),),
+        )
+
     def _migrate(self) -> None:
-        """Apply additive migrations. Idempotent, guarded by introspection."""
-        # No migrations yet. When one is needed it belongs here, guarded by a
-        # PRAGMA table_info check so that running it twice is harmless:
-        #
-        #   if "new_column" not in self._columns("runs"):
-        #       self._conn.execute("ALTER TABLE runs ADD COLUMN new_column TEXT")
+        """Apply additive migrations. Idempotent, guarded by introspection.
+
+        Each new column is backfilled from the payload, which is the truth --
+        that is what makes a schema change additive by default and is why there
+        is no migration machinery beyond this.
+
+        Indexes over columns added here are created *here*, after the
+        ``ALTER TABLE``s, not in :data:`_SCHEMA`. ``_SCHEMA`` runs first and its
+        ``CREATE TABLE IF NOT EXISTS runs`` is a no-op against a store that
+        already has the table, so a ``CREATE INDEX`` naming a new column fails
+        before the column is added and the store cannot be opened at all. That
+        is the one case the migration exists for, and it is the one case the
+        obvious placement breaks.
+        """
+        # Dropped in schema 2. IF EXISTS so this is a no-op on a fresh store
+        # and on one already migrated.
+        self._conn.execute("DROP TABLE IF EXISTS llm_cache")
+
+        existing = self._columns("runs")
+        added = [
+            (name, ddl)
+            for name, ddl in (
+                ("lex_lines", "INTEGER NOT NULL DEFAULT 0"),
+                ("lex_unmatched", "INTEGER NOT NULL DEFAULT 0"),
+                ("tool_version", "TEXT"),
+                ("rules_digest", "TEXT"),
+                ("duplicate_count", "INTEGER NOT NULL DEFAULT 0"),
+            )
+            if name not in existing
+        ]
+        for name, ddl in added:
+            self._conn.execute(f"ALTER TABLE runs ADD COLUMN {name} {ddl}")
+        if added:
+            self._backfill_projection()
+
+        # Finding a grammar gap must not mean deserialising every payload: the
+        # corpus is scanned for this on every ``stats``.
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_runs_unmatched ON runs(lex_unmatched)"
+        )
+        # "Which runs were diagnosed by the policy now in force?" -- asked
+        # whenever a cluster changes tier between two passes.
+        self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_runs_policy ON runs(tool_version, rules_digest)"
+        )
+
+    def _backfill_projection(self) -> None:
+        """Recompute the indexed projection for every stored run.
+
+        Only the projection: the payload already holds the data, so a run
+        stored before these columns existed loses nothing and does not need
+        re-ingesting. Runs predating the fields themselves backfill to zero and
+        empty, which is honest -- coverage was genuinely not recorded then, and
+        an unstamped run is reported as unstamped rather than as having been
+        diagnosed by whatever version happens to be running now.
+        """
+        for row in self._conn.execute("SELECT run_key, payload FROM runs").fetchall():
+            run = UpgradeRun.model_validate_json(row["payload"])
+            self._conn.execute(
+                """
+                UPDATE runs SET
+                    lex_lines       = ?,
+                    lex_unmatched   = ?,
+                    tool_version    = ?,
+                    rules_digest    = ?,
+                    duplicate_count = ?
+                WHERE run_key = ?
+                """,
+                (
+                    run.lex.lines,
+                    run.lex.unmatched,
+                    run.tool_version,
+                    run.rules_digest,
+                    run.duplicate_count,
+                    row["run_key"],
+                ),
+            )
 
     def _columns(self, table: str) -> set[str]:
         rows = self._conn.execute(f"PRAGMA table_info({table})").fetchall()
@@ -364,6 +456,78 @@ class Store:
         ).fetchall()
         return [(int(r["id"]), str(r["pattern"]), int(r["n"])) for r in rows]
 
+    def coverage_totals(self) -> tuple[int, int, int, int]:
+        """``(runs_with_trace, runs_imperfect, lines, unmatched)``.
+
+        An indexed aggregate rather than a scan that deserialises every
+        payload, because this is asked on every ``stats`` and the answer is the
+        tool's own health check. Runs with no resolver trace are excluded by
+        ``lex_lines > 0``: a bug that attached only ``main.log`` has nothing to
+        lex, and folding its vacuous full coverage into the mean would dilute a
+        real gap exactly where the corpus is thinnest.
+        """
+        row = self._conn.execute(
+            """
+            SELECT COUNT(*)                                  AS runs,
+                   SUM(CASE WHEN lex_unmatched > 0
+                            THEN 1 ELSE 0 END)               AS imperfect,
+                   COALESCE(SUM(lex_lines), 0)               AS lines,
+                   COALESCE(SUM(lex_unmatched), 0)           AS unmatched
+              FROM runs
+             WHERE lex_lines > 0
+            """
+        ).fetchone()
+        if row is None:
+            return (0, 0, 0, 0)
+        return (
+            int(row["runs"] or 0),
+            int(row["imperfect"] or 0),
+            int(row["lines"] or 0),
+            int(row["unmatched"] or 0),
+        )
+
+    def unmeasured_runs(self) -> list[str]:
+        """Runs stored before coverage was recorded at all.
+
+        Distinct from "this run has no resolver trace", and the two must not be
+        conflated: one is a bug that attached only ``main.log``, the other is a
+        measurement this tool did not yet take. Both show ``lex_lines == 0``,
+        so they are told apart by the policy stamp -- a run diagnosed by any
+        version that records coverage also records who diagnosed it, so an
+        empty ``tool_version`` with no lines means unmeasured rather than
+        empty.
+
+        Reported rather than silently folded in, because "100% of what I
+        measured" over a corpus where most runs were never measured is the kind
+        of true-but-useless number that gets quoted.
+        """
+        rows = self._conn.execute(
+            """
+            SELECT run_key FROM runs
+             WHERE lex_lines = 0
+               AND (tool_version IS NULL OR tool_version = '')
+             ORDER BY run_key
+            """
+        ).fetchall()
+        return [str(r["run_key"]) for r in rows]
+
+    def imperfect_runs(self) -> list[tuple[str, int, int]]:
+        """``(run_key, lines, unmatched)`` for every run that did not fully lex.
+
+        Ordered by how much went unread, because that is the order in which
+        grammar gaps are worth fixing -- and never by ``run_key`` alone, which
+        would sort a 3,000-line gap below a one-line one.
+        """
+        rows = self._conn.execute(
+            """
+            SELECT run_key, lex_lines, lex_unmatched
+              FROM runs
+             WHERE lex_unmatched > 0
+             ORDER BY lex_unmatched DESC, run_key ASC
+            """
+        ).fetchall()
+        return [(str(r["run_key"]), int(r["lex_lines"]), int(r["lex_unmatched"])) for r in rows]
+
     # -- runs ---------------------------------------------------------------
 
     def put_run(self, run: UpgradeRun) -> str:
@@ -386,6 +550,8 @@ class Store:
                 terminal_phase, evidence_complete, reached_dpkg,
                 top_cause, cascade_size, fragile, third_party,
                 current_title, started_at, ingested_at, diagnosed_at,
+                lex_lines, lex_unmatched, tool_version, rules_digest,
+                duplicate_count,
                 apport_dupe, root_graph, cause_tuple, payload
             ) VALUES (
                 ?, ?, ?, ?, ?,
@@ -394,6 +560,8 @@ class Store:
                 ?, ?, ?,
                 ?, ?, ?, ?,
                 ?, ?, ?, ?,
+                ?, ?, ?, ?,
+                ?,
                 ?, ?, ?, ?
             )
             ON CONFLICT(run_key) DO UPDATE SET
@@ -417,6 +585,11 @@ class Store:
                 current_title     = excluded.current_title,
                 started_at        = excluded.started_at,
                 diagnosed_at      = excluded.diagnosed_at,
+                lex_lines         = excluded.lex_lines,
+                lex_unmatched     = excluded.lex_unmatched,
+                tool_version      = excluded.tool_version,
+                rules_digest      = excluded.rules_digest,
+                duplicate_count   = excluded.duplicate_count,
                 apport_dupe       = excluded.apport_dupe,
                 root_graph        = excluded.root_graph,
                 cause_tuple       = excluded.cause_tuple,
@@ -445,6 +618,11 @@ class Store:
                 run.started_at.isoformat() if run.started_at else None,
                 _now(),
                 _now() if run.findings else None,
+                run.lex.lines,
+                run.lex.unmatched,
+                run.tool_version,
+                run.rules_digest,
+                run.duplicate_count,
                 run.signature.apport_dupe,
                 run.signature.root_graph,
                 run.signature.cause_tuple,
@@ -559,6 +737,115 @@ class Store:
         ).fetchall()
         return [str(r["run_key"]) for r in rows]
 
+    def packages_matching(self, name: str) -> list[tuple[PkgId, str]]:
+        """``(pkg_id, name:arch)`` for every interned spelling of ``name``.
+
+        A store-side lookup rather than :meth:`Interner.packages_named`, which
+        answers from a cache populated only by packages interned *in this
+        process*. A fresh ``Interner`` over an existing store has an empty one,
+        so asking it about a package the corpus certainly contains returns
+        nothing -- silently, and looking exactly like "no bug has ever blamed
+        this".
+
+        A bare name matches every architecture, because the upgrader and apt
+        disagree about suffixes: ``main.log``'s ``Foreign`` list omits
+        ``:arch`` for the native architecture while the resolver trace writes
+        ``libwacom9-surface:amd64`` in full. An explicit architecture is a
+        deliberate narrowing and matches only itself -- as with the ``i386``
+        orphans in bug 2169028.
+        """
+        bare, _, arch = name.partition(":")
+        if arch:
+            rows = self._conn.execute(
+                "SELECT id, name FROM packages WHERE name = ?", (f"{bare}:{arch}",)
+            ).fetchall()
+        else:
+            # Debian package names admit only lowercase, digits, '+', '-' and
+            # '.', so neither LIKE wildcard can occur -- escaped anyway, since
+            # the cost is nothing and the alternative is trusting that forever.
+            pattern = bare.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            rows = self._conn.execute(
+                "SELECT id, name FROM packages WHERE name = ? OR name LIKE ? ESCAPE '\\' "
+                "ORDER BY name",
+                (bare, f"{pattern}:%"),
+            ).fetchall()
+        return [(int(r["id"]), str(r["name"])) for r in rows]
+
+    def runs_with_package(self, pkg_ids: Sequence[PkgId]) -> list[tuple[str, str]]:
+        """``(run_key, role)`` for every run implicating any of ``pkg_ids``.
+
+        Roles are kept distinct rather than collapsed. "This package is the
+        root of nine faults" and "this package was a victim of nine faults" are
+        opposite findings, and the whole premise of the tool is that the
+        packages a reporter blames are usually victims rather than causes.
+        """
+        if not pkg_ids:
+            return []
+        # Interpolates only a counted run of '?' placeholders; every value is
+        # still bound.
+        placeholders = ",".join("?" * len(pkg_ids))
+        rows = self._conn.execute(
+            f"SELECT DISTINCT run_key, role FROM run_packages "
+            f"WHERE pkg_id IN ({placeholders}) "
+            f"ORDER BY run_key, role",
+            tuple(pkg_ids),
+        ).fetchall()
+        return [(str(r["run_key"]), str(r["role"])) for r in rows]
+
+    def runs_sharing_roots(self, run_key: str) -> list[tuple[str, int]]:
+        """``(run_key, shared_root_count)`` for runs sharing a root package.
+
+        Ordered by how many roots are shared, then by key. Sorting by count
+        first is the point: one shared root out of eleven is a coincidence
+        worth a glance, and all of them is the same fault.
+
+        Excludes ``run_key`` itself, and only considers the ``root`` role --
+        two runs that merely broke the same victim have not met the same fault.
+        """
+        rows = self._conn.execute(
+            """
+            SELECT other.run_key AS key, COUNT(DISTINCT other.pkg_id) AS shared
+              FROM run_packages AS mine
+              JOIN run_packages AS other
+                ON other.pkg_id = mine.pkg_id
+               AND other.role   = 'root'
+              JOIN runs AS r
+                ON r.run_key = other.run_key
+             WHERE mine.run_key = ?
+               AND mine.role    = 'root'
+               AND other.run_key <> ?
+               AND r.is_primary = 1
+             GROUP BY other.run_key
+             ORDER BY shared DESC, key ASC
+            """,
+            (run_key, run_key),
+        ).fetchall()
+        return [(str(r["key"]), int(r["shared"])) for r in rows]
+
+    def runs_with_signature(self, run_key: str, column: str) -> list[str]:
+        """Other primary runs whose ``column`` signature equals this run's.
+
+        ``column`` is allowlisted because it is interpolated into SQL. Returns
+        empty when this run has no such signature, which is not the same as
+        having one that nothing matches -- a run with no root-cause subgraph
+        cannot be said to share one.
+        """
+        if column not in {"apport_dupe", "root_graph", "cause_tuple"}:
+            raise ValueError(f"not a signature column: {column}")
+        row = self._conn.execute(
+            f"SELECT {column} AS sig FROM runs WHERE run_key = ?",
+            (run_key,),
+        ).fetchone()
+        if row is None or row["sig"] is None:
+            return []
+        rows = self._conn.execute(
+            f"SELECT run_key FROM runs "
+            f"WHERE {column} = ? AND run_key <> ? AND is_primary = 1 "
+            f"ORDER BY run_key",
+            (row["sig"], run_key),
+        ).fetchall()
+        return [str(r["run_key"]) for r in rows]
+
     def keys_by_signature(self, column: str) -> dict[bytes, list[str]]:
         """Group run keys by a signature column, for exact-match deduplication.
 
@@ -626,21 +913,6 @@ class Store:
             ]
             yield (cid, str(row["canonical"]), row["cause"], members)
 
-    # -- LLM cache ----------------------------------------------------------
-
-    def llm_get(self, fingerprint: str) -> str | None:
-        row = self._conn.execute(
-            "SELECT response FROM llm_cache WHERE fingerprint = ?", (fingerprint,)
-        ).fetchone()
-        return None if row is None else str(row["response"])
-
-    def llm_put(self, fingerprint: str, kind: str, model_id: str, response: str) -> None:
-        self._conn.execute(
-            "INSERT OR REPLACE INTO llm_cache (fingerprint, kind, model_id, response, created_at) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (fingerprint, kind, model_id, response, _now()),
-        )
-
     # -- attachment cache ---------------------------------------------------
 
     def attachment_etag(self, bug_id: int, name: str) -> tuple[str | None, Path | None]:
@@ -692,7 +964,6 @@ class Store:
             "packages": count("packages"),
             "templates": count("templates"),
             "clusters": count("clusters"),
-            "llm_cached": count("llm_cache"),
             "db_bytes": self.path.stat().st_size if self.path.exists() else 0,
         }
 

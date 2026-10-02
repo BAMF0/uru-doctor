@@ -35,6 +35,36 @@ Facts the script encodes, worth knowing if you work around it:
   screenshots. The correct output is `no upgrade logs were attached`, and
   getting that honest rather than inventing a cause is worth checking.
 
+### Finding bugs to fetch
+
+`searchTasks` on the source package lists them, and is a plain read-only GET:
+
+```
+https://api.launchpad.net/devel/ubuntu/+source/ubuntu-release-upgrader
+  ?ws.op=searchTasks&created_since=YYYY-MM-DD&ws.size=50
+```
+
+Verified against the live API. Each entry carries `bug_link` (the id is its
+last path segment), `status`, `date_created` and an `http_etag`;
+`next_collection_link` paginates and `total_size` comes back `null`, so count
+the entries rather than trusting a total.
+
+Two findings worth having before anyone automates this:
+
+- **`status` is in the task entry**, so a sweep gets the bug's own resolution
+  without a second request per bug. That matters because the resolution is
+  ground-truth rank 2 below, and a per-bug request for it would cost another
+  three seconds each.
+- **The default omits closed bugs.** With no `status` parameter the API returns
+  only open ones. Over one sample week that hid two `Won't Fix` bugs — and
+  closed bugs are exactly where ground truth lives, so a sweep that takes the
+  default systematically excludes its own best evidence. Pass the statuses
+  explicitly, including `Invalid`, `Won't Fix`, `Fix Released`, `Fix Committed`
+  and `Expired`.
+
+At ~3s per request and ~6 requests per bug, a hundred-bug sweep is half an
+hour. That is a watermark-and-resume job, not a one-shot command.
+
 Also record, from the bug page: status, `number_of_duplicates`,
 `duplicate_of_link`, triager tags, and whether a comment or linked upstream
 commit names a cause. That is the ground truth for step 4.
@@ -58,6 +88,29 @@ The order matters. Each gate makes the ones below it meaningful.
 Not 99.9%. An unmatched line is a verb the graph cannot see, and the failure
 mode is a confident diagnosis of partial evidence.
 
+Available from the tool itself, on every path — this is also the gate you can
+apply without the harness:
+
+```bash
+uru-doctor diagnose DIR --json | jq '.lex_coverage, .unknown_shapes'
+uru-doctor fetch 2169197 --strict   # exit 3 if the trace did not fully lex
+uru-doctor coverage --strict        # the whole corpus, worst offender first
+```
+
+`uru-doctor coverage` is the one to run after a batch. It names the offending
+run, lists the **masked** shapes a new pattern gets written from, and separates
+two different repairs: a shape that would not lex needs a pattern in
+`apt/grammar.py`, while one that lexed and no rule claimed needs a *rule*.
+Variants collapse — two `Zarp 12 Quux 44` / `Zarp 97 Quux 13` lines are one
+entry with a count, which is what keeps a gap legible instead of drowning it.
+
+`fetch` could not report coverage at all until the `stats` out-parameter was
+threaded into `ingest_attachments`, which is why this harness used to re-lex
+`apt.log` by hand. Worth knowing because the two measurements were not the
+same: the harness measured `apt.log` alone, the diagnosis used every log, and
+nothing compared them. `tests/test_ingest.py::TestCoverageIsReported` now
+asserts the two ingest paths agree.
+
 This gate has caught every grammar gap so far:
 
 | Symptom | Cause |
@@ -70,8 +123,15 @@ This gate has caught every grammar gap so far:
 Fix by adding the pattern to `apt/grammar.py`, then re-check **every** fixture —
 a widened pattern can swallow lines another pattern was matching.
 
+`lex_lines == 0` is **not** a gap. A bug that attached only `main.log`, or two
+screenshots like LP#2161332, has nothing to lex, and reporting that as
+imperfect would make every log-less bug look like a parser bug — and would make
+`--strict` useless on exactly the corpus pass where it should be informative.
+Check `lex_lines` before believing `lex_coverage`.
+
 Unknown state flags must likewise be empty. `apt/state.py` decodes all 28
-observed shapes; a new one means a new apt version.
+observed shapes; a new one means a new apt version. This one is still only in
+the harness: the vocabulary is a property of the scan rather than of the run.
 
 ### Gate 2 — did the tool understand the run?
 
@@ -130,6 +190,25 @@ A cluster that drops from `root-graph` to `cause-tuple` means the precise
 signature stopped matching, and the usual reason is that something in it
 depends on *how* it was computed rather than *what* it describes.
 
+**Rule out the tool before suspecting the logs.** Every diagnosed run now
+carries `tool_version` and `rules_digest`, so a tier change has a checkable
+explanation:
+
+```bash
+uru-doctor dedup --json | jq '.clusters[] | select(.policy_drift)'
+```
+
+A cluster flagged `policy_drift` mixes runs diagnosed by different rule sets,
+and its tier was computed from signatures two different policies produced — so
+it is not evidence of anything until the corpus is re-ingested. Re-ingest
+first, *then* read the tier. Without the stamp these two causes were
+indistinguishable, and the wrong one is much more interesting, so it is the one
+that gets investigated.
+
+`rules_digest` deliberately ignores `provenance`, `remedy` and `phase_hint`:
+rewording a remedy must not look like a policy change, or the warning becomes
+noise and stops being read.
+
 Signatures are persisted and compared across sessions, so anything that varies
 with ingest order makes them worthless. Writing this skill's harness — which
 builds a fresh interner per bug, unlike the ad-hoc scripts used until then —
@@ -163,6 +242,21 @@ exists to solve. Rank evidence like this:
    `libpeas-1.0-1 Breaks on libpeas-1.0-0` which apt keeps.
 4. **Triager tags.** Weakest. They are a guess, and `third-party-packages` on
    LP#2155743 is one the evidence contradicts.
+
+**Ask the corpus before reading the log.** Two questions the store can answer
+that a single bug cannot, and both change what the log means:
+
+```bash
+uru-doctor related lp:2150339#0    # same fault, in tiers, strongest first
+uru-doctor history libpeas-1.0-1   # root in 3 bugs across 2 release pairs
+```
+
+A package that is a root across *different release pairs* is an archive
+transition rather than one machine's misconfiguration. And a package that is a
+**victim many times and a root never** is evidence against blaming it —
+`history eog` reports three bugs and no causes, which is exactly the inversion
+this tool exists to correct. `history` keeps the roles apart and never sums
+them, because one number would erase that.
 
 If the tool and ground truth agree, record a fixture and move on. If they
 disagree, find out which is wrong before writing code.
@@ -227,6 +321,38 @@ changed an earlier bug's answer.
   reflows multi-line calls, so a later `str.replace` finds nothing and reports
   success. Twice this left a parameter unthreaded and the behaviour unchanged.
   After any scripted patch, `grep` for the new text.
+- **An out-parameter that one call site forgets is invisible.** `ingest_logs`
+  took `stats: LexStats | None`; `ingest_directory` passed it and
+  `ingest_attachments` did not. Consequence: `fetch` — the command that meets a
+  new apt version *first* — was the one command that could not report whether
+  it had understood the log, and the gap survived because the harness measured
+  coverage separately and nothing compared the two. Fixed by making the
+  function return the measurement instead of accepting somewhere to put it, so
+  forgetting is a type error. If a value is load-bearing, do not let it be
+  optional at the call site.
+- **`CREATE INDEX` in the schema on a column `_migrate` adds.** `_SCHEMA` runs
+  before `_migrate`, and its `CREATE TABLE IF NOT EXISTS runs` is a no-op
+  against an existing store — so the index statement referenced a column that
+  did not exist yet and the store could not be opened *at all*. It worked
+  perfectly on a fresh store, which is every test that does not deliberately
+  build an old one. Indexes over migrated columns belong in `_migrate`, after
+  the `ALTER TABLE`s. `TestAdditiveMigration` builds a genuine schema-1 store
+  by dropping the columns back off.
+- **A schema version that is never written back.** `_check_version` refused a
+  *newer* store and inserted the number only when absent, so a migrated store
+  kept claiming version 1 forever and an older build would read it as its own.
+  Schema 2 drops a table schema 1 queries unconditionally, so that downgrade
+  crashes rather than quietly misreporting — luck, not design.
+- **Removing a validator can start leaking what it was validating.**
+  `LlmConfig` had a hand-written check that refused an inline `api_key`
+  *without quoting it*. Deleting the model handed the job to pydantic's generic
+  extra-forbidden path, which embeds `input_value=` — and the CLI prints the
+  whole message to stderr. The test still passed, because the secret appearing
+  in the error message happened to satisfy `match="api_key"`. A test that
+  passes for the wrong reason is worse than no test; `load_config` now renders
+  validation failures as locations and reasons only, and
+  `test_rejected_values_are_not_echoed` checks the traceback too, because
+  `raise ... from exc` would put the original straight back.
 - **`jaccard([], []) == 1.0`.** A bug with only `apt.log` has no log *events*,
   so two unrelated reports scored a perfect match. Absence of evidence is not
   evidence of similarity.

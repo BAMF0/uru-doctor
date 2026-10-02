@@ -21,6 +21,7 @@ pattern invented to fit three bugs is a pattern that breaks on the fourth.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
@@ -38,6 +39,7 @@ __all__ = [
     "RuleFn",
     "all_rules",
     "rule",
+    "rules_digest",
     "rules_for",
 ]
 
@@ -143,6 +145,43 @@ def rules_for(run: UpgradeRun) -> Iterator[Rule]:
         if candidate.requires_complete_evidence and not run.evidence_complete:
             continue
         yield candidate
+
+
+def rules_digest() -> str:
+    """A short digest over the registered rules and their ranking inputs.
+
+    Recorded on every diagnosed run so that a verdict can be attributed to a
+    policy rather than only to a release. A release number is too coarse: the
+    changes that move a verdict are overwhelmingly rule changes between
+    releases, and the question "did the tool change or did the logs?" is
+    unanswerable without this.
+
+    What goes in is exactly what can change a ranking without changing a log:
+    the rule's name, the cause it attributes, its priority, severity,
+    confidence, and whether it may fire on truncated evidence. Deliberately
+    excluded are ``provenance``, ``remedy`` and ``phase_hint``, which are
+    documentation -- rewording a remedy must not look like a policy change, or
+    the digest becomes noise and gets ignored.
+
+    Not a hash of the source. That would change on a comment, and the point is
+    to be quiet when nothing a verdict depends on has moved.
+    """
+    material = "\n".join(
+        "\t".join(
+            (
+                item.name,
+                item.cause.value,
+                str(item.priority),
+                item.severity.name,
+                item.confidence.name,
+                "1" if item.requires_complete_evidence else "0",
+            )
+        )
+        # all_rules() is already sorted by (priority, name), so this is stable
+        # across interpreter runs and import orders.
+        for item in all_rules()
+    )
+    return hashlib.blake2b(material.encode("utf-8"), digest_size=8).hexdigest()
 
 
 # ---------------------------------------------------------------------------

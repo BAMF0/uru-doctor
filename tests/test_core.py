@@ -9,6 +9,9 @@ fixture carries no personal data.
 
 from __future__ import annotations
 
+import sqlite3
+from pathlib import Path
+
 import pytest
 
 from tests.conftest import apt_log, broken, fixture_text, graph_of, sectioned
@@ -25,12 +28,13 @@ from uru_doctor.models import (
     Cause,
     Event,
     Finding,
+    LexCoverage,
     Phase,
     Signature,
     UpgradeRun,
     unpack_u32,
 )
-from uru_doctor.store import Store
+from uru_doctor.store import SCHEMA_VERSION, Store
 
 # ---------------------------------------------------------------------------
 # Sections
@@ -594,6 +598,211 @@ class TestStoreQueries:
             Store(path)
 
 
+class TestCoverageProjection:
+    """Coverage is an indexed column, not only a payload field.
+
+    Asking "did coverage slip anywhere in the corpus" must not mean
+    deserialising every payload: it is asked on every ``stats``, and it is the
+    tool's own health check.
+    """
+
+    def _with_coverage(
+        self, store: Store, bug_id: int, *, lines: int, unmatched: int
+    ) -> UpgradeRun:
+        return UpgradeRun(
+            bug_id=bug_id,
+            lex=LexCoverage(lines=lines, matched=lines - unmatched),
+        )
+
+    def test_totals_exclude_runs_with_no_trace(self, store: Store) -> None:
+        """A bug with no apt.log has nothing to lex, and must not dilute.
+
+        LP#2161332 attached two screenshots. Averaging its vacuous full
+        coverage in would mask a real gap elsewhere, and would do so most
+        strongly on a thin corpus -- which is when the measurement matters
+        most.
+        """
+        store.put_run(self._with_coverage(store, 1, lines=100, unmatched=10))
+        store.put_run(UpgradeRun(bug_id=2))  # no trace at all
+        store.commit()
+        traces, imperfect, lines, unmatched = store.coverage_totals()
+        assert traces == 1
+        assert imperfect == 1
+        assert lines == 100
+        assert unmatched == 10
+
+    def test_clean_corpus_reports_no_gaps(self, store: Store) -> None:
+        store.put_run(self._with_coverage(store, 1, lines=500, unmatched=0))
+        store.put_run(self._with_coverage(store, 2, lines=300, unmatched=0))
+        store.commit()
+        traces, imperfect, lines, unmatched = store.coverage_totals()
+        assert (traces, imperfect, lines, unmatched) == (2, 0, 800, 0)
+
+    def test_imperfect_runs_are_ordered_by_how_much_went_unread(
+        self, store: Store
+    ) -> None:
+        """Not by key: a 3,000-line gap must not sort below a one-line one."""
+        store.put_run(self._with_coverage(store, 1, lines=10, unmatched=1))
+        store.put_run(self._with_coverage(store, 2, lines=5000, unmatched=3000))
+        store.put_run(self._with_coverage(store, 3, lines=50, unmatched=0))
+        store.commit()
+        assert [key for key, _, _ in store.imperfect_runs()] == ["lp:2#0", "lp:1#0"]
+
+    def test_projection_survives_a_round_trip(self, store: Store) -> None:
+        store.put_run(self._with_coverage(store, 1, lines=100, unmatched=7))
+        store.commit()
+        loaded = store.get_run("lp:1#0")
+        assert loaded is not None
+        assert loaded.lex.lines == 100
+        assert loaded.lex.unmatched == 7
+
+    def test_unmeasured_is_not_the_same_as_having_no_trace(self, store: Store) -> None:
+        """Both show ``lex_lines == 0`` and they mean opposite things.
+
+        A bug that attached only ``main.log`` has nothing to lex. A run stored
+        before coverage existed has a trace nobody measured. Conflating them
+        reports "no stored run has a resolver trace" about a corpus full of
+        them, and reporting "100% of what I measured" over a mostly unmeasured
+        corpus is the kind of true-but-useless number that gets quoted.
+
+        Told apart by the policy stamp: any version that records coverage also
+        records who diagnosed it.
+        """
+        # Genuinely no trace, diagnosed by a version that measures.
+        store.put_run(UpgradeRun(bug_id=1, tool_version="0.1.0"))
+        # A trace, measured.
+        store.put_run(
+            UpgradeRun(bug_id=2, tool_version="0.1.0", lex=LexCoverage(lines=10, matched=10))
+        )
+        # Stored before coverage was recorded at all.
+        store.put_run(UpgradeRun(bug_id=3))
+        store.commit()
+        assert store.unmeasured_runs() == ["lp:3#0"]
+
+
+class TestAdditiveMigration:
+    """A store written before these columns existed must still open.
+
+    The store is a cache, so losing it costs nothing but time -- but silently
+    failing to open one, or opening it and reading zeroes as though they were
+    measurements, both cost trust. The payload is the truth and the columns are
+    a projection, which is what makes the backfill possible at all.
+    """
+
+    def _legacy(self, path: Path) -> None:
+        """Build a store, then strip it back to the pre-Phase-1 shape."""
+        with Store.open(path) as store:
+            store.put_run(
+                UpgradeRun(
+                    bug_id=4242,
+                    lex=LexCoverage(lines=900, matched=890),
+                    tool_version="0.0.1-ancient",
+                    rules_digest="deadbeefdeadbeef",
+                    duplicate_count=13,
+                )
+            )
+            store.commit()
+        with sqlite3.connect(path / "uru-doctor.db") as raw:
+            # The indexes go first: SQLite refuses to drop a column an index
+            # still references, which is also why the real migration adds the
+            # columns before the schema's CREATE INDEX statements run.
+            raw.execute("DROP INDEX IF EXISTS idx_runs_unmatched")
+            raw.execute("DROP INDEX IF EXISTS idx_runs_policy")
+            for column in (
+                "lex_lines",
+                "lex_unmatched",
+                "tool_version",
+                "rules_digest",
+                "duplicate_count",
+            ):
+                raw.execute(f"ALTER TABLE runs DROP COLUMN {column}")
+            raw.execute("CREATE TABLE IF NOT EXISTS llm_cache (fingerprint TEXT PRIMARY KEY)")
+            raw.execute("UPDATE meta SET value='1' WHERE key='schema_version'")
+            raw.commit()
+
+    def test_legacy_store_opens_and_backfills(self, tmp_path: Path) -> None:
+        state = tmp_path / "legacy"
+        self._legacy(state)
+        with Store.open(state) as store:
+            traces, imperfect, lines, unmatched = store.coverage_totals()
+            assert (traces, imperfect, lines, unmatched) == (1, 1, 900, 10)
+            loaded = store.get_run("lp:4242#0")
+            assert loaded is not None
+            assert loaded.duplicate_count == 13
+            assert loaded.tool_version == "0.0.1-ancient"
+
+    def test_backfill_reads_the_payload_not_the_present_version(
+        self, tmp_path: Path
+    ) -> None:
+        """An unstamped old run must not acquire today's digest.
+
+        Claiming a run was diagnosed by the current policy when it was not is
+        worse than admitting the stamp is missing: it is the one thing the
+        stamp exists to rule out.
+        """
+        state = tmp_path / "unstamped"
+        with Store.open(state) as store:
+            store.put_run(UpgradeRun(bug_id=7, lex=LexCoverage(lines=10, matched=10)))
+            store.commit()
+        with sqlite3.connect(state / "uru-doctor.db") as raw:
+            raw.execute("DROP INDEX IF EXISTS idx_runs_policy")
+            raw.execute("ALTER TABLE runs DROP COLUMN rules_digest")
+            raw.commit()
+        with Store.open(state) as store:
+            loaded = store.get_run("lp:7#0")
+            assert loaded is not None
+            assert loaded.rules_digest == ""
+
+    def test_migration_is_idempotent(self, tmp_path: Path) -> None:
+        state = tmp_path / "twice"
+        self._legacy(state)
+        for _ in range(3):
+            with Store.open(state) as store:
+                assert store.coverage_totals() == (1, 1, 900, 10)
+
+    def test_the_llm_cache_is_dropped(self, tmp_path: Path) -> None:
+        """The subsystem was never built and contradicts the design claim.
+
+        Leaving an empty cache for a forbidden feature is a door held open;
+        the config section that configured it is now refused outright, so the
+        table has no remaining reason to exist.
+        """
+        state = tmp_path / "nollm"
+        self._legacy(state)
+        with Store.open(state):
+            pass
+        with sqlite3.connect(state / "uru-doctor.db") as raw:
+            tables = {
+                row[0]
+                for row in raw.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            }
+        assert "llm_cache" not in tables
+
+    def test_the_recorded_version_moves_after_migrating(self, tmp_path: Path) -> None:
+        """Otherwise the downgrade refusal silently stops working.
+
+        ``_check_version`` refuses a store written by a *newer* schema. If the
+        recorded number never advances, a migrated store still claims to be
+        version 1, and an older build reads it as its own -- against a schema
+        that no longer matches. Schema 2 drops a table that schema 1 queries
+        unconditionally, so that particular downgrade crashes rather than
+        quietly misreporting, which is luck rather than design.
+        """
+        state = tmp_path / "versioned"
+        self._legacy(state)
+        with sqlite3.connect(state / "uru-doctor.db") as raw:
+            assert raw.execute(
+                "SELECT value FROM meta WHERE key='schema_version'"
+            ).fetchone()[0] == "1"
+        with Store.open(state):
+            pass
+        with sqlite3.connect(state / "uru-doctor.db") as raw:
+            recorded = raw.execute(
+                "SELECT value FROM meta WHERE key='schema_version'"
+            ).fetchone()[0]
+        assert int(recorded) == SCHEMA_VERSION
+
+
 # ---------------------------------------------------------------------------
 # Sanitising and redaction
 # ---------------------------------------------------------------------------
@@ -693,3 +902,142 @@ class TestFixturesAreClean:
         text = fixture_text("apt/lp2150319-apt.log")
         assert "libfile-libmagic-perl" in text
         assert "@un uH" in text
+
+
+class TestCorpusLookups:
+    """The queries behind ``related`` and ``history``.
+
+    These answer the triager's second question -- "have we seen this before" --
+    and the data for it was already indexed with no way to ask it.
+    """
+
+    def _run(
+        self,
+        interner: Interner,
+        *,
+        bug_id: int,
+        roots: tuple[str, ...],
+        victims: tuple[str, ...] = (),
+        graph: bytes | None = None,
+    ) -> UpgradeRun:
+        return UpgradeRun(
+            bug_id=bug_id,
+            findings=(
+                Finding(
+                    cause=Cause.EXACT_PIN_BROKEN_BY_UPGRADE,
+                    root_pkgs=tuple(interner.package(r) for r in roots),
+                    victim_pkgs=tuple(interner.package(v) for v in victims),
+                ),
+            ),
+            signature=Signature(root_graph=graph) if graph else Signature(),
+        )
+
+    def test_a_bare_name_matches_every_architecture(
+        self, store: Store, interner: Interner
+    ) -> None:
+        """The upgrader and apt disagree about ``:arch`` suffixes.
+
+        ``main.log``'s ``Foreign`` list omits it for the native architecture
+        while the resolver trace writes it in full, so a bare-name lookup that
+        matched exactly would miss most of the corpus.
+        """
+        store.put_run(self._run(interner, bug_id=1, roots=("libfoo:amd64",)))
+        store.put_run(self._run(interner, bug_id=2, roots=("libfoo:i386",)))
+        store.commit()
+        assert [n for _, n in store.packages_matching("libfoo")] == [
+            "libfoo:amd64",
+            "libfoo:i386",
+        ]
+
+    def test_an_explicit_architecture_narrows(self, store: Store, interner: Interner) -> None:
+        """As with the i386 orphans in bug 2169028."""
+        store.put_run(self._run(interner, bug_id=1, roots=("libfoo:amd64", "libfoo:i386")))
+        store.commit()
+        assert [n for _, n in store.packages_matching("libfoo:i386")] == ["libfoo:i386"]
+
+    def test_lookup_does_not_depend_on_the_interner_cache(self, store: Store) -> None:
+        """The reason this is a store query and not ``Interner.packages_named``.
+
+        ``packages_named`` answers from ``_by_bare_name``, which is populated
+        only by packages interned *in this process*. A fresh ``Interner`` over
+        an existing store has an empty one, so it returns nothing -- silently,
+        and looking exactly like "no bug has ever blamed this".
+        """
+        warm = Interner(store)
+        store.put_run(self._run(warm, bug_id=1, roots=("libfoo:amd64",)))
+        store.commit()
+
+        cold = Interner(store)
+        assert cold.packages_named("libfoo") == (), "precondition: the cache is cold"
+        assert [n for _, n in store.packages_matching("libfoo")] == ["libfoo:amd64"]
+
+    def test_roles_are_reported_separately(self, store: Store, interner: Interner) -> None:
+        """Root and victim are opposite findings and must never be summed.
+
+        The premise of the tool is that the packages a reporter blames are
+        usually victims. A package that is a victim thirty times and a root
+        never is evidence *for* its innocence.
+        """
+        store.put_run(self._run(interner, bug_id=1, roots=("cause:amd64",), victims=("eog:amd64",)))
+        store.put_run(self._run(interner, bug_id=2, roots=("other:amd64",), victims=("eog:amd64",)))
+        store.commit()
+        eog = store.packages_matching("eog")
+        roles = {role for _, role in store.runs_with_package([p for p, _ in eog])}
+        assert roles == {"victim"}
+        assert store.runs_blaming(eog[0][0]) == []
+
+    def test_shared_roots_are_ordered_by_overlap(self, store: Store, interner: Interner) -> None:
+        """One root in common is a coincidence; all of them is one fault.
+
+        Ordered by count and then by key -- never by key alone, which would put
+        a one-root coincidence above a total match.
+        """
+        store.put_run(self._run(interner, bug_id=1, roots=("a:amd64", "b:amd64", "c:amd64")))
+        store.put_run(self._run(interner, bug_id=2, roots=("a:amd64",)))
+        store.put_run(self._run(interner, bug_id=3, roots=("a:amd64", "b:amd64", "c:amd64")))
+        store.commit()
+        assert store.runs_sharing_roots("lp:1#0") == [("lp:3#0", 3), ("lp:2#0", 1)]
+
+    def test_a_run_does_not_share_roots_with_itself(
+        self, store: Store, interner: Interner
+    ) -> None:
+        store.put_run(self._run(interner, bug_id=1, roots=("a:amd64",)))
+        store.commit()
+        assert store.runs_sharing_roots("lp:1#0") == []
+
+    def test_sharing_a_victim_is_not_sharing_a_fault(
+        self, store: Store, interner: Interner
+    ) -> None:
+        """Two runs that merely broke the same package have not met the same bug.
+
+        This is the whole point of blame orientation: ``eog`` is a victim of
+        three unrelated faults in the fixture corpus, and grouping on that
+        would merge three different bugs.
+        """
+        store.put_run(self._run(interner, bug_id=1, roots=("a:amd64",), victims=("eog:amd64",)))
+        store.put_run(self._run(interner, bug_id=2, roots=("b:amd64",), victims=("eog:amd64",)))
+        store.commit()
+        assert store.runs_sharing_roots("lp:1#0") == []
+
+    def test_signature_siblings(self, store: Store, interner: Interner) -> None:
+        store.put_run(self._run(interner, bug_id=1, roots=("a:amd64",), graph=b"\x01\x02"))
+        store.put_run(self._run(interner, bug_id=2, roots=("a:amd64",), graph=b"\x01\x02"))
+        store.put_run(self._run(interner, bug_id=3, roots=("a:amd64",), graph=b"\x09\x09"))
+        store.commit()
+        assert store.runs_with_signature("lp:1#0", "root_graph") == ["lp:2#0"]
+
+    def test_no_signature_is_not_a_match(self, store: Store, interner: Interner) -> None:
+        """A run with no root-cause subgraph cannot be said to share one.
+
+        Treating a missing signature as a value would group every log-less bug
+        together -- the same mistake as ``jaccard([], []) == 1.0``.
+        """
+        store.put_run(self._run(interner, bug_id=1, roots=("a:amd64",)))
+        store.put_run(self._run(interner, bug_id=2, roots=("a:amd64",)))
+        store.commit()
+        assert store.runs_with_signature("lp:1#0", "root_graph") == []
+
+    def test_rejects_an_arbitrary_signature_column(self, store: Store) -> None:
+        """The column name is interpolated into SQL, so it is allowlisted."""
+        with pytest.raises(ValueError, match="not a signature column"):
+            store.runs_with_signature("lp:1#0", "payload")

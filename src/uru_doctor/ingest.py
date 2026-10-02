@@ -48,6 +48,7 @@ from uru_doctor.models import (
     ConflictGraph,
     Event,
     Frontend,
+    LexCoverage,
     LogSource,
     NodeBits,
     PackageCounts,
@@ -73,7 +74,9 @@ __all__ = [
     "IngestResult",
     "LogSet",
     "check_coherence",
+    "coverage_from",
     "discover",
+    "ingest_attachments",
     "ingest_directory",
     "ingest_logs",
     "is_terminal_error",
@@ -294,6 +297,24 @@ class IngestResult:
             if run.is_primary:
                 return run
         return self.runs[0] if self.runs else None
+
+    def only(self) -> UpgradeRun:
+        """The single run, for callers that ingested exactly one attempt.
+
+        :func:`ingest_attachments` always produces exactly one run -- a bug
+        carries one attempt's worth of logs -- so its callers would otherwise
+        have to index and narrow a list that cannot have any other length.
+        Raises rather than returning ``None`` so that a caller which acquires
+        more than one attempt hears about it instead of silently reporting the
+        first.
+        """
+        if len(self.runs) != 1:
+            raise ValueError(f"expected exactly one run, got {len(self.runs)}")
+        return self.runs[0]
+
+    def coverage_of(self, run: UpgradeRun) -> LexStats | None:
+        """Lexer coverage for one run, keyed the way the caller thinks."""
+        return self.lex_stats.get(run.attempt)
 
 
 def discover(root: Path) -> Iterator[tuple[int, Path]]:
@@ -575,6 +596,35 @@ def ingest_logs(
         third_party=third_party,
         apt_broken_count=apt_broken_count,
         oscillations=oscillations,
+        lex=coverage_from(stats),
+    )
+
+
+def coverage_from(stats: LexStats | None) -> LexCoverage:
+    """Freeze a mutable :class:`LexStats` into the persisted record.
+
+    ``LexStats`` is an accumulator the lexer writes into as it scans;
+    :class:`~uru_doctor.models.LexCoverage` is the immutable fact that gets
+    stored and reported. Keeping them separate means nothing downstream of
+    ingest can quietly adjust a coverage number after the fact.
+
+    ``unknown_shapes`` is ordered by descending count and then by template
+    text. The tie-break on text matters: ``dict`` iteration here follows
+    first-seen order, which is a property of where in the log a shape happened
+    to appear, and ordering output by anything that depends on traversal order
+    is the mistake that has already bitten four times elsewhere in this
+    codebase.
+    """
+    if stats is None:
+        return LexCoverage()
+    return LexCoverage(
+        lines=stats.lines,
+        matched=stats.matched,
+        blank=stats.blank,
+        oversized=stats.oversized,
+        unknown_shapes=tuple(
+            sorted(stats.unknown_shapes.items(), key=lambda kv: (-kv[1], kv[0]))
+        ),
     )
 
 
@@ -703,14 +753,33 @@ def ingest_attachments(
     *,
     meta: ApportMeta | None = None,
     bug_id: int | None = None,
-) -> UpgradeRun:
+) -> IngestResult:
     """Ingest logs that came from Launchpad attachments rather than a directory.
 
     A bug carries one attempt's worth of logs, so there is no attempt
-    numbering to do.
+    numbering to do -- but the result is still an :class:`IngestResult` rather
+    than a bare run, because the caller needs the lexer coverage.
+
+    This returned an :class:`UpgradeRun` and dropped ``stats`` on the floor
+    until it was noticed that ``fetch`` -- the command that collects bugs from
+    Launchpad, and therefore the one that meets a new apt version first -- was
+    structurally unable to report whether it had understood the log. The
+    ``stats`` parameter of :func:`ingest_logs` existed and simply was not
+    passed here; see the unthreaded-parameter trap in the triage skill.
+    ``tests/test_ingest.py`` now asserts that the same logs report identical
+    coverage through this function and through :func:`ingest_directory`.
     """
     log_set = LogSet(source_dir=f"lp:{bug_id}" if bug_id else "lp:", texts=dict(attachments))
-    return ingest_logs(log_set, interner, meta=meta, bug_id=bug_id, is_primary=True)
+    stats = LexStats()
+    run = ingest_logs(
+        log_set,
+        interner,
+        meta=meta,
+        bug_id=bug_id,
+        is_primary=True,
+        stats=stats,
+    )
+    return IngestResult(runs=[run], lex_stats={run.attempt: stats})
 
 
 def unpack_events(run: UpgradeRun) -> tuple[Event, ...]:
