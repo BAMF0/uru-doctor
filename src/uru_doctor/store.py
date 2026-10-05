@@ -28,13 +28,15 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from dataclasses import dataclass
 from datetime import UTC, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Self
 
 from uru_doctor.models import (
     Cause,
     PkgId,
+    Signature,
     StrId,
     TemplateId,
     UpgradeRun,
@@ -169,6 +171,45 @@ CREATE TABLE IF NOT EXISTS cluster_members (
 
 CREATE INDEX IF NOT EXISTS idx_cluster_members_run ON cluster_members(run_key);
 
+-- Launchpad triage state -----------------------------------------------------
+
+-- What Launchpad says about a bug *now*, as opposed to what it said when the
+-- bug was ingested. Deliberately a table of its own rather than more columns
+-- on `runs`, for three reasons:
+--
+-- 1. Status is a property of a bug, not of a run. A bug with archived earlier
+--    attempts has several runs, and storing its status on each of them means
+--    storing the same mutable fact several times and keeping the copies in
+--    step.
+-- 2. `runs.payload` is the serialised `UpgradeRun`, which is derived purely
+--    from the logs. Refreshing triage state must never rewrite it: the whole
+--    design rests on a diagnosis being reproducible from the record, and a
+--    record that gets edited after the fact by a network call is not that.
+--    `UpgradeRun.bug_status` therefore keeps its own meaning -- what Launchpad
+--    said at ingest -- and this table holds what it says now.
+-- 3. SQLite appends `ALTER TABLE ADD COLUMN` columns after the existing ones,
+--    which would put them behind the ~54KB `payload` blob and its overflow
+--    pages. Measured over 8,000 synthetic runs, scanning a triage projection
+--    cost 22.7ms with the columns behind `payload` against 10.0ms in front of
+--    it; a separate narrow table joins at 17.9ms and sidesteps the question.
+--
+-- `is_duplicate` is tri-state on purpose: 1 means Launchpad considers this a
+-- duplicate of something, 0 means it does not, and NULL means nobody has
+-- looked. `duplicate_of` names the master and is only filled by a deep
+-- refresh, because the bug *task* entry a search returns carries no duplicate
+-- link at all -- only the bug resource does, at one request per bug.
+CREATE TABLE IF NOT EXISTS bug_state (
+    bug_id       INTEGER NOT NULL PRIMARY KEY,
+    status       TEXT    NOT NULL DEFAULT '',
+    duplicate_of INTEGER,
+    is_duplicate INTEGER,
+    checked_at   TEXT    NOT NULL
+);
+
+-- "Which bugs were checked longest ago?" is how a capped deep refresh picks
+-- its next batch, which is what makes it resumable without a watermark.
+CREATE INDEX IF NOT EXISTS idx_bug_state_checked ON bug_state(checked_at);
+
 -- Caches --------------------------------------------------------------------
 
 -- Launchpad attachment cache. ETags let a re-fetch be a conditional GET, which
@@ -202,6 +243,187 @@ def run_key_for(bug_id: int | None, attempt: int, source_dir: str = "") -> str:
     return f"dir:{source_dir}#{attempt}"
 
 
+@dataclass(frozen=True, slots=True)
+class BugState:
+    """What Launchpad currently says about one bug's triage.
+
+    Mutable state, refreshed from the API, and never an input to a diagnosis or
+    a signature -- see
+    :data:`~uru_doctor.dedup.EXCLUDED_FROM_SIGNATURES`. It exists so that a
+    worklist can tell "I have not acted on this yet" from "I acted on it and
+    Launchpad knows", without the tool keeping a local record of what it thinks
+    you have done. Launchpad is the source of truth for that, and a local flag
+    could only ever disagree with it.
+    """
+
+    bug_id: int
+    status: str = ""
+    """``New``, ``Invalid``, ``Won't Fix`` … Empty means not yet checked."""
+
+    duplicate_of: int | None = None
+    """The master, when a deep refresh has asked for it."""
+
+    is_duplicate: bool | None = None
+    """Whether Launchpad considers this a duplicate at all.
+
+    ``None`` means unknown. Separate from :attr:`duplicate_of` because the two
+    are learned by different means at very different prices: a search reveals
+    *that* a bug is a duplicate for one request per fifty bugs, while *which*
+    bug it duplicates costs one request each.
+    """
+
+    checked_at: str = ""
+    """ISO timestamp of the last successful check. Drives staleness reporting."""
+
+
+#: Launchpad statuses that mean nobody needs to act.
+#:
+#: ``Incomplete`` is deliberately absent: it means the bug is waiting on its
+#: reporter, which is a state worth seeing in a worklist because it can time
+#: out and because a log may have arrived since.
+CLOSED_STATUSES: frozenset[str] = frozenset(
+    {
+        "Invalid",
+        "Won't Fix",
+        "Expired",
+        "Opinion",
+        "Fix Committed",
+        "Fix Released",
+    }
+)
+
+
+def _label_for(*, run_key: str, bug_id: int | None, attempt: int, source_dir: str) -> str:
+    """Short human reference for a run, from its indexed columns alone.
+
+    Must agree with :attr:`~uru_doctor.report.RunEntry.label`, which computes
+    the same thing from a deserialised record. Two spellings of one label is a
+    real hazard: the directory fallback is the whole reason a corpus ingested
+    from disk reads as ``2150339`` rather than
+    ``dir:/tmp/corpus/2150339#0``, and dropping it silently turned every
+    cluster label in ``dedup`` into a path.
+    """
+    if bug_id is not None:
+        return f"LP#{bug_id}"
+    if source_dir:
+        name = PurePosixPath(source_dir).name or source_dir
+        return f"{name}#{attempt}" if attempt else name
+    return run_key
+
+
+@dataclass(frozen=True, slots=True)
+class ClusterFacts:
+    """Enough to label and audit one run inside a cluster. No payload needed."""
+
+    label: str
+    """``LP#2150245``, or the run key when there is no bug number."""
+
+    cause: str | None
+    tool_version: str
+    rules_digest: str
+
+    @property
+    def policy(self) -> tuple[str, str]:
+        """The stamp two clustered runs must share for their tier to mean one thing."""
+        return (self.tool_version, self.rules_digest)
+
+
+@dataclass(frozen=True, slots=True)
+class TriageRow:
+    """One run, projected to just what a worklist needs to classify it.
+
+    Every field here comes from an indexed column. Nothing in this row
+    requires deserialising ``runs.payload``, which is the property that lets a
+    worklist stay linear in a corpus of thousands: measured at 0.6ms per run to
+    validate a payload against 0.02ms to read a projected row, the difference
+    at ten thousand runs is six seconds and half a gigabyte of JSON against a
+    fifth of a second.
+
+    ``confident`` in particular is not stored. It is
+    ``evidence_complete and not cause.needs_human`` -- the same expression
+    :func:`~uru_doctor.title.propose_title` uses -- so it is derived here from
+    two columns rather than read back from a finding.
+    """
+
+    run_key: str
+    bug_id: int | None
+    label: str
+    """Short human reference. Computed by :func:`_label_for`, never re-derived."""
+
+    cause: Cause | None
+    """``None`` when no rule fired, which is distinct from ``Cause.UNKNOWN``."""
+
+    third_party: bool
+    """Whether *any* finding blamed a third-party package.
+
+    Not the same question as "is this a candidate Invalid", and the two must
+    not be confused -- see :attr:`candidate_invalid`.
+    """
+
+    evidence_complete: bool
+    current_title: str
+    duplicate_count: int
+    lex_lines: int
+    lex_unmatched: int
+    state: BugState | None
+    """Launchpad's current verdict, or ``None`` if never checked."""
+
+    @property
+    def status(self) -> str:
+        return self.state.status if self.state else ""
+
+    @property
+    def candidate_invalid(self) -> bool:
+        """Whether the *primary* cause is a package Ubuntu does not ship.
+
+        Mirrors
+        :attr:`~uru_doctor.diagnose.DiagnosisResult.is_candidate_invalid`, and
+        deliberately does not use :attr:`third_party`. Any machine with a few
+        PPAs -- the normal state of a machine that files one of these bugs --
+        has *some* third-party package implicated somewhere, so testing every
+        finding is how LP#2150319 got flagged as a candidate on the strength of
+        an ``imagemagick`` PPA with four victims, on a bug upstream later fixed
+        with an SRU.
+
+        In this corpus the difference is three bugs out of four: ``third_party``
+        is set on LP#2168863, LP#2168909 and LP#2169251, whose primary causes
+        are ``holdback_blocks_new_dep``, ``update_failed`` and
+        ``post_install_script_error`` -- all genuine Ubuntu archive faults that
+        proposing as Invalid would be precisely the inversion this tool exists
+        to correct.
+        """
+        return self.cause is Cause.THIRD_PARTY_PIN
+
+    @property
+    def confident(self) -> bool:
+        """Whether a title built from this run would assert its cause.
+
+        Mirrors :func:`~uru_doctor.title.propose_title`; see the class
+        docstring for why it is derived rather than stored.
+        """
+        return (
+            self.cause is not None and self.evidence_complete and not self.cause.needs_human
+        )
+
+    @property
+    def diagnosed(self) -> bool:
+        """Whether a real cause was named, as opposed to a terminal state.
+
+        ``upgrade_succeeded`` counts as a diagnosis for reporting but not as
+        something to act on, so it is excluded here along with the two
+        "I cannot explain this" causes.
+        """
+        return (
+            self.cause is not None
+            and not self.cause.needs_human
+            and self.cause is not Cause.UPGRADE_SUCCEEDED
+        )
+
+    @property
+    def closed(self) -> bool:
+        return self.status in CLOSED_STATUSES
+
+
 class Store:
     """SQLite-backed state, and the :class:`~uru_doctor.intern.InternBackend`.
 
@@ -223,6 +445,7 @@ class Store:
         self._conn.executescript(_SCHEMA)
         self._check_version()
         self._migrate()
+        self._seed_bug_state()
         self._record_version()
         self._conn.commit()
 
@@ -873,6 +1096,316 @@ class Store:
         ).fetchall()
         return [(int(r["phase"]), int(r["n"])) for r in rows]
 
+    # -- Launchpad triage state ---------------------------------------------
+
+    def put_bug_states(self, states: Iterable[BugState]) -> int:
+        """Record what Launchpad currently says about these bugs.
+
+        Bulk, and deliberately one statement: a refresh of a corpus of
+        thousands is a single ``executemany`` into a narrow table, with no
+        payload read, no JSON round-trip and no model validation anywhere in
+        the path.
+
+        Every field merges rather than overwrites, because the callers learn
+        different subsets at different prices and none of them should be able
+        to erase what another found. A cheap refresh sees *that* a bug is a
+        duplicate but not *of what*; ``fetch`` sees the master but can never
+        see a status, since that lives on the bug's tasks and it never asks
+        for them. So an empty status and a null duplicate both mean "I did not
+        look", never "there is nothing there" -- and writing one over a known
+        value is how `fetch` would have blanked the status of every bug a
+        previous sweep had already read.
+        """
+        rows = [
+            (
+                state.bug_id,
+                state.status,
+                state.duplicate_of,
+                None if state.is_duplicate is None else int(state.is_duplicate),
+                state.checked_at or _now(),
+            )
+            for state in states
+        ]
+        if not rows:
+            return 0
+        self._conn.executemany(
+            """
+            INSERT INTO bug_state (bug_id, status, duplicate_of, is_duplicate, checked_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(bug_id) DO UPDATE SET
+                status       = COALESCE(NULLIF(excluded.status, ''), bug_state.status),
+                duplicate_of = COALESCE(excluded.duplicate_of, bug_state.duplicate_of),
+                is_duplicate = COALESCE(excluded.is_duplicate, bug_state.is_duplicate),
+                checked_at   = excluded.checked_at
+            """,
+            rows,
+        )
+        return len(rows)
+
+    def touch_bug_states(self, bug_ids: Sequence[int], checked_at: str) -> int:
+        """Confirm existing verdicts as still current, without changing them.
+
+        "Launchpad did not return this bug as modified since the watermark" is
+        positive evidence, not absence of it: the recorded status is still
+        right, and only its age was wrong. Without this the age of a corpus
+        would be the age of its *least recently changed* bug, so a worklist
+        over bugs that are all correctly quiet would report itself permanently
+        stale and the staleness warning would mean nothing.
+
+        Deliberately an UPDATE and never an insert. A bug with no row has a
+        status nobody has ever read, and writing a fresh timestamp against an
+        empty status would claim knowledge of exactly the thing that is
+        missing.
+        """
+        if not bug_ids:
+            return 0
+        cur = self._conn.executemany(
+            "UPDATE bug_state SET checked_at = ? WHERE bug_id = ?",
+            [(checked_at, bug_id) for bug_id in bug_ids],
+        )
+        return int(cur.rowcount or 0)
+
+    def cluster_facts(self, *, primary_only: bool = True) -> dict[str, ClusterFacts]:
+        """What labelling and auditing a cluster needs, without any payload.
+
+        ``dedup`` used to deserialise every stored run to do three things: read
+        two signature blobs, print ``LP#2150245`` instead of ``lp:2150245#0``,
+        and compare policy stamps. All six of those values are indexed columns,
+        and only the Markdown digest -- which quotes titles and per-run facts --
+        genuinely needs the record itself.
+
+        Measured on a corpus of forty-four: 26ms to validate the payloads
+        against 1ms to read this projection. The ratio is what matters at a
+        corpus of thousands, where the payload walk is six seconds and half a
+        gigabyte of JSON.
+        """
+        sql = """
+            SELECT run_key, bug_id, attempt, source_dir, top_cause,
+                   tool_version, rules_digest
+              FROM runs
+        """
+        if primary_only:
+            sql += " WHERE is_primary = 1"
+        return {
+            str(r["run_key"]): ClusterFacts(
+                label=_label_for(
+                    run_key=str(r["run_key"]),
+                    bug_id=None if r["bug_id"] is None else int(r["bug_id"]),
+                    attempt=int(r["attempt"] or 0),
+                    source_dir=str(r["source_dir"] or ""),
+                ),
+                cause=None if r["top_cause"] is None else str(r["top_cause"]),
+                tool_version=str(r["tool_version"] or ""),
+                rules_digest=str(r["rules_digest"] or ""),
+            )
+            for r in self._conn.execute(sql)
+        }
+
+    def bug_states(self) -> dict[int, BugState]:
+        """Every known Launchpad verdict, keyed by bug id."""
+        return {
+            int(r["bug_id"]): BugState(
+                bug_id=int(r["bug_id"]),
+                status=str(r["status"] or ""),
+                duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
+                is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
+                checked_at=str(r["checked_at"] or ""),
+            )
+            for r in self._conn.execute(
+                "SELECT bug_id, status, duplicate_of, is_duplicate, checked_at FROM bug_state"
+            )
+        }
+
+    def stale_bug_ids(self, limit: int, *, among: Sequence[int] | None = None) -> list[int]:
+        """Bug ids whose Launchpad state was checked longest ago, never first.
+
+        This ordering is what makes a capped deep refresh resumable without a
+        watermark of its own. Each pass takes the least recently confirmed
+        bugs, so repeated passes walk the corpus round-robin and a pass that
+        stops early simply leaves the rest at the front of the next queue.
+        Unchecked bugs sort first because "never looked" is staler than any
+        timestamp.
+
+        ``among`` restricts the candidates, which is how a refresh spends its
+        per-bug requests on the bugs a worklist is actually about to act on
+        rather than on the whole corpus. ``None`` means no restriction; an
+        *empty* sequence means no candidates and returns nothing.
+
+        That distinction is not pedantry. Treating an empty restriction as no
+        restriction made a deep pass asked to resolve a specific empty group
+        silently fall back to the whole corpus, and spend its entire budget on
+        the four oldest bugs in the store instead of the three it was pointed
+        at.
+        """
+        if limit <= 0:
+            return []
+        if among is not None:
+            if not among:
+                return []
+            marks = ",".join("?" * len(among))
+            sql = f"""
+                SELECT r.bug_id AS bug_id
+                  FROM (SELECT DISTINCT bug_id FROM runs WHERE bug_id IS NOT NULL) r
+                  LEFT JOIN bug_state s ON s.bug_id = r.bug_id
+                 WHERE r.bug_id IN ({marks})
+                 ORDER BY (s.checked_at IS NULL) DESC, s.checked_at ASC, r.bug_id ASC
+                 LIMIT ?
+            """
+            params: tuple[Any, ...] = (*among, limit)
+        else:
+            sql = """
+                SELECT r.bug_id AS bug_id
+                  FROM (SELECT DISTINCT bug_id FROM runs WHERE bug_id IS NOT NULL) r
+                  LEFT JOIN bug_state s ON s.bug_id = r.bug_id
+                 ORDER BY (s.checked_at IS NULL) DESC, s.checked_at ASC, r.bug_id ASC
+                 LIMIT ?
+            """
+            params = (limit,)
+        return [int(r["bug_id"]) for r in self._conn.execute(sql, params)]
+
+    def status_watermark(self) -> datetime | None:
+        """When the last status refresh reached.
+
+        Separate from :meth:`sweep_watermark` because the two mean different
+        things and must not interfere: the sweep mark is about bug *creation*
+        and advancing it skips bugs, while this one is about bug
+        *modification* and advancing it only skips re-reading a verdict that
+        has not changed.
+        """
+        raw = self.meta_get("status_watermark")
+        if not raw:
+            return None
+        try:
+            return datetime.fromisoformat(raw)
+        except ValueError:
+            return None
+
+    def advance_status_watermark(self, when: datetime) -> None:
+        """Move the status mark forward, never backward."""
+        current = self.status_watermark()
+        if current is not None and when <= current:
+            return
+        self.meta_put("status_watermark", when.isoformat())
+
+    def _seed_bug_state(self) -> None:
+        """Adopt the statuses already recorded inside stored payloads.
+
+        One-time, and SQL-only via ``json_extract`` so that upgrading does not
+        deserialise the whole corpus. Runs only when the table is empty: after
+        that this table is authoritative and the payload's copy is history.
+
+        Without this, every bug a previous ``sweep`` had already learned the
+        status of would come back as "never checked" and the first worklist
+        would be one long instruction to go and refresh.
+        """
+        row = self._conn.execute("SELECT 1 FROM bug_state LIMIT 1").fetchone()
+        if row is not None:
+            return
+        self._conn.execute(
+            """
+            INSERT OR IGNORE INTO bug_state (bug_id, status, checked_at)
+            SELECT bug_id,
+                   json_extract(payload, '$.bug_status'),
+                   COALESCE(ingested_at, ?)
+              FROM runs
+             WHERE bug_id IS NOT NULL
+               AND COALESCE(json_extract(payload, '$.bug_status'), '') <> ''
+             GROUP BY bug_id
+            """,
+            (_now(),),
+        )
+
+    # -- worklist projections -----------------------------------------------
+
+    def signature_rows(self, *, primary_only: bool = True) -> dict[str, Signature]:
+        """Run key to the two structural signatures, read straight from columns.
+
+        Clustering needs nothing else. ``root_graph`` and ``cause_tuple`` are
+        already indexed BLOB columns, so grouping the whole corpus costs one
+        narrow scan rather than a payload deserialisation per run -- verified
+        to produce byte-identical clusters to the payload path, at roughly a
+        thirtieth of the cost.
+
+        ``evidence_set`` is deliberately absent: it is only used by tier-2
+        scoring, which is quadratic, is not part of clustering, and is not
+        projected into a column.
+        """
+        sql = "SELECT run_key, root_graph, cause_tuple FROM runs"
+        if primary_only:
+            sql += " WHERE is_primary = 1"
+        return {
+            str(r["run_key"]): Signature(
+                root_graph=r["root_graph"],
+                cause_tuple=r["cause_tuple"],
+            )
+            for r in self._conn.execute(sql)
+        }
+
+    def triage_rows(self, *, primary_only: bool = True) -> list[TriageRow]:
+        """Every run, projected to what a worklist needs, joined to LP state.
+
+        One query over indexed columns plus a join on ``bug_id``, which
+        ``idx_runs_bug`` already covers. Nothing here touches ``payload``; see
+        :class:`TriageRow`.
+        """
+        sql = """
+            SELECT r.run_key, r.bug_id, r.attempt, r.source_dir, r.top_cause,
+                   r.third_party, r.evidence_complete, r.current_title,
+                   r.duplicate_count, r.lex_lines, r.lex_unmatched,
+                   s.bug_id AS state_bug, s.status, s.duplicate_of,
+                   s.is_duplicate, s.checked_at
+              FROM runs r
+              LEFT JOIN bug_state s ON s.bug_id = r.bug_id
+        """
+        if primary_only:
+            sql += " WHERE r.is_primary = 1"
+        sql += " ORDER BY r.bug_id, r.run_key"
+
+        rows: list[TriageRow] = []
+        for r in self._conn.execute(sql):
+            raw_cause = r["top_cause"]
+            # An unrecognised cause string means a store written by a build
+            # that knows a cause this one does not. Treated as "no cause"
+            # rather than crashing a worklist over it.
+            cause: Cause | None = None
+            if raw_cause is not None:
+                try:
+                    cause = Cause(str(raw_cause))
+                except ValueError:
+                    cause = None
+            state = (
+                None
+                if r["state_bug"] is None
+                else BugState(
+                    bug_id=int(r["state_bug"]),
+                    status=str(r["status"] or ""),
+                    duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
+                    is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
+                    checked_at=str(r["checked_at"] or ""),
+                )
+            )
+            rows.append(
+                TriageRow(
+                    run_key=str(r["run_key"]),
+                    bug_id=None if r["bug_id"] is None else int(r["bug_id"]),
+                    label=_label_for(
+                        run_key=str(r["run_key"]),
+                        bug_id=None if r["bug_id"] is None else int(r["bug_id"]),
+                        attempt=int(r["attempt"] or 0),
+                        source_dir=str(r["source_dir"] or ""),
+                    ),
+                    cause=cause,
+                    third_party=bool(r["third_party"]),
+                    evidence_complete=bool(r["evidence_complete"]),
+                    current_title=str(r["current_title"] or ""),
+                    duplicate_count=int(r["duplicate_count"] or 0),
+                    lex_lines=int(r["lex_lines"] or 0),
+                    lex_unmatched=int(r["lex_unmatched"] or 0),
+                    state=state,
+                )
+            )
+        return rows
+
     # -- clusters -----------------------------------------------------------
 
     def replace_clusters(
@@ -883,6 +1416,14 @@ class Store:
         Clustering is a pure function of the corpus, so it is recomputed rather
         than incrementally maintained. Wholesale replacement removes any
         possibility of a stale edge surviving a rule change.
+
+        ``canonical`` is the representative run key and ``cause`` is the
+        cluster's cause; each member carries its own tier *index* (see
+        :data:`~uru_doctor.dedup.TIER_ORDER`) and score. The call site used to
+        pass the tier where ``canonical`` was expected and the representative
+        where ``cause`` was, which went unnoticed because nothing read the
+        table back -- so every stored cluster recorded its tier as its
+        canonical member, and every member's tier as 0.
         """
         self._conn.execute("DELETE FROM cluster_members")
         self._conn.execute("DELETE FROM clusters")
@@ -996,15 +1537,14 @@ class Store:
 
         return {
             "runs": count("runs"),
-            # Distinct *real* bug ids. A set over the raw column counts ``None``
-            # as a member, so a store holding nothing but local directories --
-            # every one of which has no bug id -- reported "1 bug".
-            "bugs": len(
-                {
-                    r["bug_id"]
-                    for r in self._conn.execute("SELECT bug_id FROM runs")
-                    if r["bug_id"] is not None
-                }
+            # Distinct *real* bug ids. A set over the raw column counted
+            # ``None`` as a member, so a store holding nothing but local
+            # directories -- every one of which has no bug id -- reported
+            # "1 bug". ``COUNT(DISTINCT)`` already ignores NULL, and does it
+            # without materialising a Python set over the whole table.
+            "bugs": int(
+                self._conn.execute("SELECT COUNT(DISTINCT bug_id) AS n FROM runs").fetchone()["n"]
+                or 0
             ),
             "strings": count("strings"),
             "packages": count("packages"),

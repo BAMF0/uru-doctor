@@ -146,6 +146,36 @@ sweep_page_size = 50
 # them is never the right answer; see `lp.read.ALL_STATUSES`.
 sweep_max_bugs = 50
 
+# How many bugs one `uru-doctor refresh --deep` will ask about individually.
+#
+# A cheap refresh learns every bug's status for one request per fifty bugs,
+# because `searchTasks` returns the status in the task entry. Learning *which*
+# bug a duplicate duplicates is one request each, because only the bug resource
+# carries that link -- so at three seconds apiece a corpus of thousands is
+# hours, and this is the stop that keeps the command usable.
+#
+# Safe to cap because the batch is chosen least-recently-checked first, so
+# repeated runs walk the corpus round-robin rather than re-reading its head.
+max_deep_bugs = 50
+
+
+[queue]
+
+# When to stop trusting the recorded Launchpad state, in days.
+#
+# `uru-doctor queue` exists so that a triager does not have to re-check
+# Launchpad for every row, and that only works if the tool is honest about how
+# old its copy is. Past this many days it says so rather than presenting a
+# stale verdict as current.
+stale_after_days = 7
+
+# Rows listed per bucket before eliding.
+#
+# Counts are always exact and always shown; this caps only what is printed. A
+# worklist of three hundred actionable bugs is paged through rather than read,
+# and a command that prints all of them has buried its own first row.
+max_rows = 20
+
 
 [report]
 

@@ -30,8 +30,9 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Iterator, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
+from functools import partial
 from pathlib import Path
 from typing import Any, Final
 from urllib.parse import urlencode
@@ -105,6 +106,41 @@ class BugRef:
     title: str = ""
     """The task title, which embeds the bug's. Display only, never an input."""
 
+    is_duplicate: bool | None = None
+    """Whether Launchpad considers this bug a duplicate of another.
+
+    ``None`` means not determined. The task entry carries no duplicate field
+    at all -- verified against the live API, see :data:`OMIT_DUPLICATES_NOTE`
+    -- so this is filled by :meth:`Launchpad.search_triage`, which infers it
+    from the difference between a search that omits duplicates and one that
+    does not. *Which* bug this duplicates is a separate and much more
+    expensive question; only :meth:`Launchpad.bug` can answer it.
+    """
+
+
+#: Why ``omit_duplicates=false`` is passed explicitly.
+#:
+#: Launchpad's ``searchTasks`` omits bugs marked as duplicates by default, and
+#: the default is wrong here for the same reason the status default is.
+#: Measured against the live API on 2026-10-05 over ``created_since=2026-09-25``
+#: for ``ubuntu-release-upgrader``: the default returned 36 tasks and
+#: ``omit_duplicates=false`` returned 49, hiding 13 bugs.
+#:
+#: Four of those thirteen were already in a local corpus, stored as ``New``
+#: with no duplicate recorded, because they had been swept *before* anyone
+#: marked them. A bug therefore does not merely start out invisible -- it
+#: *becomes* invisible the moment it is triaged, which is precisely when a
+#: triage tool most needs to notice. Accepting the default means the corpus can
+#: never see Launchpad's own duplicate verdicts, and so can never be checked
+#: against them.
+#:
+#: Two of the thirteen, LP#2169028 and LP#2169157, are duplicates of LP#2168855
+#: -- which is exactly the master this tool had already chosen for them from
+#: the logs alone, at ``root-graph`` tier.
+OMIT_DUPLICATES_NOTE: Final = (
+    "searchTasks hides duplicates by default; measured 36 vs 49 tasks on 2026-10-05"
+)
+
 
 #: Statuses a sweep asks for explicitly.
 #:
@@ -133,6 +169,29 @@ ALL_STATUSES: Final[tuple[str, ...]] = (
 
 #: The source package whose bugs this tool is about.
 DEFAULT_TARGET: Final = "/ubuntu/+source/ubuntu-release-upgrader"
+
+
+@dataclass(frozen=True, slots=True)
+class TriageSearch:
+    """The result of a triage listing, and whether it saw the whole queue.
+
+    ``complete`` exists because the two facts a refresh draws from a listing
+    are asymmetric. A bug that *is* returned carries its status, and that is
+    true either way. A bug that is *not* returned has only been shown not to
+    have changed -- and only if the listing actually reached the end. For a
+    package with more bugs than ``max_pages`` will fetch, it does not, and
+    treating absence as confirmation would silently stamp thousands of unread
+    bugs as current.
+    """
+
+    refs: tuple[BugRef, ...]
+    complete: bool
+
+    def __iter__(self) -> Iterator[BugRef]:
+        return iter(self.refs)
+
+    def __len__(self) -> int:
+        return len(self.refs)
 
 
 @dataclass(frozen=True, slots=True)
@@ -343,39 +402,31 @@ class Launchpad:
 
     # -- bugs ---------------------------------------------------------------
 
-    def search_tasks(
+    def _collect_tasks(
         self,
         *,
-        created_since: datetime | None = None,
-        statuses: Sequence[str] = ALL_STATUSES,
-        target: str = DEFAULT_TARGET,
-        page_size: int = 50,
-        max_pages: int = 40,
-    ) -> Iterator[BugRef]:
-        """Yield bug tasks for the target package, oldest first.
+        created_since: datetime | None,
+        modified_since: datetime | None,
+        statuses: Sequence[str],
+        target: str,
+        page_size: int,
+        max_pages: int,
+        omit_duplicates: bool,
+    ) -> tuple[list[BugRef], bool]:
+        """Walk the listing. Returns the tasks and whether it reached the end.
 
-        One request per page. Yields lazily so that a caller can persist a
-        watermark as it goes: a sweep interrupted by a 429 halfway through page
-        six should keep the five pages it already processed, and that is only
-        possible if the pages arrive one at a time.
-
-        ``statuses`` defaults to :data:`ALL_STATUSES` rather than to
-        Launchpad's own default, which silently omits closed bugs -- see that
-        constant for the measurement and why it matters.
-
-        Ordered oldest-first on the way out, because a watermark can only
-        advance safely over bugs that have actually been handled. The API's own
-        order is newest-first, so processing in arrival order and then storing
-        the newest timestamp seen would skip everything older on the next run.
-
-        ``max_pages`` is a stop, not a target. At three seconds a request a
-        runaway pagination loop is a slow one, and a sweep that silently walks
-        four thousand bugs is not what anyone asked for.
+        The completeness flag is load-bearing rather than informational.
+        ``ubuntu-release-upgrader`` has far more bugs than ``max_pages`` will
+        fetch, so a caller that treats "absent from the listing" as "not
+        modified" would silently mark thousands of unread bugs as confirmed
+        current. Absent from a *complete* listing means something; absent from
+        a truncated one means nothing at all.
         """
         base = self.config.api_base.rstrip("/")
         params: list[tuple[str, str]] = [
             ("ws.op", "searchTasks"),
             ("ws.size", str(page_size)),
+            ("omit_duplicates", "true" if omit_duplicates else "false"),
             *(("status", status) for status in statuses),
         ]
         if created_since is not None:
@@ -383,9 +434,12 @@ class Launchpad:
             # inclusively, so re-running a sweep within the same day would
             # otherwise re-fetch the boundary bug on every pass.
             params.append(("created_since", created_since.date().isoformat()))
+        if modified_since is not None:
+            params.append(("modified_since", modified_since.date().isoformat()))
         url = f"{base}{target}?{urlencode(params)}"
 
         collected: list[BugRef] = []
+        complete = False
         for page in range(max_pages):
             self._say(f"searching, page {page + 1}")
             payload = self._json(url)
@@ -408,13 +462,117 @@ class Launchpad:
                 )
             next_link = payload.get("next_collection_link")
             if not isinstance(next_link, str) or not next_link:
+                complete = True
                 break
             url = next_link
 
         # ``total_size`` comes back null on this collection, so there is
         # nothing to cross-check the count against; the entries are the answer.
         collected.sort(key=lambda ref: (ref.created or _EPOCH, ref.bug_id))
+        return (collected, complete)
+
+    def search_tasks(
+        self,
+        *,
+        created_since: datetime | None = None,
+        modified_since: datetime | None = None,
+        statuses: Sequence[str] = ALL_STATUSES,
+        target: str = DEFAULT_TARGET,
+        page_size: int = 50,
+        max_pages: int = 40,
+        omit_duplicates: bool = False,
+    ) -> Iterator[BugRef]:
+        """Yield bug tasks for the target package, oldest first.
+
+        One request per page.
+
+        ``statuses`` defaults to :data:`ALL_STATUSES` rather than to
+        Launchpad's own default, which silently omits closed bugs -- see that
+        constant for the measurement and why it matters.
+
+        ``omit_duplicates`` defaults to ``False`` for the same reason, and the
+        default here is likewise the opposite of the API's; see
+        :data:`OMIT_DUPLICATES_NOTE`.
+
+        ``modified_since`` is what makes refreshing triage state cheap. A
+        status change or a duplicate marking modifies the bug, so asking only
+        for tasks modified since the last check is one request in the steady
+        state regardless of how large the corpus is. Measured against the live
+        API: 14 tasks modified in the preceding day against a full page of 100
+        over five weeks.
+
+        Ordered oldest-first, because a watermark can only advance safely over
+        bugs that have actually been handled. The API's own order is
+        newest-first, so processing in arrival order and then storing the
+        newest timestamp seen would skip everything older on the next run.
+        Sorting means every page is fetched before the first item is yielded;
+        a caller that needs to know whether the listing was truncated wants
+        :meth:`search_triage` or :meth:`_collect_tasks`.
+
+        ``max_pages`` is a stop, not a target. At three seconds a request a
+        runaway pagination loop is a slow one, and a sweep that silently walks
+        four thousand bugs is not what anyone asked for.
+        """
+        collected, _ = self._collect_tasks(
+            created_since=created_since,
+            modified_since=modified_since,
+            statuses=statuses,
+            target=target,
+            page_size=page_size,
+            max_pages=max_pages,
+            omit_duplicates=omit_duplicates,
+        )
         yield from collected
+
+    def search_triage(
+        self,
+        *,
+        modified_since: datetime | None = None,
+        target: str = DEFAULT_TARGET,
+        page_size: int = 50,
+        max_pages: int = 40,
+    ) -> TriageSearch:
+        """Current status for every matching bug, and whether it is a duplicate.
+
+        Two searches rather than one, because the bug *task* entry a search
+        returns has no duplicate field -- verified against the live API, whose
+        task entries carry ``status``, ``date_created``, ``importance`` and
+        twenty-odd other keys, none of them about duplication. So duplication
+        is inferred structurally: the bugs present when duplicates are included
+        and absent when they are excluded are exactly the duplicates.
+
+        That costs twice the *listing* requests, which is the cheap half of
+        talking to this API -- two requests in the steady state against one
+        request per bug for the alternative. It yields only the boolean;
+        :meth:`bug` and :meth:`duplicate_of` are the only ways to learn which
+        bug is the master.
+
+        Returns a :class:`TriageSearch` rather than a bare list because
+        ``complete`` changes what a caller may conclude from a bug's *absence*,
+        and that is the difference between confirming a verdict and inventing
+        one.
+        """
+        search = partial(
+            self._collect_tasks,
+            created_since=None,
+            modified_since=modified_since,
+            statuses=ALL_STATUSES,
+            target=target,
+            page_size=page_size,
+            max_pages=max_pages,
+        )
+        self._say("searching, including duplicates")
+        everything, complete = search(omit_duplicates=False)
+        self._say("searching, excluding duplicates")
+        plain, plain_complete = search(omit_duplicates=True)
+        not_duplicates = {ref.bug_id for ref in plain}
+        return TriageSearch(
+            refs=tuple(
+                replace(ref, is_duplicate=ref.bug_id not in not_duplicates)
+                for ref in everything
+            ),
+            complete=complete and plain_complete,
+        )
 
     def bug(self, bug_id: int) -> BugRecord:
         """Fetch a bug and its attachment listing. Two requests."""
@@ -445,6 +603,40 @@ class Launchpad:
             duplicate_count=int(payload.get("number_of_duplicates") or 0),
             created=_parse_created(payload.get("date_created")),
             attachments=tuple(refs),
+        )
+
+    def task_status(self, bug_id: int, *, target: str = DEFAULT_TARGET) -> str:
+        """This package's task status for one bug. One request.
+
+        The escape hatch from the listing's page limit. A search covers fifty
+        bugs per request but only reaches ``max_pages`` of them, and this
+        package has far more bugs than that -- so a bug filed years ago cannot
+        be reached by listing at all, at any price. Addressing its task
+        directly can, at one request each.
+
+        Returns an empty string when the bug has no task against this package,
+        which is not an error: a bug can be retargeted after it was collected.
+        """
+        base = self.config.api_base.rstrip("/")
+        try:
+            payload = self._json(f"{base}{target}/+bug/{bug_id}")
+        except LaunchpadError:
+            return ""
+        return str(payload.get("status") or "")
+
+    def duplicate_of(self, bug_id: int) -> tuple[int | None, int]:
+        """``(master bug id or None, duplicate count)``. One request.
+
+        Separate from :meth:`bug` because that fetches the attachment listing
+        too, and a refresh wants none of it: at three seconds a request,
+        halving the cost of the per-bug pass halves the cost of the only part
+        of refreshing that does not scale.
+        """
+        base = self.config.api_base.rstrip("/")
+        payload = self._json(f"{base}/bugs/{bug_id}")
+        return (
+            _bug_id_from_link(payload.get("duplicate_of_link")),
+            int(payload.get("number_of_duplicates") or 0),
         )
 
     # -- attachments --------------------------------------------------------

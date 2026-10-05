@@ -565,6 +565,52 @@ changed an earlier bug's answer.
   them, and the match means only "this package was in the upgrade". Filtering
   these by size does not work: real evidence reaches 53 tokens while a short
   `Obsolete:` list is 21, so the bands overlap. Match the known prefixes.
+- **`searchTasks` has two hostile defaults, not one.** `status` hiding closed
+  bugs was found and fixed; `omit_duplicates` hiding duplicates was found a
+  year of commits later, by the same measurement. On 2026-10-05 the default
+  returned 36 tasks against 49 with `omit_duplicates=false`, hiding thirteen —
+  four of them already in the corpus, stored as `New`, because they had been
+  swept before anyone marked them. A bug becomes invisible *when it is
+  triaged*. Whenever this API grows a new call, enumerate its boolean
+  parameters and measure each one; do not read the default off the apidoc,
+  which does not state it.
+- **The bug task entry carries no duplicate field.** Verified against the live
+  API: a task has `status`, `date_created`, `importance` and twenty-odd other
+  keys, none about duplication. So *that* a bug is a duplicate is learned by
+  differencing two listings (cheap, two requests), and *which* bug it
+  duplicates only from `/bugs/{id}` (one request each). These are different
+  facts at different prices and need separate fields — `is_duplicate` is
+  tri-state and `None` means "nobody looked", never "no".
+- **"Absent from the listing" means nothing unless the listing finished.**
+  `ubuntu-release-upgrader` has far more bugs than `max_pages` will page
+  through, so a full pass is always truncated. Treating absence as
+  "not modified" stamped 23 unread bugs as confirmed-current on the first run.
+  `TriageSearch.complete` exists for this; a pass that hit the cap may update
+  what it saw and must not touch what it did not.
+- **An empty restriction is not the absence of a restriction.**
+  `stale_bug_ids(limit, among=[])` meaning "no candidates" and `among=None`
+  meaning "no filter" are one typo apart, and a falsy check conflates them. It
+  made a deep refresh aimed at three specific bugs spend its whole budget on
+  the four oldest bugs in the store instead. Same shape as the `is_duplicate`
+  trap: distinguish empty from unknown.
+- **`third_party` the column is not `is_candidate_invalid` the verdict.** The
+  column is `any(finding is THIRD_PARTY_PIN)`; the verdict is *primary cause
+  only*. Using the column put three bugs in `candidate-invalid` whose real
+  causes were `holdback_blocks_new_dep`, `update_failed` and
+  `post_install_script_error` — genuine Ubuntu faults, proposed for closing as
+  Invalid. This is the inversion the whole tool exists to correct, reproduced
+  by reaching for the convenient column. `TriageRow.candidate_invalid` is the
+  one to use.
+- **`ALTER TABLE ADD COLUMN` lands the column after `payload`.** SQLite keeps
+  large values in overflow pages, so a column added behind a 54KB blob costs
+  more to scan than one in front of it — measured over 8,000 synthetic runs,
+  22.7ms against 10.0ms, with a separate narrow table at 17.9ms. Small in
+  absolute terms, so decide on schema grounds; but a "narrow projection" that
+  reads trailing columns is not as narrow as it looks.
+- **Naive timestamps from the store crash staleness arithmetic.** A
+  `checked_at` without a zone subtracts against `datetime.now(UTC)` as a
+  `TypeError` and takes the whole command down. Normalise at the parse
+  boundary, not at each use.
 
 ## Where things live
 
@@ -579,5 +625,7 @@ changed an earlier bug's answer.
 | rules and provenance | `src/uru_doctor/rules/` |
 | ranking policy | `src/uru_doctor/diagnose.py` |
 | signatures and clusters | `src/uru_doctor/dedup.py` |
+| worklist buckets | `src/uru_doctor/worklist.py` |
+| Launchpad triage state | `bug_state` table in `src/uru_doctor/store.py` |
 | title templates | `src/uru_doctor/title.py` |
 | fixture provenance | `tests/record_fixtures.py`, `tests/fixtures/MANIFEST.md` |

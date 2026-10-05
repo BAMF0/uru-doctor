@@ -14,6 +14,7 @@ being parsed.
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -680,3 +681,164 @@ class TestProgressReporting:
         assert said
         for message in said:
             assert len(message) <= 60, message
+
+
+class TestOmitDuplicates:
+    """Launchpad hides duplicates by default, and that default is wrong here.
+
+    Measured against the live API on 2026-10-05 over
+    ``created_since=2026-09-25``: the default returned 36 tasks and
+    ``omit_duplicates=false`` returned 49, hiding 13 bugs. Four of the thirteen
+    were already in the development corpus, stored as ``New`` with no duplicate
+    recorded, because they had been swept *before* anyone marked them.
+
+    So a bug does not merely start out invisible -- it *becomes* invisible the
+    moment somebody triages it, which is exactly when a triage tool needs to
+    notice.
+    """
+
+    def _url(self, **kwargs: object) -> str:
+        recorder = Recorder(
+            {
+                f"{API}/ubuntu/+source/ubuntu-release-upgrader": httpx.Response(
+                    200, json={"entries": [_task(1)]}
+                )
+            }
+        )
+        with _launchpad(recorder) as client:
+            list(client.search_tasks(**kwargs))  # type: ignore[arg-type]
+        return recorder.urls[0]
+
+    def test_duplicates_are_included_by_default(self) -> None:
+        assert "omit_duplicates=false" in self._url()
+
+    def test_can_still_be_asked_to_omit_them(self) -> None:
+        """The exclusion is needed to *detect* duplicates by difference."""
+        assert "omit_duplicates=true" in self._url(omit_duplicates=True)
+
+    def test_modified_since_is_sent_as_a_date(self) -> None:
+        """What makes a refresh one request rather than one per fifty bugs."""
+        url = self._url(modified_since=datetime(2026, 10, 3, 14, 30, tzinfo=UTC))
+        assert "modified_since=2026-10-03" in url
+        assert "14%3A30" not in url
+
+
+class TestSearchTriage:
+    """Learning status and duplication from the listing alone."""
+
+    def _triage(
+        self, with_dupes: list[dict], without_dupes: list[dict]
+    ) -> tuple[object, Recorder]:
+        calls: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            url = str(request.url)
+            calls.append(url)
+            entries = without_dupes if "omit_duplicates=true" in url else with_dupes
+            return httpx.Response(200, json={"entries": entries})
+
+        recorder = Recorder({})
+        recorder.urls = calls
+        with Launchpad(
+            config=LaunchpadConfig(min_interval_s=0.0),
+            client=httpx.Client(transport=httpx.MockTransport(handler)),
+            sleep=lambda _: None,
+        ) as client:
+            return (client.search_triage(), recorder)
+
+    def test_the_difference_identifies_duplicates(self) -> None:
+        """The task entry has no duplicate field, so this is the cheap route.
+
+        Verified against the live API: a task entry carries ``status``,
+        ``date_created``, ``importance`` and twenty-odd other keys, none of
+        them about duplication.
+        """
+        search, _ = self._triage(
+            with_dupes=[_task(1), _task(2), _task(3)],
+            without_dupes=[_task(1), _task(3)],
+        )
+        flags = {ref.bug_id: ref.is_duplicate for ref in search}  # type: ignore[attr-defined]
+        assert flags == {1: False, 2: True, 3: False}
+
+    def test_it_costs_two_listings_not_one_request_per_bug(self) -> None:
+        _, recorder = self._triage([_task(1)], [_task(1)])
+        assert len(recorder.urls) == 2
+
+    def test_a_complete_listing_is_reported_as_complete(self) -> None:
+        search, _ = self._triage([_task(1)], [_task(1)])
+        assert search.complete is True  # type: ignore[attr-defined]
+
+    def test_a_truncated_listing_is_reported_as_incomplete(self) -> None:
+        """The flag changes what absence from the listing may be read to mean.
+
+        ``ubuntu-release-upgrader`` has far more bugs than ``max_pages`` will
+        fetch. A caller that treated "absent" as "unmodified" would stamp every
+        unread bug as confirmed current -- which is the one lie the whole
+        refresh mechanism exists to avoid.
+        """
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            # Always another page, so pagination can only end by hitting the cap.
+            return httpx.Response(
+                200,
+                json={
+                    "entries": [_task(1)],
+                    "next_collection_link": f"{API}/next",
+                },
+            )
+
+        with Launchpad(
+            config=LaunchpadConfig(min_interval_s=0.0),
+            client=httpx.Client(transport=httpx.MockTransport(handler)),
+            sleep=lambda _: None,
+        ) as client:
+            search = client.search_triage(max_pages=2)
+        assert search.complete is False
+
+
+class TestDuplicateOf:
+    """Resolving a master, which only the bug resource can answer."""
+
+    def test_reads_the_master_and_the_count(self) -> None:
+        recorder = Recorder(
+            {
+                f"{API}/bugs/2169028": httpx.Response(
+                    200,
+                    json=_bug_payload(
+                        duplicate_of_link=f"{API}/bugs/2168855",
+                        number_of_duplicates=0,
+                    ),
+                )
+            }
+        )
+        with _launchpad(recorder) as client:
+            assert client.duplicate_of(2169028) == (2168855, 0)
+
+    def test_costs_one_request_not_the_attachment_listing_too(self) -> None:
+        """Halving the per-bug cost halves the only pass that does not scale."""
+        recorder = Recorder(
+            {f"{API}/bugs/1": httpx.Response(200, json=_bug_payload(duplicate_of_link=None))}
+        )
+        with _launchpad(recorder) as client:
+            assert client.duplicate_of(1) == (None, 2)
+        assert len(recorder.urls) == 1
+
+
+class TestTaskStatus:
+    """The escape hatch from the listing's page limit."""
+
+    def test_reads_this_package_s_task_status(self) -> None:
+        recorder = Recorder(
+            {
+                f"{API}/ubuntu/+source/ubuntu-release-upgrader/+bug/40792": httpx.Response(
+                    200, json={"status": "Triaged"}
+                )
+            }
+        )
+        with _launchpad(recorder) as client:
+            assert client.task_status(40792) == "Triaged"
+
+    def test_a_missing_task_is_empty_not_an_error(self) -> None:
+        """A bug can be retargeted after it was collected."""
+        with _launchpad(Recorder({})) as client:
+            assert client.task_status(404) == ""

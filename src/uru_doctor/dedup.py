@@ -120,6 +120,29 @@ class Tier:
     NONE = "none"
 
 
+#: The tiers in strength order, strongest first.
+#:
+#: Exists because ``cluster_members.tier`` is an integer column while a tier is
+#: named everywhere else. Storing the *index* keeps the column narrow and the
+#: ordering meaningful -- ``ORDER BY tier`` is strongest-first -- while the name
+#: stays the thing reports print, since "root-graph" explains itself and "0"
+#: does not.
+TIER_ORDER: Final[tuple[str, ...]] = (Tier.ROOT_GRAPH, Tier.CAUSE_TUPLE, Tier.EVIDENCE)
+
+
+def tier_index(tier: str) -> int:
+    """Tier name to its stored index; unknown names sort last."""
+    try:
+        return TIER_ORDER.index(tier)
+    except ValueError:
+        return len(TIER_ORDER)
+
+
+def tier_name(index: int) -> str:
+    """Stored index back to a tier name, tolerating an index from the future."""
+    return TIER_ORDER[index] if 0 <= index < len(TIER_ORDER) else Tier.NONE
+
+
 @dataclass(frozen=True, slots=True)
 class DuplicateVerdict:
     """Why two runs were or were not judged duplicates."""

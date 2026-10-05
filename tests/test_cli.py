@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
@@ -85,6 +86,116 @@ def _conf(tmp_path: Path, state: Path) -> str:
     path = tmp_path / "uru-doctor.toml"
     path.write_text(f'[paths]\nstate_dir = "{state}"\n')
     return str(path)
+
+
+#: Bug ids used by the ``swept`` fixture.
+#:
+#: Three bugs served identical logs, so they diagnose identically and cluster
+#: at ``root-graph`` tier. That is what the worklist's strongest proposal is
+#: made of, and building it from a sweep rather than by hand means the
+#: classification runs over real diagnoses carrying real bug numbers -- which
+#: an ``ingest`` of directories cannot provide, because those runs have no bug
+#: id to join Launchpad state to.
+SWEPT = (2150339, 2151847, 2169028)
+
+
+@pytest.fixture
+def swept(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A store of Launchpad-numbered runs, collected through a mock transport."""
+    apt = fixture_text("apt/lp2150339-apt.log")
+    main = fixture_text("logs/lp2150339-main.log")
+    api = "https://api.launchpad.net/devel"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if "searchTasks" in url:
+            return httpx.Response(
+                200,
+                json={
+                    "entries": [
+                        {
+                            "bug_link": f"{api}/bugs/{bug_id}",
+                            "status": "New",
+                            "date_created": "2026-09-29T10:00:00+00:00",
+                            "title": f"Bug #{bug_id}",
+                        }
+                        for bug_id in SWEPT
+                    ]
+                },
+            )
+        if "+attachment" in url:
+            return httpx.Response(
+                200, content=(main if url.endswith("/1/data") else apt).encode()
+            )
+        if url.endswith("/attachments"):
+            bug_id = int(url.rsplit("/", 2)[-2])
+            return httpx.Response(
+                200,
+                json={
+                    "entries": [
+                        {
+                            "title": "VarLogDistupgradeAptlog.txt",
+                            "data_link": f"{api}/bugs/{bug_id}/+attachment/0/data",
+                        },
+                        {
+                            "title": "VarLogDistupgradeMainlog.txt",
+                            "data_link": f"{api}/bugs/{bug_id}/+attachment/1/data",
+                        },
+                    ]
+                },
+            )
+        if "/bugs/" in url:
+            bug_id = int(url.rsplit("/", 1)[-1])
+            return httpx.Response(
+                200,
+                json={
+                    "id": bug_id,
+                    "title": "upgrade failed",
+                    "description": "ProblemType: Bug\n",
+                    "tags": [],
+                    "number_of_duplicates": 0,
+                    "date_created": "2026-09-29T10:00:00+00:00",
+                },
+            )
+        return httpx.Response(404)
+
+    _patch_launchpad(monkeypatch, httpx.MockTransport(handler))
+    state = tmp_path / "swept-state"
+    result = runner.invoke(app, ["sweep", "--config", _conf(tmp_path, state)])
+    assert result.exit_code == EXIT_OK, result.output
+    # A sweep legitimately records each bug's status from the search, and
+    # re-seeding would put it back anyway, so the statuses stay. Only the
+    # watermark is cleared, so that a refresh in a test takes a predictable
+    # path rather than depending on when the sweep happened.
+    with Store.open(state) as store:
+        store._conn.execute("DELETE FROM meta WHERE key = 'status_watermark'")
+        store.commit()
+    return state
+
+
+def _patch_launchpad(
+    monkeypatch: pytest.MonkeyPatch, transport: httpx.MockTransport
+) -> None:
+    """Make every Launchpad client the CLI builds use the mock transport.
+
+    Patching ``__post_init__`` rather than injecting a client is what makes
+    this work for commands that construct their own: the suite must not touch
+    the network, and a test that forgets to pass a client would silently reach
+    the live API.
+    """
+    import uru_doctor.lp.read as lp
+
+    original = lp.Launchpad.__post_init__
+
+    def post_init(self: lp.Launchpad) -> None:
+        original(self)
+        self.client = httpx.Client(transport=transport, follow_redirects=True)
+        self.sleep = lambda _s: None
+        object.__setattr__(
+            self, "config", self.config.model_copy(update={"min_interval_s": 0.0})
+        )
+
+    monkeypatch.setattr(lp.Launchpad, "__post_init__", post_init)
 
 
 class TestTopLevel:
@@ -1151,20 +1262,7 @@ class TestSweep:
         return (httpx.MockTransport(handler), fetched)
 
     def _patch(self, monkeypatch: pytest.MonkeyPatch, transport: httpx.MockTransport) -> None:
-        """Make every Launchpad client in the CLI use the mock transport."""
-        import uru_doctor.lp.read as lp
-
-        original = lp.Launchpad.__post_init__
-
-        def post_init(self: lp.Launchpad) -> None:
-            original(self)
-            self.client = httpx.Client(transport=transport, follow_redirects=True)
-            self.sleep = lambda _s: None
-            object.__setattr__(
-                self, "config", self.config.model_copy(update={"min_interval_s": 0.0})
-            )
-
-        monkeypatch.setattr(lp.Launchpad, "__post_init__", post_init)
+        _patch_launchpad(monkeypatch, transport)
 
     def test_dry_run_spends_no_log_requests(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -1547,3 +1645,435 @@ class TestProgressDisplay:
         lines = [line for line in result.stdout.splitlines() if line.strip()]
         assert len(lines) == 1
         assert "\x1b[" not in result.stdout
+
+
+class TestQueue:
+    """The worklist: what still needs a decision.
+
+    Driven against a store built by ``ingest`` so that the classification runs
+    over real diagnoses rather than hand-written rows -- the hand-written cases
+    live in ``test_worklist.py``. What is being tested here is the wiring:
+    that Launchpad state reaches the buckets, that counts stay exact when rows
+    are capped, and that the thing refuses to guess.
+    """
+
+    @staticmethod
+    def _state(state: Path, bug_id: int, **kwargs: object) -> None:
+        from uru_doctor.store import BugState
+
+        with Store.open(state) as store:
+            store.put_bug_states([BugState(bug_id=bug_id, **kwargs)])  # type: ignore[arg-type]
+            store.commit()
+
+    def test_empty_store_says_so(self, tmp_path: Path) -> None:
+        result = runner.invoke(
+            app, ["queue", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_FAIL
+        assert "empty" in result.output
+
+    def test_unknown_status_is_reported_not_guessed(
+        self, tmp_path: Path, ingested: Path
+    ) -> None:
+        """An ingested corpus has no Launchpad state at all.
+
+        Every row must land in ``status-unknown`` rather than being filed as
+        outstanding work, because nothing here knows whether these bugs are
+        already closed.
+        """
+        result = runner.invoke(app, ["queue", "--config", _conf(tmp_path, ingested)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "status-unknown" in result.output
+        assert "refresh" in result.output
+
+    def test_never_read_is_reported_as_stale(self, tmp_path: Path, ingested: Path) -> None:
+        """Not fresh merely because there is no timestamp to contradict it."""
+        payload = json.loads(
+            runner.invoke(
+                app, ["queue", "--json", "--config", _conf(tmp_path, ingested)]
+            ).stdout
+        )
+        assert payload["launchpad_state"]["stale"] is True
+        assert payload["launchpad_state"]["newest_check"] is None
+
+    def test_closed_bugs_are_counted_never_listed(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        for bug_id in SWEPT:
+            self._state(swept, bug_id, status="Invalid", checked_at="2026-10-05")
+        result = runner.invoke(app, ["queue", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "nothing waiting on a decision" in result.output
+        assert "need nothing" in result.output
+        assert "3 Invalid" in result.output
+
+    def test_counts_stay_exact_when_rows_are_capped(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        """Narrowing the view must not narrow the arithmetic.
+
+        A reader who works through a capped bucket believing it was the whole
+        backlog is worse off than one who was never shown it.
+        """
+        payload = json.loads(
+            runner.invoke(
+                app,
+                ["queue", "--json", "--limit", "1", "--config", _conf(tmp_path, swept)],
+            ).stdout
+        )
+        # Three bugs with identical logs: one master and two proposed duplicates.
+        assert payload["counts"]["mark-duplicate"] == 2
+        assert payload["counts"]["diagnosed-unrecorded"] == 1
+        result = runner.invoke(
+            app, ["queue", "--limit", "1", "--config", _conf(tmp_path, swept)]
+        )
+        assert "showing 1 of 2" in result.output
+
+    def test_bucket_filter_narrows_rows_but_not_counts(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        """A reader who asked about one bucket still needs the whole arithmetic."""
+        payload = json.loads(
+            runner.invoke(
+                app,
+                [
+                    "queue",
+                    "--json",
+                    "-b",
+                    "candidate-invalid",
+                    "--config",
+                    _conf(tmp_path, swept),
+                ],
+            ).stdout
+        )
+        assert payload["items"] == []
+        assert payload["counts"]["mark-duplicate"] == 2
+        assert payload["actionable"] == 3
+
+    def test_unknown_bucket_is_a_usage_error(self, tmp_path: Path, swept: Path) -> None:
+        result = runner.invoke(
+            app, ["queue", "-b", "nonsense", "--config", _conf(tmp_path, swept)]
+        )
+        assert result.exit_code == EXIT_USAGE
+        assert "mark-duplicate" in result.output
+
+    def test_markdown_and_json_are_exclusive(self, tmp_path: Path, swept: Path) -> None:
+        result = runner.invoke(
+            app, ["queue", "--markdown", "--json", "--config", _conf(tmp_path, swept)]
+        )
+        assert result.exit_code == EXIT_USAGE
+
+    def test_markdown_dates_itself(self, tmp_path: Path, ingested: Path) -> None:
+        result = runner.invoke(
+            app, ["queue", "--markdown", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert "# Triage worklist" in result.output
+        assert "never been read" in result.output
+
+    def test_json_carries_a_schema(self, tmp_path: Path, swept: Path) -> None:
+        payload = json.loads(
+            runner.invoke(
+                app, ["queue", "--json", "--config", _conf(tmp_path, swept)]
+            ).stdout
+        )
+        assert payload["schema"] == 1
+
+    def test_a_launchpad_duplicate_leaves_the_worklist(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        """The whole mechanism, end to end.
+
+        LP#2169028 and LP#2151847 share a root-cause subgraph, so the tool
+        proposes marking one a duplicate of the other. Recording that
+        Launchpad already thinks so must clear the row -- without any local
+        note that a human did it.
+        """
+        config = _conf(tmp_path, swept)
+        for bug_id in SWEPT:
+            self._state(swept, bug_id, status="New", checked_at="2026-10-05")
+        before = json.loads(
+            runner.invoke(app, ["queue", "--json", "--config", config]).stdout
+        )
+        proposed = {
+            item["bug_id"] for item in before["items"] if item["bucket"] == "mark-duplicate"
+        }
+        assert proposed, "expected the libpeas trio to produce a duplicate proposal"
+
+        for bug_id in proposed:
+            self._state(swept, bug_id, is_duplicate=True, checked_at="2026-10-05")
+        after = json.loads(
+            runner.invoke(app, ["queue", "--json", "--config", config]).stdout
+        )
+        assert after["counts"]["mark-duplicate"] == 0
+        assert after["done_by_status"]["already a duplicate"] == len(proposed)
+
+    def test_a_contradicting_master_is_reported(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        config = _conf(tmp_path, swept)
+        for bug_id in SWEPT:
+            self._state(swept, bug_id, status="New", checked_at="2026-10-05")
+        before = json.loads(
+            runner.invoke(app, ["queue", "--json", "--config", config]).stdout
+        )
+        victim = next(
+            item for item in before["items"] if item["bucket"] == "mark-duplicate"
+        )
+        self._state(
+            swept,
+            victim["bug_id"],
+            status="New",
+            is_duplicate=True,
+            duplicate_of=999999,
+            checked_at="2026-10-05",
+        )
+        after = json.loads(
+            runner.invoke(app, ["queue", "--json", "--config", config]).stdout
+        )
+        conflict = next(
+            item for item in after["items"] if item["bucket"] == "duplicate-conflict"
+        )
+        assert conflict["bug_id"] == victim["bug_id"]
+        assert "LP#999999" in conflict["action"]
+        assert victim["master"] in conflict["action"]
+
+
+class TestRefresh:
+    """Re-reading Launchpad's verdict on bugs already stored.
+
+    The steady state has to be cheap or nobody will run it, and it has to be
+    honest about what it did not reach or the worklist built on it is fiction.
+    """
+
+    API = "https://api.launchpad.net/devel"
+
+    def _transport(
+        self,
+        tasks: list[dict[str, object]],
+        *,
+        duplicates: set[int] = frozenset(),
+        truncate: bool = False,
+        masters: dict[int, int] | None = None,
+    ) -> tuple[httpx.MockTransport, list[str]]:
+        """Serve the two triage listings, plus per-bug lookups."""
+        calls: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            url = str(request.url)
+            calls.append(url)
+            if "searchTasks" in url:
+                entries = [
+                    task
+                    for task in tasks
+                    if not (
+                        "omit_duplicates=true" in url
+                        and int(str(task["bug_link"]).rsplit("/", 1)[-1]) in duplicates
+                    )
+                ]
+                body: dict[str, object] = {"entries": entries}
+                if truncate:
+                    body["next_collection_link"] = (
+                        f"{self.API}/ubuntu/+source/ubuntu-release-upgrader"
+                        "?ws.op=searchTasks&more=1"
+                    )
+                return httpx.Response(200, json=body)
+            if "/+bug/" in url:
+                return httpx.Response(200, json={"status": "Triaged"})
+            if "/bugs/" in url:
+                bug_id = int(url.rsplit("/", 1)[-1])
+                master = (masters or {}).get(bug_id)
+                return httpx.Response(
+                    200,
+                    json={
+                        "id": bug_id,
+                        "title": "upgrade failed",
+                        "description": "",
+                        "tags": [],
+                        "number_of_duplicates": 0,
+                        "duplicate_of_link": (
+                            f"{self.API}/bugs/{master}" if master else None
+                        ),
+                        "date_created": "2026-09-29T10:00:00+00:00",
+                    },
+                )
+            return httpx.Response(404)
+
+        return (httpx.MockTransport(handler), calls)
+
+    def _task(self, bug_id: int, status: str = "New") -> dict[str, object]:
+        return {
+            "bug_link": f"{self.API}/bugs/{bug_id}",
+            "status": status,
+            "date_created": "2026-09-29T10:00:00+00:00",
+            "title": f"Bug #{bug_id}",
+        }
+
+    def _patch(self, monkeypatch: pytest.MonkeyPatch, transport: httpx.MockTransport) -> None:
+        TestSweep._patch(self, monkeypatch, transport)  # type: ignore[arg-type]
+
+    def test_an_empty_store_has_nothing_to_refresh(self, tmp_path: Path) -> None:
+        result = runner.invoke(
+            app, ["refresh", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_FAIL
+        assert "no Launchpad bugs" in result.output
+
+    def test_the_steady_state_is_two_requests(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """One listing including duplicates, one excluding. That is the budget.
+
+        It must not grow with the corpus: this is the command a triager runs
+        before every session, and the whole design of the worklist assumes it
+        is close to free.
+        """
+        with Store.open(swept) as store:
+            store.advance_status_watermark(datetime(2026, 10, 1, tzinfo=UTC))
+            store.commit()
+        transport, calls = self._transport([self._task(2169028, "Triaged")])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert len(calls) == 2, calls
+        assert "modified_since=2026-10-01" in calls[0]
+
+    def test_a_status_change_is_recorded_and_reported(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, _ = self._transport([self._task(2169028, "Won't Fix")])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "Won't Fix" in result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2169028].status == "Won't Fix"
+
+    def test_a_newly_marked_duplicate_is_noticed(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The signal Launchpad's own default hides.
+
+        A bug drops out of the default search the moment somebody marks it,
+        which is exactly when a triage tool needs to see it.
+        """
+        transport, _ = self._transport(
+            [self._task(2169028)], duplicates={2169028}
+        )
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "newly marked a duplicate" in result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2169028].is_duplicate is True
+
+    def test_an_unmodified_bug_is_confirmed_current(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Absence from a *complete* listing is positive evidence.
+
+        Without this the age of a corpus would be the age of its least
+        recently changed bug, so a worklist over bugs that are all correctly
+        quiet would report itself permanently stale.
+        """
+        from uru_doctor.store import BugState
+
+        with Store.open(swept) as store:
+            store.put_bug_states(
+                [BugState(bug_id=2150339, status="Triaged", checked_at="2020-01-01")]
+            )
+            store.commit()
+        transport, _ = self._transport([self._task(2169028)])
+        self._patch(monkeypatch, transport)
+        assert (
+            runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)]).exit_code
+            == EXIT_OK
+        )
+        with Store.open(swept) as store:
+            state = store.bug_states()[2150339]
+        assert state.status == "Triaged"
+        assert state.checked_at != "2020-01-01"
+
+    def test_a_truncated_listing_does_not_confirm_anything(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The bug this flag exists to prevent.
+
+        This package has far more bugs than the listing will page through, so
+        treating absence as "unmodified" would stamp every unread bug as
+        confirmed current.
+        """
+        from uru_doctor.store import BugState
+
+        with Store.open(swept) as store:
+            store.put_bug_states(
+                [BugState(bug_id=2150339, status="Triaged", checked_at="2020-01-01")]
+            )
+            store.commit()
+        transport, _ = self._transport([self._task(2169028)], truncate=True)
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2150339].checked_at == "2020-01-01"
+        assert "beyond the listing" in result.output
+
+    def test_deep_resolves_a_master(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, _ = self._transport(
+            [self._task(2169028)],
+            duplicates={2169028},
+            masters={2169028: 2150339},
+        )
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(
+            app, ["refresh", "--deep", "-n", "2", "--config", _conf(tmp_path, swept)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2169028].duplicate_of == 2150339
+
+    def test_dry_run_spends_nothing(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        transport, calls = self._transport([self._task(2169028)])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(
+            app, ["refresh", "--dry-run", "--config", _conf(tmp_path, swept)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert calls == []
+        assert "listing request" in result.output
+
+    def test_dry_run_does_not_promise_a_full_pass_is_cheap(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A full pass walks Launchpad's queue, not this corpus.
+
+        An earlier estimate divided the corpus size by the page size and
+        promised six seconds for a pass that takes four minutes.
+        """
+        transport, _ = self._transport([self._task(2169028)])
+        self._patch(monkeypatch, transport)
+        payload = json.loads(
+            runner.invoke(
+                app,
+                ["refresh", "--dry-run", "--json", "--config", _conf(tmp_path, swept)],
+            ).stdout
+        )
+        assert payload["full_pass"] is True
+        assert payload["listing_requests_max"] == 80
+
+    def test_the_sweep_watermark_is_left_alone(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Advancing the sweep mark skips bugs; this one must not touch it."""
+        with Store.open(swept) as store:
+            before = store.sweep_watermark()
+        transport, _ = self._transport([self._task(2169028)])
+        self._patch(monkeypatch, transport)
+        runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        with Store.open(swept) as store:
+            assert store.sweep_watermark() == before
+            assert store.status_watermark() is not None

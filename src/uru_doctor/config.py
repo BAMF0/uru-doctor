@@ -262,6 +262,20 @@ class LaunchpadConfig(BaseModel):
     than skipped.
     """
 
+    max_deep_bugs: int = Field(50, ge=1)
+    """How many bugs one ``refresh --deep`` will ask about individually.
+
+    A cheap refresh learns every bug's status in one request per fifty bugs,
+    because ``searchTasks`` returns status in the task entry. Learning *which*
+    bug a duplicate duplicates is one request each, since only the bug resource
+    carries that link -- so at three seconds apiece a corpus of thousands is
+    hours, and this is the stop that keeps the command usable.
+
+    It is safe to cap because the batch is chosen least-recently-checked first,
+    which makes repeated runs walk the corpus round-robin rather than
+    re-reading the same head of it.
+    """
+
     # There is deliberately no ``wanted_attachments`` list. One lived here and
     # disagreed with the code: its last three entries -- ``Dependencies``,
     # ``ProcCpuinfoMinimal`` and ``VarLogDistupgradeLspcitxt`` -- are all
@@ -297,6 +311,29 @@ class ReportConfig(BaseModel):
     show_needs_human: bool = True
 
 
+class QueueConfig(BaseModel):
+    """The worklist: what still needs a decision."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    stale_after_days: int = Field(7, ge=1)
+    """When to stop trusting the recorded Launchpad state.
+
+    The worklist exists so that a triager does not have to re-check Launchpad
+    for every row, which only works if the tool is honest about how old its
+    copy is. Past this many days it says so rather than presenting a stale
+    verdict as current.
+    """
+
+    max_rows: int = Field(20, ge=1)
+    """Rows listed per bucket before eliding.
+
+    Counts are always exact and always shown; this caps only what is printed.
+    A worklist of three hundred actionable bugs is paged through, not read, and
+    a command that prints all of them has buried its own first row.
+    """
+
+
 class Config(BaseModel):
     """The whole configuration tree."""
 
@@ -310,6 +347,7 @@ class Config(BaseModel):
     title: TitleConfig = TitleConfig()
     launchpad: LaunchpadConfig = LaunchpadConfig()
     report: ReportConfig = ReportConfig()
+    queue: QueueConfig = QueueConfig()
 
     source_path: Path | None = None
     """Where this was loaded from, for ``uru-doctor`` to report."""

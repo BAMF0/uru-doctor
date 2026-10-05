@@ -58,17 +58,18 @@ from rich.table import Table
 import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
 from uru_doctor import __version__
 from uru_doctor.config import Config, load_config
-from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summarise
+from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summarise, tier_index
 from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
 from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
 from uru_doctor.intern import Interner
 from uru_doctor.lp.read import BugRecord, BugRef, Launchpad, LaunchpadError, RateLimited
 from uru_doctor.models import LogSource, Signature, UpgradeRun
 from uru_doctor.parsers.apportmeta import parse_apport_meta
-from uru_doctor.report import RunEntry, plural, render_corpus, render_run
+from uru_doctor.report import RunEntry, plural, render_corpus, render_run, render_worklist
 from uru_doctor.rules.registry import all_rules, rules_digest
-from uru_doctor.store import Store, run_key_for
+from uru_doctor.store import BugState, Store, run_key_for
 from uru_doctor.title import ProposedTitle, propose_title
+from uru_doctor.worklist import BUCKET_HELP, Bucket, Worklist, classify
 
 EXIT_OK: Final = 0
 EXIT_FAIL: Final = 1
@@ -1029,6 +1030,23 @@ def fetch(
                 stamped, diagnosis, proposed, signature = _diagnose_run(run, interner, config)
                 if save:
                     store.put_run(stamped.with_findings(diagnosis.findings, signature))
+                    # ``fetch`` cannot learn a status -- that lives on the
+                    # bug's tasks and this path never asks for them -- but it
+                    # does know the master, so recording the half it has means
+                    # a later `refresh` only has to fill in the status. No row
+                    # at all would make the bug indistinguishable from one
+                    # nobody has ever looked at.
+                    if record.duplicate_of is not None:
+                        store.put_bug_states(
+                            [
+                                BugState(
+                                    bug_id=bug_id,
+                                    duplicate_of=record.duplicate_of,
+                                    is_duplicate=True,
+                                    checked_at=datetime.now(UTC).isoformat(),
+                                )
+                            ]
+                        )
                 if not attachments:
                     err.print(f"[yellow]LP#{bug_id} has no usable logs attached[/]")
                 diagnosed.append(stamped)
@@ -1078,38 +1096,43 @@ def dedup(
         _fail("choose one of --markdown or --json", EXIT_USAGE)
     config = _config(config_path)
     with _state_store(config) as store:
-        interner = Interner(store)
         entries: list[RunEntry] = []
-        signatures: dict[str, Signature] = {}
         document = as_json or markdown
         with _progress(console=err if document else out) as tracker:
-            # Every payload is deserialised here, so this is linear in corpus
-            # size and the clustering after it is worse than linear. A total is
-            # available cheaply from the key list, so the bar is a real one.
-            total = len(store.run_keys(primary_only=True))
-            tracker.start(f"loading {plural(total, 'run')}", total=total)
-            for run in store.iter_runs(primary_only=True):
-                # Findings are on the stored run; re-diagnosing would be
-                # wasteful and could drift from what was recorded.
-                result = DiagnosisResult(findings=run.findings)
-                entries.append(
-                    RunEntry(
-                        key=_key_for(run),
-                        run=run,
-                        result=result,
-                        title=propose_title(
-                            run, result, interner, max_length=config.title.max_length
-                        ),
-                    )
-                )
-                signatures[_key_for(run)] = run.signature
-                tracker.advance()
-
-            if not entries:
+            # Signatures, labels and policy stamps are all indexed columns, so
+            # the common path costs two narrow scans. Only the Markdown digest
+            # needs the records themselves, and it is the only path that pays
+            # for them.
+            tracker.start("reading signatures", total=None)
+            signatures = store.signature_rows(primary_only=True)
+            if not signatures:
                 _fail("the store is empty; run `uru-doctor ingest` first")
+            facts = store.cluster_facts(primary_only=True)
 
-            # Pair scoring is quadratic in the worst case, and unlike the load
-            # above it cannot be counted in advance -- the tiers short-circuit.
+            if markdown:
+                interner = Interner(store)
+                total = len(signatures)
+                tracker.start(f"loading {plural(total, 'run')}", total=total)
+                for run in store.iter_runs(primary_only=True):
+                    # Findings are on the stored run; re-diagnosing would be
+                    # wasteful and could drift from what was recorded.
+                    result = DiagnosisResult(findings=run.findings)
+                    entries.append(
+                        RunEntry(
+                            key=_key_for(run),
+                            run=run,
+                            result=result,
+                            title=propose_title(
+                                run, result, interner, max_length=config.title.max_length
+                            ),
+                        )
+                    )
+                    tracker.advance()
+
+            # Grouping is a hash bucket per signature column, so it is linear;
+            # the quadratic part is tier-2 scoring, which happens per bucket
+            # elsewhere and not here. The count is not knowable in advance
+            # because the tiers short-circuit.
             tracker.start("clustering", total=None)
             clusters = cluster_runs(
                 signatures,
@@ -1118,18 +1141,19 @@ def dedup(
             )
         store.replace_clusters(
             (
-                cluster.tier,
-                cluster.representative or None,
-                [(member, 0, 1.0) for member in cluster.members],
+                cluster.representative,
+                facts[cluster.representative].cause
+                if cluster.representative in facts
+                else None,
+                [(member, tier_index(cluster.tier), 1.0) for member in cluster.members],
             )
             for cluster in clusters
         )
         store.commit()
 
-        policies = {
-            entry.key: (entry.run.tool_version, entry.run.rules_digest) for entry in entries
-        }
+        policies = {key: fact.policy for key, fact in facts.items()}
         drifted = _policy_drift(clusters, policies)
+        labels = {key: fact.label for key, fact in facts.items()}
 
         if markdown:
             _write(
@@ -1144,7 +1168,7 @@ def dedup(
                 json.dumps(
                     {
                         "schema": JSON_SCHEMA_VERSION,
-                        "runs": len(entries),
+                        "runs": len(signatures),
                         "summary": summarise(clusters),
                         "clusters": [
                             {
@@ -1173,14 +1197,14 @@ def dedup(
 
         stats = summarise(clusters)
         out.print(
-            f"{plural(len(entries), 'run')}: {plural(stats['clusters'], 'cluster')} "
+            f"{plural(len(signatures), 'run')}: {plural(stats['clusters'], 'cluster')} "
             f"covering {plural(stats['duplicates'], 'candidate duplicate')}"
         )
         table = Table(box=None, pad_edge=False)
         table.add_column("tier", style="dim")
         table.add_column("master")
         table.add_column("duplicates", overflow="fold")
-        labels = {entry.key: entry.label for entry in entries}
+        labels = {key: fact.label for key, fact in facts.items()}
         for cluster in clusters[: config.report.max_clusters]:
             table.add_row(
                 cluster.tier,
@@ -1893,6 +1917,23 @@ def sweep(
                 _report_dry_run(found, fresh, watermark, cap, as_json, out_path)
                 return
 
+            # The search already carries every bug's status, including the
+            # ones already stored -- and those are exactly the bugs whose
+            # status a sweep otherwise freezes forever, since it skips them.
+            # Recording them here costs no requests at all.
+            store.put_bug_states(
+                [
+                    BugState(
+                        bug_id=ref.bug_id,
+                        status=ref.status,
+                        is_duplicate=ref.is_duplicate,
+                        checked_at=datetime.now(UTC).isoformat(),
+                    )
+                    for ref in found
+                    if ref.bug_id in known
+                ]
+            )
+
             planned = fresh[:cap]
             tracker.start(f"fetching {plural(len(planned), 'bug')}", total=len(planned))
 
@@ -1926,6 +1967,21 @@ def sweep(
                 )
                 stamped, diagnosis, proposed, signature = _diagnose_run(run, interner, config)
                 store.put_run(stamped.with_findings(diagnosis.findings, signature))
+                # The worklist reads `bug_state`, not the payload, so a bug
+                # swept but never recorded here would show up as "status
+                # unknown" immediately after being collected with its status
+                # in hand.
+                store.put_bug_states(
+                    [
+                        BugState(
+                            bug_id=ref.bug_id,
+                            status=ref.status,
+                            duplicate_of=record.duplicate_of,
+                            is_duplicate=ref.is_duplicate,
+                            checked_at=datetime.now(UTC).isoformat(),
+                        )
+                    ]
+                )
                 diagnosed.append(stamped)
                 seen += 1
                 if not attachments:
@@ -2061,6 +2117,620 @@ def _report_dry_run(
         f"[dim]~{len(planned) * 6} requests, "
         f"~{len(planned) * 6 * 3 // 60} min at the configured pacing[/]"
     )
+
+
+# -- acting on the corpus ----------------------------------------------------
+
+#: Pages one triage listing will walk, per duplicate-inclusion pass.
+#:
+#: The same stop as ``search_tasks``'s own default, named here because the
+#: refresh estimate has to agree with it. It is a cap on a *listing*, so a
+#: package with more bugs than ``40 * page_size`` cannot be fully enumerated
+#: and ``TriageSearch.complete`` comes back false -- which is precisely the
+#: case ``refresh --deep`` exists to cover.
+_TRIAGE_MAX_PAGES: Final = 40
+
+
+def _worklist(store: Store, config: Config) -> Worklist:
+    """Classify the whole store without deserialising a single payload.
+
+    Two narrow queries and an O(n) bucketing. Clusters are recomputed here
+    rather than read back from the ``clusters`` table on purpose: clustering
+    from the indexed signature columns costs about a fifth of a second over ten
+    thousand runs and is always current, where a cached grouping would need a
+    staleness check that could only ever tell you to go and run ``dedup``.
+    """
+    signatures = store.signature_rows(primary_only=True)
+    clusters = cluster_runs(
+        signatures, config=config.dedup, oldest_first=sorted(signatures)
+    )
+    return classify(store.triage_rows(primary_only=True), clusters)
+
+
+@app.command(rich_help_panel="Act on the corpus")
+def refresh(
+    all_bugs: Annotated[
+        bool,
+        typer.Option("--all", help="Re-read every bug, ignoring the watermark."),
+    ] = False,
+    deep: Annotated[
+        bool,
+        typer.Option("--deep", help="Also learn which bug each duplicate duplicates."),
+    ] = False,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", "-n", metavar="N", help="Cap the per-bug pass of --deep."),
+    ] = None,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Say what this would cost and stop.")
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable summary.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Re-read Launchpad's verdict on the bugs already in the store.
+
+    What keeps ``queue`` honest. ``sweep`` only ever looks at bugs it has not
+    seen, so a status it recorded once is frozen for good -- and a bug's status
+    is exactly what changes when somebody triages it.
+
+    Cheap by design: ``searchTasks`` returns status in the task entry, so one
+    request covers fifty bugs, and asking only for bugs modified since the last
+    pass makes the steady state a single request however large the corpus is.
+    Bugs the search does not return were not modified, which is positive
+    evidence that what is already recorded is still current.
+
+    \b
+    Examples:
+      uru-doctor refresh            # one request, usually
+      uru-doctor refresh --all      # re-read everything
+      uru-doctor refresh --deep     # also resolve duplicate masters
+    """
+    config = _config(config_path)
+    with _state_store(config) as store:
+        known = store.known_bug_ids()
+        if not known:
+            _fail("the store holds no Launchpad bugs; run `uru-doctor sweep` first")
+
+        watermark = None if all_bugs else store.status_watermark()
+        cap = limit if limit is not None else config.launchpad.max_deep_bugs
+
+        if dry_run:
+            _report_refresh_plan(store, config, known, watermark, cap, deep, as_json, out_path)
+            return
+
+        now = datetime.now(UTC)
+        stamp = now.isoformat()
+        changed: list[tuple[int, str, str]] = []
+        newly_duplicate: list[int] = []
+        resolved: list[tuple[int, int]] = []
+        before = store.bug_states()
+
+        with (
+            _progress(console=err if as_json else out) as tracker,
+            Launchpad(
+                config=config.launchpad,
+                store=store,
+                cache_dir=config.paths.state_dir / "attachments",
+                progress=tracker.callback,
+            ) as client,
+        ):
+            tracker.start("reading Launchpad statuses", total=None)
+            try:
+                search = client.search_triage(
+                    modified_since=watermark,
+                    page_size=config.launchpad.sweep_page_size,
+                )
+            except RateLimited as exc:
+                _fail(f"{exc}\nWait a minute and retry; nothing was changed.")
+                return
+            except LaunchpadError as exc:
+                _fail(f"could not search Launchpad: {exc}")
+                return
+
+            seen = [ref for ref in search.refs if ref.bug_id in known]
+            states = [
+                BugState(
+                    bug_id=ref.bug_id,
+                    status=ref.status,
+                    is_duplicate=ref.is_duplicate,
+                    checked_at=stamp,
+                )
+                for ref in seen
+            ]
+            for state in states:
+                was = before.get(state.bug_id)
+                if was is None or was.status != state.status:
+                    changed.append((state.bug_id, was.status if was else "", state.status))
+                if state.is_duplicate and not (was and was.is_duplicate):
+                    newly_duplicate.append(state.bug_id)
+            store.put_bug_states(states)
+
+            # A bug the listing did not return was not modified since the
+            # watermark, so its recorded verdict is confirmed current and only
+            # its timestamp moves. That inference is valid *only* if the
+            # listing reached the end: this package has far more bugs than
+            # ``max_pages`` will fetch, so on a truncated pass absence means
+            # "never looked", and stamping it as confirmed would be the one
+            # lie this whole mechanism exists to prevent.
+            unreached = sorted(known - {s.bug_id for s in states})
+            if search.complete:
+                store.touch_bug_states(unreached, stamp)
+                unreached = []
+
+            if deep:
+                targets = _deep_targets(store, config, cap, unreached)
+                if targets:
+                    tracker.start(f"resolving {plural(len(targets), 'bug')}", total=len(targets))
+                    deep_states: list[BugState] = []
+                    recorded = store.bug_states()
+                    for bug_id in targets:
+                        tracker.context(f"LP#{bug_id}")
+                        current = recorded.get(bug_id)
+                        status = current.status if current else ""
+                        try:
+                            # Status first, and only when it is actually
+                            # missing: an unlisted bug needs it and a listed
+                            # one already has it, so paying for both would
+                            # double the cost of the expensive pass to learn
+                            # something already known.
+                            if not status or bug_id in set(unreached):
+                                status = client.task_status(bug_id) or status
+                            master, _ = client.duplicate_of(bug_id)
+                        except RateLimited as exc:
+                            err.print(f"[yellow]rate limited after {len(deep_states)}:[/] {exc}")
+                            break
+                        except LaunchpadError as exc:
+                            err.print(f"[yellow]skipped LP#{bug_id}:[/] {exc}")
+                            continue
+                        if current is None or current.status != status:
+                            changed.append(
+                                (bug_id, current.status if current else "", status)
+                            )
+                        deep_states.append(
+                            BugState(
+                                bug_id=bug_id,
+                                status=status,
+                                duplicate_of=master,
+                                is_duplicate=(
+                                    True if master is not None
+                                    else (current.is_duplicate if current else None)
+                                ),
+                                checked_at=stamp,
+                            )
+                        )
+                        if master is not None:
+                            resolved.append((bug_id, master))
+                        tracker.advance()
+                    store.put_bug_states(deep_states)
+                    unreached = [b for b in unreached if b not in {s.bug_id for s in deep_states}]
+
+            if seen or watermark is None:
+                store.advance_status_watermark(now)
+            store.commit()
+
+        # One query, not one per bug: this used to call ``bug_states()`` inside
+        # the comprehension, which is a full read of the table per bug.
+        final = store.bug_states()
+        unchecked = sum(1 for bug_id in known if not final.get(bug_id, BugState(bug_id)).status)
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "modified_since": watermark.isoformat() if watermark else None,
+                    "tasks_seen": len(search),
+                    "listing_complete": search.complete,
+                    "in_corpus": len(seen),
+                    "not_reached": unreached,
+                    "status_changed": [
+                        {"bug_id": bug_id, "was": before_status, "now": after_status}
+                        for bug_id, before_status, after_status in changed
+                    ],
+                    "newly_duplicate": newly_duplicate,
+                    "masters_resolved": [
+                        {"bug_id": b, "duplicate_of": m} for b, m in resolved
+                    ],
+                    "never_checked": unchecked,
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="refresh",
+        )
+        return
+
+    out.print(
+        f"[green]checked {plural(len(seen), 'bug')}[/] of {len(known)} in the corpus"
+        + (f" modified since {watermark.date().isoformat()}" if watermark else "")
+    )
+    if changed:
+        table = Table(box=None, pad_edge=False)
+        table.add_column("bug")
+        table.add_column("was", style="dim")
+        table.add_column("now")
+        for bug_id, before_status, after_status in changed[: config.queue.max_rows]:
+            table.add_row(f"LP#{bug_id}", before_status or "unknown", after_status)
+        out.print(table)
+        if len(changed) > config.queue.max_rows:
+            out.print(f"[dim]… and {len(changed) - config.queue.max_rows} more[/]")
+    else:
+        out.print("[dim]no status changed[/]")
+    if newly_duplicate:
+        out.print(
+            f"[yellow]{plural(len(newly_duplicate), 'bug')} newly marked a duplicate:[/] "
+            + ", ".join(f"LP#{b}" for b in newly_duplicate[:10])
+        )
+    for bug_id, master in resolved:
+        out.print(f"[dim]LP#{bug_id} duplicates LP#{master}[/]")
+    if unreached:
+        # Said out loud because the alternative is a worklist that looks
+        # complete and is not. The per-bug pass is the only way to reach these.
+        out.print(
+            f"[yellow]{plural(len(unreached), 'bug')} beyond the listing's "
+            f"{config.launchpad.sweep_page_size * 40}-task window[/] -- their recorded "
+            "status is unconfirmed; `uru-doctor refresh --deep` reaches them one at a time"
+        )
+    if unchecked and not all_bugs:
+        out.print(
+            f"[dim]{plural(unchecked, 'bug')} never checked -- "
+            f"`uru-doctor refresh --all` would read them[/]"
+        )
+
+
+def _deep_targets(
+    store: Store, config: Config, cap: int, unreached: Sequence[int] = ()
+) -> list[int]:
+    """Which bugs to spend per-bug requests on, most informative first.
+
+    A deep pass costs a request or two per bug, so which bugs it picks matters
+    more than how many it takes. The order is by how much is missing:
+
+    1. Bugs the listing could not reach at all. Nothing else can read their
+       status, so for these the per-bug request is not an optimisation but the
+       only route.
+    2. Bugs Launchpad already calls duplicates. A master is known to exist and
+       is the one fact absent.
+    3. Bugs with outstanding work, where a master contradicting this tool's own
+       is the other thing worth knowing.
+
+    Within each group the order is least-recently-checked first, which is what
+    makes a capped pass resumable: repeated runs walk the corpus round-robin
+    instead of re-reading its head.
+    """
+    worklist = _worklist(store, config)
+    targets: list[int] = []
+    for group in (
+        list(unreached),
+        list(worklist.deep_unknown),
+        [
+            item.row.bug_id
+            for item in worklist.items
+            if item.bucket.actionable and item.row.bug_id is not None
+        ],
+    ):
+        if len(targets) >= cap:
+            break
+        chosen = set(targets)
+        candidates = [b for b in dict.fromkeys(group) if b not in chosen]
+        targets += store.stale_bug_ids(cap - len(targets), among=candidates)
+    return targets
+
+
+def _report_refresh_plan(
+    store: Store,
+    config: Config,
+    known: set[int],
+    watermark: datetime | None,
+    cap: int,
+    deep: bool,
+    as_json: bool,
+    out_path: Path | None,
+) -> None:
+    """Say what a refresh would cost without spending anything on finding out.
+
+    The listing is two requests per page -- one including duplicates, one
+    excluding. How many pages is a property of *Launchpad's* bug list, not of
+    this corpus: a full pass walks the package's whole queue, which for
+    ``ubuntu-release-upgrader`` is far more than ``max_pages`` will fetch. An
+    earlier version of this estimate divided the corpus size by the page size
+    and promised six seconds for a pass that takes four minutes.
+
+    A watermarked pass is the cheap one and genuinely is two requests, because
+    ``modified_since`` leaves almost nothing to page through.
+    """
+    full_pass = watermark is None
+    cheap = 2 * (_TRIAGE_MAX_PAGES if full_pass else 1)
+    deep_targets = _deep_targets(store, config, cap) if deep else []
+    # Two per bug in the worst case: the task carries the status, the bug
+    # carries the master, and neither carries the other.
+    seconds = int((cheap + 2 * len(deep_targets)) * config.launchpad.min_interval_s)
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "modified_since": watermark.isoformat() if watermark else None,
+                    "bugs_known": len(known),
+                    "full_pass": full_pass,
+                    "listing_requests_max": cheap,
+                    "deep_requests": len(deep_targets),
+                    "would_resolve": deep_targets,
+                    "estimated_seconds": seconds,
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="plan",
+        )
+        return
+
+    out.print(f"{plural(len(known), 'bug')} in the corpus")
+    out.print(
+        f"[dim]up to {cheap} listing request(s)"
+        + (f" + up to {2 * len(deep_targets)} per-bug request(s)" if deep else "")
+        + f", ~{seconds // 60}m{seconds % 60:02d}s at the configured pacing[/]"
+    )
+    if full_pass:
+        out.print(
+            "[dim]a full pass walks Launchpad's whole queue for this package, "
+            "not just this corpus; later passes use the watermark and cost two[/]"
+        )
+    if deep and deep_targets:
+        out.print("[dim]would resolve: " + ", ".join(f"LP#{b}" for b in deep_targets[:12]) + "[/]")
+
+
+@app.command(rich_help_panel="Act on the corpus")
+def queue(
+    bucket: Annotated[
+        str | None,
+        typer.Option("--bucket", "-b", metavar="NAME", help="Show one bucket only."),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", "-n", metavar="N", help="Rows per bucket. Counts stay exact."),
+    ] = None,
+    titles: Annotated[
+        bool,
+        typer.Option("--titles", help="Include each bug's current Launchpad title."),
+    ] = False,
+    do_refresh: Annotated[
+        bool, typer.Option("--refresh", help="Re-read Launchpad statuses first.")
+    ] = False,
+    markdown: Annotated[
+        bool, typer.Option("--markdown", "-m", help="Emit the Markdown worklist.")
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable worklist.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """What still needs a decision, and what has already had one.
+
+    Reads the store; add ``--refresh`` to re-read Launchpad first. Rows leave
+    this list because Launchpad changed, never because the tool remembers you
+    looking -- so it reports how old its copy of Launchpad is, and says when
+    that is too old to rely on.
+
+    Every row is a proposal. A third-party cause is a *candidate* Invalid;
+    whether a bug is Invalid is a judgement for a human.
+
+    \b
+    Examples:
+      uru-doctor queue
+      uru-doctor queue --refresh
+      uru-doctor queue -b mark-duplicate
+    """
+    if markdown and as_json:
+        _fail("choose one of --markdown or --json", EXIT_USAGE)
+
+    chosen: Bucket | None = None
+    if bucket is not None:
+        try:
+            chosen = Bucket(bucket)
+        except ValueError:
+            names = ", ".join(b.value for b in Bucket)
+            _fail(f"unknown bucket {bucket!r}; expected one of: {names}", EXIT_USAGE)
+
+    if do_refresh:
+        refresh(as_json=False, out_path=None, config_path=config_path)
+        out.print()
+
+    config = _config(config_path)
+    rows = limit if limit is not None else config.queue.max_rows
+    with _state_store(config) as store:
+        if not store.run_keys(primary_only=True):
+            _fail("the store is empty; run `uru-doctor sweep` first")
+        worklist = _worklist(store, config)
+        lookup = _titles_for(store, worklist) if titles else {}
+
+    now = datetime.now(UTC)
+    stale = worklist.stale(now=now, after_days=config.queue.stale_after_days)
+
+    if as_json:
+        _write(
+            json.dumps(_queue_json(worklist, chosen, now, stale), indent=2) + "\n",
+            out_path,
+            label="worklist",
+        )
+        return
+    if markdown:
+        _write(
+            render_worklist(
+                worklist,
+                chosen=chosen,
+                max_rows=rows,
+                stale=stale,
+                titles=lookup,
+            ),
+            out_path,
+            label="worklist",
+        )
+        return
+
+    _print_worklist(worklist, chosen, rows, stale=stale, titles=lookup)
+
+
+def _titles_for(store: Store, worklist: Worklist) -> dict[str, str]:
+    """Current Launchpad titles for the actionable rows.
+
+    Read from the ``current_title`` column, which is already in the projection,
+    so this costs nothing extra -- it exists as a separate step only because
+    a worklist is read for its *actions* and a column of upstream prose pushes
+    them off the right-hand edge.
+    """
+    return {
+        item.row.run_key: item.row.current_title
+        for item in worklist.items
+        if item.bucket.actionable and item.row.current_title
+    }
+
+
+def _queue_json(
+    worklist: Worklist, chosen: Bucket | None, now: datetime, stale: bool
+) -> dict[str, object]:
+    """The machine-readable worklist.
+
+    Counts are unconditional and exact even when ``--bucket`` narrows the
+    rows, because a consumer that asked about one bucket still needs to know
+    it is looking at a fifth of the backlog.
+    """
+    items = [
+        item
+        for item in worklist.items
+        if item.bucket.actionable and (chosen is None or item.bucket is chosen)
+    ]
+    return {
+        "schema": JSON_SCHEMA_VERSION,
+        "generated_at": now.isoformat(),
+        "launchpad_state": {
+            "newest_check": (
+                worklist.newest_check.isoformat() if worklist.newest_check else None
+            ),
+            "oldest_check": (
+                worklist.oldest_check.isoformat() if worklist.oldest_check else None
+            ),
+            "never_checked": worklist.unchecked,
+            "stale": stale,
+        },
+        "counts": {bucket.value: worklist.counts.get(bucket, 0) for bucket in Bucket},
+        "actionable": worklist.actionable,
+        "done_by_status": dict(sorted(worklist.done_by_status.items())),
+        "deep_unknown": list(worklist.deep_unknown),
+        "items": [
+            {
+                "bucket": item.bucket.value,
+                "key": item.row.run_key,
+                "bug_id": item.row.bug_id,
+                "status": item.row.status,
+                "cause": item.row.cause.value if item.row.cause else None,
+                "action": item.action,
+                "master": item.master or None,
+                "tier": item.tier or None,
+                "duplicate_count": item.row.duplicate_count,
+                "evidence_complete": item.row.evidence_complete,
+                "checked_at": item.row.state.checked_at if item.row.state else None,
+            }
+            for item in items
+        ],
+    }
+
+
+def _freshness(worklist: Worklist, stale: bool) -> str:
+    """One line on how much to trust the rows below it."""
+    if worklist.newest_check is None:
+        return "[yellow]Launchpad state never read -- run `uru-doctor refresh --all`[/]"
+    age = datetime.now(UTC) - worklist.newest_check
+    hours = int(age.total_seconds() // 3600)
+    when = f"{hours}h ago" if hours < 48 else f"{hours // 24}d ago"
+    style = "yellow" if stale else "dim"
+    note = ""
+    if stale:
+        oldest = worklist.oldest_check
+        note = (
+            f"; oldest is {(datetime.now(UTC) - oldest).days}d old -- refresh"
+            if oldest
+            else "; refresh"
+        )
+    return f"[{style}]Launchpad state as of {when}{note}[/]"
+
+
+def _print_worklist(
+    worklist: Worklist,
+    chosen: Bucket | None,
+    max_rows: int,
+    *,
+    stale: bool,
+    titles: Mapping[str, str],
+) -> None:
+    """The worklist, for a terminal."""
+    out.print(
+        f"[bold]{plural(worklist.actionable, 'bug')} waiting on a decision[/] "
+        f"of {len(worklist.items)} in the corpus"
+    )
+    out.print(_freshness(worklist, stale))
+
+    shown = 0
+    for bucket in Bucket:
+        if not bucket.actionable or (chosen is not None and bucket is not chosen):
+            continue
+        items = worklist.of(bucket)
+        if not items:
+            continue
+        shown += 1
+        out.print()
+        out.rule(f"[bold]{bucket.value}[/]  {len(items)}", align="left")
+        out.print(f"[dim]{BUCKET_HELP[bucket]}[/]")
+
+        table = Table(box=None, pad_edge=False)
+        table.add_column("bug")
+        table.add_column("status", style="dim")
+        table.add_column("cause", style="dim")
+        table.add_column("proposed action", overflow="fold")
+        if titles:
+            table.add_column("current title", style="dim", overflow="fold")
+        for item in items[:max_rows]:
+            row = [
+                item.label,
+                item.row.status or "unknown",
+                item.row.cause.value if item.row.cause else "none",
+                item.action,
+            ]
+            if titles:
+                row.append(titles.get(item.row.run_key, ""))
+            table.add_row(*row)
+        out.print(table)
+        if len(items) > max_rows:
+            out.print(
+                f"[dim]… showing {max_rows} of {len(items)}; "
+                f"`--limit {len(items)}` for all[/]"
+            )
+
+    if not shown:
+        out.print("\n[green]nothing waiting on a decision[/]")
+
+    done = worklist.counts.get(Bucket.DONE, 0)
+    if done and chosen is None:
+        breakdown = ", ".join(
+            f"{count} {status}" for status, count in sorted(worklist.done_by_status.items())
+        )
+        out.print(f"\n[dim]{plural(done, 'bug')} need nothing: {breakdown}[/]")
+    if worklist.deep_unknown:
+        out.print(
+            f"[dim]{plural(len(worklist.deep_unknown), 'bug')} Launchpad calls a duplicate "
+            f"without us knowing of what -- `uru-doctor refresh --deep` resolves them[/]"
+        )
+    if worklist.unchecked and chosen is None:
+        out.print(
+            f"[dim]{plural(worklist.unchecked, 'bug')} never checked against Launchpad[/]"
+        )
 
 
 @app.callback(invoke_without_command=True)

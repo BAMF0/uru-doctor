@@ -139,7 +139,6 @@ cause-tuple  same causes and roots, same phase
 A shared root package alone is reported as a count, not a verdict. One root
 in common out of eleven is a coincidence worth a glance, all of them is the
 same fault, and the tool does not pretend to know where the line is.
-
 `history` keeps the roles apart. `libpeas-1.0-1` is a root in three bugs across
 two different release pairs, which is what an archive transition looks like.
 `eog` turns up in three bugs and causes none of them, and gets told so:
@@ -151,6 +150,53 @@ evidence against blaming it
 
 That inversion is the thing this tool exists to correct, so the two roles are
 never summed into one number.
+
+Then ask what is actually left to do:
+
+```sh
+uru-doctor refresh    # two requests
+uru-doctor queue
+```
+
+```
+18 bugs waiting on a decision of 44 in the corpus
+Launchpad state as of 0h ago
+
+mark-duplicate  2 ───────────────────────────────────────────────────────
+Same root-cause subgraph as an earlier bug, which Launchpad has not linked.
+The strongest tier there is: safe to act on.
+bug         status     cause              proposed action
+LP#2169106  Confirmed  resolver_livelock  mark as a duplicate of LP#2169035
+LP#2169157  New        resolver_livelock  mark as a duplicate of LP#2168855
+
+diagnosed-unrecorded  6 ─────────────────────────────────────────────────
+Confidently diagnosed, but the status does not say so. Nothing is wrong;
+nobody has written it down.
+...
+26 bugs need nothing: 2 Confirmed, 7 Fix Released, 1 Invalid, 9 Triaged,
+2 Won't Fix, 3 already a duplicate
+```
+
+A diagnosis is not a triage decision, and the gap between the two is where
+work accumulates: a duplicate nobody marked, a cause nobody recorded, a
+third-party bug nobody closed. `queue` is that gap, in buckets ordered by how
+safe the proposed action is.
+
+Rows leave the list because *Launchpad* changed — a status was set, a duplicate
+was marked — and never because the tool noted you looking at one. There is no
+local "done" flag, deliberately: it would be a second opinion about a fact
+Launchpad already owns, and the two would diverge the first time anyone used
+the web UI. The cost of that choice is that the list is exactly as current as
+the last `refresh`, so it carries its own age and says when that age has
+stopped being good enough.
+
+`refresh` is built to be run without thinking about it. `searchTasks` returns
+each bug's status in the task entry, so one request covers fifty bugs, and
+asking only for bugs *modified* since the last pass makes the steady state two
+requests however large the corpus is. Bugs the search does not return were not
+modified, which is positive evidence that what is already recorded is still
+current — provided the listing reached the end, which the tool checks, because
+this package has more bugs than any listing will page through.
 
 Check how much of the corpus was actually read:
 
@@ -192,9 +238,16 @@ that lexed and no rule claimed, because those are different repairs.
 | `rules` | List the diagnostic rules; `--explain NAME` for one. |
 | `stats` | Summarise the record store, with corpus-wide lexer coverage. |
 
-Every command takes `-h`/`--help`. The ten that answer a question also take
+### Act on the corpus
+
+| | |
+| --- | --- |
+| `queue` | What still needs a decision, in buckets. `--bucket NAME` for one. |
+| `refresh` | Re-read Launchpad's status on stored bugs. Two requests. |
+
+Every command takes `-h`/`--help`. The twelve that answer a question also take
 `--json`: `diagnose`, `ingest`, `fetch`, `sweep`, `dedup`, `related`,
-`history`, `coverage`, `show` and `stats`.
+`history`, `coverage`, `show`, `stats`, `queue` and `refresh`.
 
 ## Behaviour
 
@@ -231,6 +284,26 @@ a bug's own resolution is the second-strongest ground truth there is. Taking
 the default would quietly exclude the best evidence for whether this tool is
 right, so closed bugs are included. `sweep` also records each bug's status,
 which `searchTasks` returns for free.
+
+**Duplicates stay in too, for the same reason and a sharper one.**
+`searchTasks` also omits bugs marked as duplicates by default. Measured on
+2026-10-05 over one week of release-upgrader reports, the default returned 36
+tasks and `omit_duplicates=false` returned 49 — hiding thirteen bugs. Four of
+the thirteen were already in the local corpus, stored as `New` with no
+duplicate recorded, because they had been swept *before* anyone marked them.
+So a bug does not merely start out invisible: it *becomes* invisible the moment
+somebody triages it, which is exactly when a triage tool needs to notice. Two
+of those thirteen, 2169028 and 2169157, are duplicates of 2168855 — which is
+the master this tool had already picked for them from the logs alone, at
+`root-graph` tier.
+
+**Launchpad's verdict is cached, not merged into the record.** `bug_state` is
+a table of its own, keyed by bug rather than by run, and refreshing it never
+rewrites a stored `UpgradeRun`. A diagnosis has to stay reproducible from the
+record, and a record edited after the fact by a network call is not that. So
+`UpgradeRun.bug_status` keeps its own meaning — what Launchpad said when the
+bug was ingested — and the table holds what it says now. Neither is ever an
+input to a diagnosis or a signature.
 
 ## Exit status
 
@@ -332,7 +405,17 @@ translation. `pkgProblem::Resolve` keeps its identifier even in French.
 
 It will not tell you a bug is Invalid. Third-party findings get their own
 section labelled *candidate* Invalid, and that is as far as it goes. The
-judgement belongs to someone accountable for it.
+judgement belongs to someone accountable for it. `queue` holds the same line:
+it proposes, counts and orders, and the one bucket that touches this is called
+`candidate-invalid` and says the call is yours. Note that the test is the
+*primary* cause only — any machine with a few PPAs has one implicated
+somewhere, and the broader test flags bugs whose real cause is an Ubuntu
+package. In the development corpus that is three bugs out of four.
+
+It will not remember what you have done. There is no local "triaged",
+"acknowledged" or "dismissed" state anywhere, and `queue` derives every row
+from Launchpad's current status and duplicate links. A local flag would be a
+second opinion about a fact Launchpad owns.
 
 It will not guess which PPA a package came from. The upgrader writes a flat
 `Foreign` list with no origin attached, so grouping by PPA would mean inferring
@@ -357,9 +440,21 @@ the ones that are defined but not yet wired up rather than presenting them as
 settings. A test enforces both directions.
 
 State lives in `.uru-doctor/` at the corpus root: the record store that
-`dedup`, `related`, `history`, `coverage`, `show` and `stats` read, and the
-attachment cache that `fetch` and `sweep` fill. The `[paths] state_dir` option
-moves it. `diagnose` and `title` leave nothing behind.
+`dedup`, `related`, `history`, `coverage`, `show`, `stats` and `queue` read,
+and the attachment cache that `fetch` and `sweep` fill. The `[paths] state_dir`
+option moves it. `diagnose` and `title` leave nothing behind.
+
+The corpus-wide commands are built to stay usable at a corpus of thousands,
+which in practice means one rule: `queue`, `refresh` and `dedup`'s default
+output read indexed columns and never deserialise a stored record. Measured,
+because the difference is not visible in the output — validating a payload
+costs 0.6ms against 0.02ms for a projected row, so at ten thousand runs it is
+six seconds and half a gigabyte of JSON against a fifth of a second.
+Clustering is a hash bucket over two indexed signature columns and is linear;
+only `dedup --markdown`, which quotes titles and per-run facts, needs the
+records themselves. A test asserts that the projections do not select
+`payload`, since a refactor adding one convenient field would undo this
+silently.
 
 Logs read from disk are redacted by default (hostnames, usernames, home paths,
 emails, IPs) because the Markdown report quotes log lines verbatim for pasting

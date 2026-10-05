@@ -30,7 +30,7 @@ equally confident.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Final
@@ -41,8 +41,16 @@ from uru_doctor.diagnose import DiagnosisResult, explain
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Decision, Finding, UpgradeRun
 from uru_doctor.title import ProposedTitle, phase_note, propose_title
+from uru_doctor.worklist import BUCKET_HELP, Bucket, Worklist
 
-__all__ = ["MAX_QUOTE_CHARS", "RunEntry", "plural", "render_corpus", "render_run"]
+__all__ = [
+    "MAX_QUOTE_CHARS",
+    "RunEntry",
+    "plural",
+    "render_corpus",
+    "render_run",
+    "render_worklist",
+]
 
 _RULE: Final = "---"
 
@@ -952,5 +960,118 @@ def render_corpus(
             present = ", ".join(s.value for s in entry.run.logs_present) or "nothing usable"
             lines.append(f"- {names[entry.key]}: {present}")
         lines.append("")
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def render_worklist(
+    worklist: Worklist,
+    *,
+    chosen: Bucket | None = None,
+    max_rows: int = 20,
+    stale: bool = False,
+    titles: Mapping[str, str] | None = None,
+) -> str:
+    """Render the worklist as Markdown: what needs a decision, and how fresh.
+
+    The freshness line comes first and is not optional. This page's whole
+    claim is that a triager need not re-check Launchpad row by row, and that
+    claim is only worth anything if the page says how old its copy of
+    Launchpad is. A worklist that cannot date itself is reporting an opinion.
+
+    Counts are always the full counts, even under ``chosen``. Narrowing the
+    rows must not narrow the arithmetic, or a reader works through one bucket
+    believing it was the backlog.
+    """
+    titles = titles or {}
+    lines = [
+        "# Triage worklist",
+        "",
+        f"{plural(worklist.actionable, 'bug')} waiting on a decision, "
+        f"of {len(worklist.items)} in the corpus.",
+        "",
+    ]
+
+    if worklist.newest_check is None:
+        lines += [
+            "> **Launchpad state has never been read.** Every row below is "
+            "unclassified until `uru-doctor refresh --all` has run.",
+            "",
+        ]
+    else:
+        age = f"{worklist.newest_check:%Y-%m-%d %H:%M} UTC"
+        warning = " **This is stale; refresh before acting.**" if stale else ""
+        lines += [
+            f"Launchpad state as of {age}.{warning}",
+            "",
+        ]
+
+    lines += [
+        "Rows leave this list because Launchpad changed -- a status was set, a "
+        "duplicate was marked -- and never because this tool recorded you "
+        "looking at one. Nothing here has been applied; every row is a "
+        "proposal for a human to act on.",
+        "",
+        "| Bucket | Bugs |",
+        "| --- | --- |",
+    ]
+    for bucket in Bucket:
+        count = worklist.counts.get(bucket, 0)
+        if count:
+            lines.append(f"| `{bucket.value}` | {count:,} |")
+    lines.append("")
+
+    for bucket in Bucket:
+        if not bucket.actionable or (chosen is not None and bucket is not chosen):
+            continue
+        items = worklist.of(bucket)
+        if not items:
+            continue
+        lines += [f"## {bucket.value} ({len(items)})", "", BUCKET_HELP[bucket], ""]
+        header = "| Bug | Status | Cause | Proposed action |"
+        divider = "| --- | --- | --- | --- |"
+        if titles:
+            header = "| Bug | Status | Cause | Proposed action | Current title |"
+            divider = "| --- | --- | --- | --- | --- |"
+        lines += [header, divider]
+        for item in items[:max_rows]:
+            cause = _code(item.row.cause.value) if item.row.cause else "_none_"
+            cells = [
+                item.label,
+                item.row.status or "unknown",
+                cause,
+                item.action,
+            ]
+            if titles:
+                cells.append(_elide(titles.get(item.row.run_key, ""), 60))
+            lines.append("| " + " | ".join(cells) + " |")
+        lines.append("")
+        if len(items) > max_rows:
+            lines += [f"… and {len(items) - max_rows:,} more in this bucket.", ""]
+
+    done = worklist.counts.get(Bucket.DONE, 0)
+    if done:
+        breakdown = ", ".join(
+            f"{count} {status}" for status, count in sorted(worklist.done_by_status.items())
+        )
+        lines += [
+            f"## Needs nothing ({done})",
+            "",
+            f"Counted rather than listed: {breakdown}.",
+            "",
+        ]
+
+    if worklist.deep_unknown:
+        lines += [
+            "## Masters unresolved",
+            "",
+            f"Launchpad calls {plural(len(worklist.deep_unknown), 'bug')} a duplicate "
+            "without this tool knowing of what. A search can reveal *that* a bug is a "
+            "duplicate cheaply; only the bug resource names the master, at one request "
+            "each. `uru-doctor refresh --deep` resolves them.",
+            "",
+            ", ".join(f"LP#{bug}" for bug in worklist.deep_unknown),
+            "",
+        ]
 
     return "\n".join(lines).rstrip() + "\n"
