@@ -705,7 +705,7 @@ wheels = [
 
 [[package]]
 name = "uru-doctor"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
@@ -734,7 +734,7 @@ dev = [
 
 [[package]]
 name = "uru-doctor-cli"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "cli" }
 dependencies = [
     { name = "httpx" },

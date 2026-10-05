@@ -53,6 +53,23 @@ database; use `uru_doctor.Store` as the backend for a corpus you query
 repeatedly. To work on the tool itself rather than use it, see *Development*
 below.
 
+## Versioning
+
+Both packages follow [Semantic Versioning](https://semver.org/). While they
+are pre-1.0, a minor bump may change the public surface, so pin the library to
+a minor series:
+
+```sh
+uv add 'uru-doctor>=0.2,<0.3'
+```
+
+The library's public surface is exactly the names re-exported from
+`uru_doctor/__init__.py`; anything reachable only through a submodule may move
+without a major bump. The CLI is versioned independently of the library, and
+`uru-doctor --version` prints both. What changed, in which version, is in
+[CHANGELOG.md](CHANGELOG.md); a test fails a release whose version is not
+covered there.
+
 ## Quickstart
 
 Point it at a log directory, whether your own machine's or one unpacked from a

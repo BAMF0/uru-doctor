@@ -1,6 +1,6 @@
 [project]
 name = "uru-doctor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Diagnose, deduplicate and retitle Ubuntu Release Upgrader bugs from their upgrade logs"
 readme = "README.md"
 # Matching ubuntu-release-upgrader, which this exists to triage bugs for. Its

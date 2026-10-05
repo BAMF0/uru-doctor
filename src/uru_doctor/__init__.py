@@ -46,7 +46,7 @@ from uru_doctor.memory import MemoryBackend
 from uru_doctor.store import Store
 from uru_doctor.title import ProposedTitle, propose_title
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Cluster",

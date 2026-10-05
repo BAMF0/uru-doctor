@@ -22,6 +22,27 @@ uv run ruff check src tests cli/src cli/tests
 uv run mypy src/uru_doctor cli/src/uru_doctor_cli
 ```
 
+## Releasing
+
+Both packages follow SemVer; pre-1.0, a minor bump may change the public
+surface (the names re-exported from `uru_doctor/__init__.py` — anything
+deeper may move freely). The two distributions version independently. A bump
+means, in any order:
+
+1. Edit `version` in the package's `pyproject.toml` **and** `__version__` in
+   its `__init__.py`. `uv_build` has no dynamic-version hook, so the pair is
+   kept consistent by a test, not a tool.
+2. Add the `CHANGELOG.md` entry. Tests pin that the newest entry matches the
+   library's version and that some entry matches the CLI's.
+3. If the CLI changed, `uv sync` to relock, and bump `user_agent` in the
+   shipped `uru-doctor.toml` — the config test compares it against the
+   default, which now tracks the CLI version.
+
+Version bumps are user-visible in the store: records stamp the library's
+version as `tool_version`, so a bump makes older records report policy drift
+and be re-ingested. That is the drift mechanism working as designed, not a
+migration to suppress.
+
 After any change that affects the grammar, the rules, ranking or fixtures, run
 the full regression — two fixes so far looked clean and changed an earlier
 bug's answer:

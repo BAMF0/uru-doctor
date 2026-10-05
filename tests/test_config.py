@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 """Tests for :mod:`uru_doctor.config`, the library's configuration tree.
 
-Loading semantics and licensing live here. The guard that keeps the checked-in
-``uru-doctor.toml`` and the code from drifting apart lives in
-``cli/tests/test_config.py``, because that file documents the CLI's sections
+Loading semantics, licensing and version consistency live here. The guard that
+keeps the checked-in ``uru-doctor.toml`` and the code from drifting apart lives
+in ``cli/tests/test_config.py``, because that file documents the CLI's sections
 too and so must be validated against the CLI's model.
 """
 
@@ -150,3 +150,31 @@ class TestLicensing:
             if header not in lines:
                 missing.append(str(path.relative_to(PROJECT)))
         assert not missing, f"missing SPDX header: {missing}"
+
+
+class TestVersioning:
+    """The version must be stated consistently in every place.
+
+    ``uv_build`` has no dynamic-version hook, so the version lives in
+    ``pyproject.toml`` and in ``__init__.__version__``, and this class is what
+    stops them drifting apart. The changelog check is the client-facing half:
+    a release without an entry is a version nobody can evaluate.
+    """
+
+    def test_pyproject_matches_package_version(self) -> None:
+        import uru_doctor
+
+        raw = tomllib.loads((PROJECT / "pyproject.toml").read_text())
+        assert raw["project"]["version"] == uru_doctor.__version__
+
+    def test_changelog_covers_the_current_version(self) -> None:
+        import re
+
+        import uru_doctor
+
+        changelog = (PROJECT / "CHANGELOG.md").read_text()
+        released = re.findall(r"^## \[(\d[^]]*)\]", changelog, re.MULTILINE)
+        assert released, "CHANGELOG.md has no release entries"
+        assert released[0] == uru_doctor.__version__, (
+            f"newest changelog entry is {released[0]}, package says {uru_doctor.__version__}"
+        )

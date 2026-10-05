@@ -156,6 +156,54 @@ class TestShippedFile:
         assert not missing, f"documented but unread: {sorted(missing)}"
 
 
+class TestVersioning:
+    """The CLI's version must be stated consistently in every place.
+
+    Same drift risk as the library, one extra leg: the dependency the CLI
+    declares on the library must actually accept the library in this tree, or
+    a release ships a frontend that refuses its own backend.
+    """
+
+    def test_pyproject_matches_package_version(self) -> None:
+        import uru_doctor_cli
+
+        raw = tomllib.loads((PROJECT / "cli" / "pyproject.toml").read_text())
+        assert raw["project"]["version"] == uru_doctor_cli.__version__
+
+    def test_changelog_covers_the_current_version(self) -> None:
+        import uru_doctor_cli
+
+        changelog = (PROJECT / "CHANGELOG.md").read_text()
+        released = re.findall(r"^## \[(\d[^]]*)\]", changelog, re.MULTILINE)
+        assert uru_doctor_cli.__version__ in released, (
+            f"no changelog entry for CLI {uru_doctor_cli.__version__}"
+        )
+
+    def test_library_requirement_accepts_the_workspace_library(self) -> None:
+        """The pin must not exclude the library it is developed against.
+
+        Parsed by hand rather than via ``packaging`` so the test does not
+        depend on a package the library deliberately does not.
+        """
+        import uru_doctor
+
+        raw = tomllib.loads((PROJECT / "cli" / "pyproject.toml").read_text())
+        (requirement,) = [
+            d for d in raw["project"]["dependencies"] if d.startswith("uru-doctor")
+        ]
+        specifiers = re.findall(r"(>=|<=|==|~=|<|>)\s*([0-9.]+)", requirement)
+        assert specifiers, f"uru-doctor is unpinned: {requirement}"
+        current = tuple(int(p) for p in uru_doctor.__version__.split("."))
+        for op, bound in specifiers:
+            bound_v = tuple(int(p) for p in bound.split("."))
+            if op == ">=":
+                assert current >= bound_v, requirement
+            elif op == "<":
+                assert current < bound_v, requirement
+            elif op == "==":
+                assert current == bound_v, requirement
+
+
 class TestDocstring:
     def test_header_precedes_the_docstring(self) -> None:
         """A header inserted after the docstring would blank ``__doc__``.

@@ -56,7 +56,7 @@ from rich.progress import (
 from rich.table import Table
 
 import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
-from uru_doctor import __version__
+from uru_doctor import __version__ as LIBRARY_VERSION
 from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summarise, tier_index
 from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
 from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
@@ -68,6 +68,7 @@ from uru_doctor.rules.registry import all_rules, rules_digest
 from uru_doctor.store import BugState, Store, run_key_for
 from uru_doctor.title import ProposedTitle, propose_title
 from uru_doctor.worklist import BUCKET_HELP, Bucket, Worklist, classify
+from uru_doctor_cli import __version__ as CLI_VERSION
 from uru_doctor_cli.config import CliConfig as Config
 from uru_doctor_cli.config import load_cli_config as load_config
 from uru_doctor_cli.lp import BugRecord, BugRef, Launchpad, LaunchpadError, RateLimited
@@ -318,8 +319,10 @@ def _diagnose_run(
         enabled=config.rules.enabled,
         disabled=config.rules.disabled,
     )
+    # The library version is stamped, not the CLI's: the record is a library
+    # artifact, and the check is "was this produced by this analysis code".
     stamped = run.model_copy(
-        update={"tool_version": __version__, "rules_digest": rules_digest()}
+        update={"tool_version": LIBRARY_VERSION, "rules_digest": rules_digest()}
     )
     title = propose_title(stamped, result, interner, max_length=config.title.max_length)
     signature = build_signature(
@@ -627,7 +630,7 @@ def _warn_recomputed_policy(run: UpgradeRun) -> None:
         f"[yellow]policy drift:[/] stored verdict came from "
         f"{run.tool_version or 'an unrecorded version'} with rules "
         f"{run.rules_digest}; the verdict below was recomputed with "
-        f"{__version__} and rules {current}."
+        f"{LIBRARY_VERSION} and rules {current}."
     )
     err.print("[dim]Re-fetch or re-ingest this run to store the current verdict.[/]")
 
@@ -2739,7 +2742,10 @@ def main(
     version: Annotated[bool, typer.Option("--version", help="Show the version and exit.")] = False,
 ) -> None:
     if version:
-        out.print(f"uru-doctor {__version__}")
+        # The CLI's version first -- that is the distribution a user installed --
+        # with the library's alongside, because both matter in a bug report once
+        # they can diverge.
+        out.print(f"uru-doctor {CLI_VERSION} (library {LIBRARY_VERSION})")
         raise typer.Exit(EXIT_OK)
 
 

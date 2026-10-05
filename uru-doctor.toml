@@ -103,8 +103,9 @@ disabled = []
 # Launchpad, and no credentials are ever used.
 api_base = "https://api.launchpad.net/devel"
 
-# Identify yourself. Launchpad is a shared service; be nameable.
-user_agent = "uru-doctor/0.1 (+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
+# Identify yourself. Launchpad is a shared service; be nameable. The default
+# tracks the CLI package version, so this line changes when that does.
+user_agent = "uru-doctor/0.2.0 (+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
 
 # Minimum gap between requests, in seconds.
 #

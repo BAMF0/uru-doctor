@@ -15,6 +15,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field
 
 from uru_doctor.config import Config, load_config
+from uru_doctor_cli import __version__
 
 
 class PathsConfig(BaseModel):
@@ -35,10 +36,18 @@ class LaunchpadConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     api_base: str = "https://api.launchpad.net/devel"
-    user_agent: str = (
-        "uru-doctor/0.1 (+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
+    user_agent: str = Field(
+        default_factory=lambda: (
+            f"uru-doctor/{__version__} "
+            "(+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
+        )
     )
-    """Identifies the client. Launchpad is a shared service; be nameable."""
+    """Identifies the client. Launchpad is a shared service; be nameable.
+
+    Derived from the package version, so it cannot drift behind a release; the
+    shipped ``uru-doctor.toml`` restates it, and the both-directions config
+    test is what makes a version bump update the file too.
+    """
 
     max_retries: int = Field(5, ge=0)
     backoff_base_s: float = Field(2.0, gt=0)
