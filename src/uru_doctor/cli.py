@@ -600,6 +600,36 @@ def _policy_drift(
     return drifted
 
 
+def _warn_recomputed_policy(run: UpgradeRun) -> None:
+    """Warn when a re-rendered verdict is not the one that was recorded.
+
+    ``show`` reconstructs the verdict and the title from the stored log record
+    rather than reading them back, because neither is persisted. So what it
+    prints is *today's* reading of an old record. Usually that is the same
+    reading. When the rules or the apt grammar have moved since, it
+    legitimately is not -- and a reader who is holding this output next to the
+    sweep it came from, wondering why the cause changed, is owed the answer
+    rather than left to find it.
+
+    Runs carrying no stamp predate stamping. Warning on those would fire on
+    every pre-existing record and so teach the reader to ignore the warning,
+    which is the same reason :func:`_policy_drift` passes over them.
+    """
+    if not run.rules_digest:
+        return
+    current = rules_digest()
+    if run.rules_digest == current:
+        return
+    # stderr, so that --out and a pipe both still get a clean report.
+    err.print(
+        f"[yellow]policy drift:[/] stored verdict came from "
+        f"{run.tool_version or 'an unrecorded version'} with rules "
+        f"{run.rules_digest}; the verdict below was recomputed with "
+        f"{__version__} and rules {current}."
+    )
+    err.print("[dim]Re-fetch or re-ingest this run to store the current verdict.[/]")
+
+
 class CorpusCoverage(TypedDict):
     """Aggregate lexer coverage over a whole store.
 
@@ -1522,9 +1552,17 @@ def show(
         str,
         typer.Argument(metavar="KEY", help="Run key, e.g. lp:2150245#0, or a bare bug number."),
     ],
+    table: Annotated[
+        bool,
+        typer.Option(
+            "--table",
+            "-t",
+            help="Emit the compact verdict table, as fetch and sweep do. The default.",
+        ),
+    ] = False,
     markdown: Annotated[
-        bool, typer.Option("--markdown", "-m", help="Emit the full Markdown report.")
-    ] = True,
+        bool, typer.Option("--markdown", "-m", help="Emit the full Markdown report instead.")
+    ] = False,
     as_json: Annotated[
         bool, typer.Option("--json", help="Emit the machine-readable record instead.")
     ] = False,
@@ -1533,11 +1571,21 @@ def show(
 ) -> None:
     """Show a stored run's report.
 
+    Prints the same verdict table that fetch and sweep print, so a sweep can
+    be read back without going to Launchpad again. The table is recomputed
+    from the stored logs, so it says so when the rules have moved since.
+
     \b
     Examples:
+      uru-doctor show 2150245
       uru-doctor show lp:2150245#0
+      uru-doctor show --markdown 2150245
       uru-doctor show --json 2150245
     """
+    if table and markdown:
+        # Resolving this by precedence would silently ignore whichever flag
+        # lost, and the one thing the reader was explicit about is the format.
+        _fail("--table and --markdown select different formats; pass one.", code=EXIT_USAGE)
     config = _config(config_path)
     with _state_store(config) as store:
         interner = Interner(store)
@@ -1560,14 +1608,43 @@ def show(
 
         records: list[dict[str, object]] = []
         for run in candidates:
-            result = DiagnosisResult(findings=run.findings)
+            # Only the table mode re-diagnoses, and it has to. A
+            # ``DiagnosisResult`` rebuilt from stored findings carries no
+            # ``corroborated`` set and no ``notes``, because neither is
+            # persisted -- and the verdict table prints both. Rebuilding would
+            # therefore drop the "corroborated by apt" qualifier and every
+            # withheld-rule note, so the table would differ from the sweep that
+            # produced it in precisely the places a reader is checking. Rules
+            # are pure over the stored record, so this re-reads nothing from
+            # the network.
+            #
+            # The other two modes keep the stored findings deliberately:
+            # ``--json`` is a report of what was recorded, and the Markdown
+            # page states its own provenance in a footer.
+            if as_json or markdown:
+                result = DiagnosisResult(findings=run.findings)
+            else:
+                result = diagnose(
+                    run,
+                    interner,
+                    enabled=config.rules.enabled,
+                    disabled=config.rules.disabled,
+                )
             proposed = propose_title(run, result, interner, max_length=config.title.max_length)
+
             if as_json:
                 # The stored signature, not a recomputed one: this command
                 # reports what was recorded, and recomputing here would hide
                 # exactly the drift that the policy stamp exists to expose.
+                # The record carries that stamp, so a consumer can detect the
+                # drift itself -- which is why this mode does not warn.
                 records.append(_json_record(run, result, proposed, run.signature, interner))
-            elif markdown:
+                continue
+
+            # Both human formats recompute the proposed title, so both can
+            # disagree with the record they are rendering.
+            _warn_recomputed_policy(run)
+            if markdown:
                 out.file.write(
                     render_run(
                         run,

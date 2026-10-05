@@ -188,7 +188,7 @@ that lexed and no rule claimed, because those are different repairs.
 | `related KEY` | Stored runs reporting the same fault as this one, in tiers. |
 | `history PKG` | Which runs implicate a package, as root or as victim. |
 | `coverage` | How much of the stored corpus the lexer recognised. |
-| `show KEY` | Re-render a stored run's report. |
+| `show KEY` | Re-render a stored run's verdict; `--markdown` for the full report. |
 | `rules` | List the diagnostic rules; `--explain NAME` for one. |
 | `stats` | Summarise the record store, with corpus-wide lexer coverage. |
 
@@ -310,6 +310,17 @@ they are indistinguishable. The digest covers what can change a ranking
 (priority, severity, confidence, which rules exist) and deliberately not
 prose, because a reworded remedy that looks like a policy change makes the
 warning noise.
+
+**A re-read verdict says when it is not the stored one.** Neither the proposed
+title nor the diagnosis is persisted -- both are recomputed from the stored
+logs -- so `show` is answering with today's rules about an older record. When
+the stamp on that record no longer matches the current rules, `show` says so
+on stderr before the report, naming both digests. Otherwise the one case where
+re-reading a sweep disagrees with the sweep is the one case that looks like a
+bug. `--json` is exempt: it reports the stored findings and the stored stamp,
+leaving the comparison to the consumer. Runs stored before stamping existed
+carry no digest and are passed over rather than warned about, for the same
+reason `dedup` passes over them.
 
 **Translated logs.** apt's error stack and all of `apt-term.log` are
 translated, but the resolver verbs are not. Dependency names *are* (`Depèn`,

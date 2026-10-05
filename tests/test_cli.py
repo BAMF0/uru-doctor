@@ -307,11 +307,59 @@ class TestIngestAndQuery:
         assert "store is empty" in result.output
 
     def test_show_a_stored_run(self, ingested: Path, tmp_path: Path, corpus: Path) -> None:
+        """The default is the verdict table, as fetch and sweep print it."""
         key = f"dir:{corpus / '2150245'}#0"
         result = runner.invoke(app, ["show", key, "--config", _conf(tmp_path, ingested)])
         assert result.exit_code == EXIT_OK, result.output
+        assert "proposed title" in result.stdout
+        assert "libwacom9-surface" in result.stdout
+
+    def test_show_renders_markdown_on_request(
+        self, ingested: Path, tmp_path: Path, corpus: Path
+    ) -> None:
+        key = f"dir:{corpus / '2150245'}#0"
+        result = runner.invoke(
+            app, ["show", key, "--markdown", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
         assert result.stdout.startswith("# ")
         assert "libwacom9-surface" in result.stdout
+
+    def test_show_refuses_two_formats(self, ingested: Path, tmp_path: Path, corpus: Path) -> None:
+        """Resolving the conflict by precedence would ignore an explicit flag."""
+        key = f"dir:{corpus / '2150245'}#0"
+        result = runner.invoke(
+            app, ["show", key, "--table", "--markdown", "--config", _conf(tmp_path, ingested)]
+        )
+        assert result.exit_code == EXIT_USAGE
+        assert "pass one" in result.output
+
+    def test_show_table_matches_what_diagnose_printed(
+        self, ingested: Path, tmp_path: Path, corpus: Path
+    ) -> None:
+        """The whole point of the table: it is the same verdict, re-read.
+
+        ``corroborated`` and ``notes`` are not persisted, so a result rebuilt
+        from stored findings alone silently drops the "corroborated by apt"
+        qualifier and every withheld-rule note. Comparing against ``diagnose``,
+        which never touches the store, is what catches that regression.
+        """
+        fresh = runner.invoke(app, ["diagnose", str(corpus / "2150245")])
+        assert fresh.exit_code == EXIT_OK, fresh.output
+        key = f"dir:{corpus / '2150245'}#0"
+        stored = runner.invoke(app, ["show", key, "--config", _conf(tmp_path, ingested)])
+        assert stored.exit_code == EXIT_OK, stored.output
+
+        def rows(text: str) -> list[str]:
+            keep = ("cause", "confidence", "blast radius", "fragile", "evidence", "note:")
+            return [
+                " ".join(line.split())
+                for line in text.splitlines()
+                if line.strip().startswith(keep)
+            ]
+
+        assert rows(stored.stdout) == rows(fresh.stdout)
+        assert rows(stored.stdout)
 
     def test_show_unknown_key_lists_known_ones(self, ingested: Path, tmp_path: Path) -> None:
         result = runner.invoke(app, ["show", "lp:9999999#0", "--config", _conf(tmp_path, ingested)])
