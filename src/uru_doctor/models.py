@@ -1371,9 +1371,8 @@ class UpgradeRun(Frozen):
     Launchpad's ``number_of_duplicates``, carried because it is the cheapest
     available signal that a fault is an archive-wide one rather than one
     machine's misconfiguration -- thirteen duplicates means thirteen reporters
-    met the same thing. It was being fetched into
-    :class:`~uru_doctor.lp.read.BugRecord` and then dropped before reaching the
-    run.
+    met the same thing. It was being fetched into the CLI's ``BugRecord`` and
+    then dropped before reaching the run.
 
     Never an input to a diagnosis or a signature. It describes how a bug was
     *triaged*, not what the logs say, and the whole design rests on not

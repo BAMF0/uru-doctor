@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Tests for :mod:`uru_doctor.cli`.
+"""Tests for :mod:`uru_doctor_cli.cli`.
 
 Driven through Typer's ``CliRunner`` rather than by calling the command
 functions, because most of what can go wrong here is in the wiring: an exit
@@ -19,13 +19,12 @@ from pathlib import Path
 
 import httpx
 import pytest
+from conftest import FIXTURES, fixture_text
 from typer.testing import CliRunner
+from uru_doctor_cli.cli import EXIT_FAIL, EXIT_IMPERFECT, EXIT_OK, EXIT_USAGE, app
 
-from uru_doctor.cli import EXIT_FAIL, EXIT_IMPERFECT, EXIT_OK, EXIT_USAGE, app
 from uru_doctor.models import UpgradeRun
 from uru_doctor.store import Store
-
-from .conftest import FIXTURES, fixture_text
 
 runner = CliRunner()
 
@@ -183,7 +182,7 @@ def _patch_launchpad(
     the network, and a test that forgets to pass a client would silently reach
     the live API.
     """
-    import uru_doctor.lp.read as lp
+    import uru_doctor_cli.lp as lp
 
     original = lp.Launchpad.__post_init__
 
@@ -1520,7 +1519,7 @@ class TestProgressDisplay:
 
     def test_a_disabled_tracker_is_a_safe_no_op(self) -> None:
         """So no caller has to ask whether progress is on."""
-        from uru_doctor.cli import Tracker
+        from uru_doctor_cli.cli import Tracker
 
         tracker = Tracker(None, None)
         tracker.start("anything", total=5)
@@ -1536,8 +1535,7 @@ class TestProgressDisplay:
         from io import StringIO
 
         from rich.console import Console
-
-        from uru_doctor.cli import _progress
+        from uru_doctor_cli.cli import _progress
 
         with _progress(console=Console(file=StringIO(), force_terminal=False)) as tracker:
             assert tracker.display is None
@@ -1551,8 +1549,7 @@ class TestProgressDisplay:
         from io import StringIO
 
         from rich.console import Console
-
-        from uru_doctor.cli import _progress
+        from uru_doctor_cli.cli import _progress
 
         console = Console(file=StringIO(), force_terminal=True, width=100)
         with _progress(console=console) as tracker:
@@ -1573,8 +1570,7 @@ class TestProgressDisplay:
         from io import StringIO
 
         from rich.console import Console
-
-        from uru_doctor.cli import _progress
+        from uru_doctor_cli.cli import _progress
 
         console = Console(file=StringIO(), force_terminal=True, width=100)
         with _progress(console=console) as tracker:
@@ -1592,8 +1588,7 @@ class TestProgressDisplay:
         from io import StringIO
 
         from rich.console import Console
-
-        from uru_doctor.cli import _progress
+        from uru_doctor_cli.cli import _progress
 
         console = Console(file=StringIO(), force_terminal=True, width=100)
         with _progress(console=console) as tracker:
@@ -1607,8 +1602,7 @@ class TestProgressDisplay:
         from io import StringIO
 
         from rich.console import Console
-
-        from uru_doctor.cli import _progress
+        from uru_doctor_cli.cli import _progress
 
         console = Console(file=StringIO(), force_terminal=True, width=100)
         with _progress(console=console) as tracker:

@@ -57,12 +57,10 @@ from rich.table import Table
 
 import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
 from uru_doctor import __version__
-from uru_doctor.config import Config, load_config
 from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summarise, tier_index
 from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
 from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
 from uru_doctor.intern import Interner
-from uru_doctor.lp.read import BugRecord, BugRef, Launchpad, LaunchpadError, RateLimited
 from uru_doctor.models import LogSource, Signature, UpgradeRun
 from uru_doctor.parsers.apportmeta import parse_apport_meta
 from uru_doctor.report import RunEntry, plural, render_corpus, render_run, render_worklist
@@ -70,6 +68,9 @@ from uru_doctor.rules.registry import all_rules, rules_digest
 from uru_doctor.store import BugState, Store, run_key_for
 from uru_doctor.title import ProposedTitle, propose_title
 from uru_doctor.worklist import BUCKET_HELP, Bucket, Worklist, classify
+from uru_doctor_cli.config import CliConfig as Config
+from uru_doctor_cli.config import load_cli_config as load_config
+from uru_doctor_cli.lp import BugRecord, BugRef, Launchpad, LaunchpadError, RateLimited
 
 EXIT_OK: Final = 0
 EXIT_FAIL: Final = 1
@@ -238,7 +239,7 @@ class Tracker:
 
     @property
     def callback(self) -> Callable[[str], None]:
-        """A ``progress`` callable for :class:`~uru_doctor.lp.read.Launchpad`."""
+        """A ``progress`` callable for :class:`~uru_doctor_cli.lp.Launchpad`."""
         return self.note
 
 

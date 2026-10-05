@@ -12,7 +12,7 @@ Writes into ``/tmp/opencode/aptlogs/``:
     new<ID>-aptterm.log apt-term.log, when attached
     new<ID>-history.log history.log, when attached
 
-This is a thin wrapper around :mod:`uru_doctor.lp.read`, which owns the
+This is a thin wrapper around :mod:`uru_doctor_cli.lp`, which owns the
 rate-limiting, the retry policy and the decision about which attachments are
 worth downloading. It was once a standalone implementation of all three, and
 the copies drifted: the module learned to sniff hand-uploaded attachments by
@@ -45,9 +45,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "cli" / "src"))
 
-from uru_doctor.lp.read import Launchpad, LaunchpadError, RateLimited  # noqa: E402
 from uru_doctor.models import LogSource  # noqa: E402
+from uru_doctor_cli.lp import Launchpad, LaunchpadError, RateLimited  # noqa: E402
 
 OUT = Path("/tmp/opencode/aptlogs")
 

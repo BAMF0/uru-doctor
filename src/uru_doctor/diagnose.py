@@ -43,7 +43,6 @@ from uru_doctor.models import (
     Finding,
     Phase,
     Severity,
-    Signature,
     UpgradeRun,
 )
 from uru_doctor.parsers.apportmeta import ApportMeta
@@ -506,16 +505,6 @@ def _deduplicate(findings: Sequence[Finding]) -> list[Finding]:
         if existing is None or finding.cascade_size > existing.cascade_size:
             seen[key] = finding
     return list(seen.values())
-
-
-def signature_for(run: UpgradeRun, result: DiagnosisResult) -> Signature:
-    """Placeholder until :mod:`uru_doctor.dedup` lands.
-
-    Returned empty rather than guessed at: a wrong signature silently merges
-    unrelated bugs, which is worse than no deduplication at all.
-    """
-    del run, result
-    return Signature()
 
 
 def explain(rule_name: str) -> Rule | None:

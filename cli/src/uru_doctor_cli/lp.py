@@ -39,7 +39,6 @@ from urllib.parse import urlencode
 
 import httpx
 
-from uru_doctor.config import LaunchpadConfig
 from uru_doctor.models import LogSource
 from uru_doctor.parsers.apportmeta import (
     attachment_source,
@@ -48,6 +47,7 @@ from uru_doctor.parsers.apportmeta import (
 )
 from uru_doctor.parsers.sanitize import read_log
 from uru_doctor.store import Store
+from uru_doctor_cli.config import LaunchpadConfig
 
 __all__ = [
     "ALL_STATUSES",

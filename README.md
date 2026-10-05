@@ -21,12 +21,36 @@ Launchpad.
 ## Install
 
 ```sh
-uv tool install git+https://github.com/BAMF0/uru-doctor.git
+uv tool install git+https://github.com/BAMF0/uru-doctor.git#subdirectory=cli
 uru-doctor --version
 ```
 
-Python 3.12 or newer. Runtime dependencies are `pydantic`, `typer`, `rich` and
-`httpx`. To work on the tool itself rather than use it, see *Development*
+Python 3.12 or newer.
+
+The project is two packages. `uru-doctor` is the **library** -- log parsing,
+diagnosis, dedup, titles, the record store -- and its only runtime dependency
+is `pydantic`. `uru-doctor-cli` is the command-line frontend (and the only
+place Launchpad is talked to), adding `typer`, `rich` and `httpx`. To use the
+library from your own code rather than the command line:
+
+```sh
+uv add git+https://github.com/BAMF0/uru-doctor.git
+```
+
+```python
+from pathlib import Path
+
+from uru_doctor import Interner, MemoryBackend, diagnose, ingest_directory
+
+interner = Interner(MemoryBackend())
+result = ingest_directory(Path("/var/log/dist-upgrade"), interner)
+run = result.primary  # the most recent attempt, or None if no logs were found
+diagnosis = diagnose(run, interner)
+```
+
+`MemoryBackend` keeps interning in process, so a one-shot question needs no
+database; use `uru_doctor.Store` as the backend for a corpus you query
+repeatedly. To work on the tool itself rather than use it, see *Development*
 below.
 
 ## Quickstart
@@ -459,9 +483,13 @@ into a public bug.
 ```sh
 uv sync
 uv run pytest
-uv run ruff check src tests
-uv run mypy src/uru_doctor
+uv run ruff check src tests cli/src cli/tests
+uv run mypy src/uru_doctor cli/src/uru_doctor_cli
 ```
+
+The repository is a `uv` workspace: the library at the root, the CLI in
+`cli/`. The layering is one-way -- the library never imports the frontend --
+and `tests/test_layering.py` fails any import that crosses it.
 
 `.opencode/skills/triage-new-bug/` holds the workflow for validating the tool
 against a new bug, including the ordered checks that have to pass before a

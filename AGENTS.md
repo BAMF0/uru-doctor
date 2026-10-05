@@ -5,13 +5,21 @@ documentation lives in [README.md](README.md). The tool diagnoses, deduplicates
 and retitles Ubuntu Release Upgrader bugs from their upgrade logs; it proposes
 and never acts.
 
+The repository is a `uv` workspace of two distributions. `uru-doctor` (the
+repository root) is the **library**: log parsing, diagnosis, dedup, titles,
+reports, the record store. `uru-doctor-cli` (`cli/`) is the command-line
+frontend and owns everything the library deliberately does not: Typer, Rich,
+and the read-only Launchpad client. The edge runs one way only -- the library
+never imports the frontend, and `tests/test_layering.py` fails any import of
+`typer`, `rich`, `httpx` or `uru_doctor_cli` under `src/uru_doctor/`.
+
 ## Development
 
 ```sh
 uv sync
 uv run pytest
-uv run ruff check src tests
-uv run mypy src/uru_doctor
+uv run ruff check src tests cli/src cli/tests
+uv run mypy src/uru_doctor cli/src/uru_doctor_cli
 ```
 
 After any change that affects the grammar, the rules, ranking or fixtures, run
@@ -20,7 +28,7 @@ bug's answer:
 
 ```sh
 uv run .opencode/skills/triage-new-bug/scripts/check_bug.py --fixtures
-uv run pytest tests/ -q && uv run ruff check src/ tests/ && uv run mypy src/uru_doctor/
+uv run pytest tests/ cli/tests/ -q && uv run ruff check src/ tests/ cli/src/ cli/tests/ && uv run mypy src/uru_doctor/ cli/src/uru_doctor_cli/
 ```
 
 ## Design invariants
@@ -112,6 +120,12 @@ Changes must preserve these. Most are enforced by tests; all are deliberate.
 | worklist buckets | `src/uru_doctor/worklist.py` |
 | Launchpad triage state | `bug_state` table in `src/uru_doctor/store.py` |
 | title templates | `src/uru_doctor/title.py` |
+| library config (ingest/apt/rules/dedup/title/report) | `src/uru_doctor/config.py` |
+| one-shot interning backend | `src/uru_doctor/memory.py` |
+| public API surface | `src/uru_doctor/__init__.py` |
+| the commands | `cli/src/uru_doctor_cli/cli.py` |
+| read-only Launchpad client | `cli/src/uru_doctor_cli/lp.py` |
+| CLI config (paths/launchpad/queue) | `cli/src/uru_doctor_cli/config.py` |
 | fixture provenance | `tests/record_fixtures.py`, `tests/fixtures/MANIFEST.md` |
 
 ## Traps that have actually bitten (general)

@@ -395,7 +395,7 @@ Finally, the full regression:
 
 ```bash
 uv run .opencode/skills/triage-new-bug/scripts/check_bug.py --fixtures
-uv run pytest tests/ -q && uv run ruff check src/ tests/ && uv run mypy src/uru_doctor/
+uv run pytest tests/ cli/tests/ -q && uv run ruff check src/ tests/ cli/src/ cli/tests/ && uv run mypy src/uru_doctor/ cli/src/uru_doctor_cli/
 ```
 
 The `--fixtures` pass is not optional. Two fixes so far looked clean and

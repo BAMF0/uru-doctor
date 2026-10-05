@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-"""Tests for :mod:`uru_doctor.lp.read`.
+"""Tests for :mod:`uru_doctor_cli.lp`.
 
 Everything here runs against :class:`httpx.MockTransport`. The test suite must
 not touch the network: Launchpad is a shared service, it rate-limits, and a
@@ -19,19 +19,18 @@ from pathlib import Path
 
 import httpx
 import pytest
-
-from uru_doctor.config import LaunchpadConfig
-from uru_doctor.lp.read import (
+from conftest import fixture_text
+from uru_doctor_cli.config import LaunchpadConfig
+from uru_doctor_cli.lp import (
     AttachmentRef,
     BugRecord,
     Launchpad,
     LaunchpadError,
     RateLimited,
 )
+
 from uru_doctor.models import LogSource
 from uru_doctor.store import Store
-
-from .conftest import fixture_text
 
 API = "https://api.launchpad.net/devel"
 
@@ -379,7 +378,7 @@ class TestReadOnly:
         source mentions credentials in prose to explain their absence and a
         substring search over the whole file matched the explanation.
         """
-        import uru_doctor.lp.read as module
+        import uru_doctor_cli.lp as module
 
         names = set()
         for value in vars(module).values():

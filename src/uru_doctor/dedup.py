@@ -48,6 +48,7 @@ from hashlib import blake2b
 from typing import TYPE_CHECKING, Final
 
 from uru_doctor.apt.graph import canonical_digest
+from uru_doctor.diagnose import CAVEAT_CAUSES
 from uru_doctor.models import (
     Cause,
     Finding,
@@ -310,8 +311,6 @@ def _evidence_set(run: UpgradeRun) -> bytes:
 
 
 def _primary(findings: Sequence[Finding]) -> Finding | None:
-    from uru_doctor.diagnose import CAVEAT_CAUSES
-
     for finding in findings:
         if finding.cause not in CAVEAT_CAUSES:
             return finding
