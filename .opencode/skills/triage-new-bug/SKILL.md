@@ -403,15 +403,12 @@ changed an earlier bug's answer.
 
 ## Traps that have actually bitten
 
-- **An unanchored `.gitignore` pattern ate the fixture corpus.** `logs/`
-  matches at *any* depth, so `tests/fixtures/logs/` — every recorded
-  `main.log`, `apt-term.log` and `history.log` — was never committed, while the
-  comment two lines above it in `.gitignore` claimed those were the exception.
-  Nothing failed, because `fixture_text` calls `pytest.skip`: a fresh clone
-  quietly skipped the `main.log` half of the ground-truth suite and reported
-  success. Twenty-one files. Anchor state-directory patterns with a leading
-  slash (`/logs/`), and when a test corpus is supposed to be committed, check
-  `git ls-files` rather than `ls`.
+General codebase traps — scripted patches, pydantic, sqlite schema and
+migration, Rich progress output, interners and enums, test and `.gitignore`
+idioms — live in [AGENTS.md](../../../AGENTS.md). What follows is specific to
+this workflow's domain: the logs, the upgrader, Launchpad and the diagnostic
+rules.
+
 - **A message is not a failure unless the run stopped.** `doUpdate() failed
   completely` is logged by two call sites.
   `DistUpgradeController.py:2020` runs `doUpdate(showErrors=False,
@@ -452,105 +449,12 @@ changed an earlier bug's answer.
   noticed. Corroboration should weight the *terminal* message. Still open;
   until it is, treat "corroborated by apt" on a run with more than one `E:`
   line as unproven.
-
-- **`ruff format` silently undoes `python - <<'PY'` string patches.** It
-  reflows multi-line calls, so a later `str.replace` finds nothing and reports
-  success. Twice this left a parameter unthreaded and the behaviour unchanged.
-  After any scripted patch, `grep` for the new text.
-- **An out-parameter that one call site forgets is invisible.** `ingest_logs`
-  took `stats: LexStats | None`; `ingest_directory` passed it and
-  `ingest_attachments` did not. Consequence: `fetch` — the command that meets a
-  new apt version *first* — was the one command that could not report whether
-  it had understood the log, and the gap survived because the harness measured
-  coverage separately and nothing compared the two. Fixed by making the
-  function return the measurement instead of accepting somewhere to put it, so
-  forgetting is a type error. If a value is load-bearing, do not let it be
-  optional at the call site.
-- **`CREATE INDEX` in the schema on a column `_migrate` adds.** `_SCHEMA` runs
-  before `_migrate`, and its `CREATE TABLE IF NOT EXISTS runs` is a no-op
-  against an existing store — so the index statement referenced a column that
-  did not exist yet and the store could not be opened *at all*. It worked
-  perfectly on a fresh store, which is every test that does not deliberately
-  build an old one. Indexes over migrated columns belong in `_migrate`, after
-  the `ALTER TABLE`s. `TestAdditiveMigration` builds a genuine schema-1 store
-  by dropping the columns back off.
-- **A schema version that is never written back.** `_check_version` refused a
-  *newer* store and inserted the number only when absent, so a migrated store
-  kept claiming version 1 forever and an older build would read it as its own.
-  Schema 2 drops a table schema 1 queries unconditionally, so that downgrade
-  crashes rather than quietly misreporting — luck, not design.
-- **Removing a validator can start leaking what it was validating.**
-  `LlmConfig` had a hand-written check that refused an inline `api_key`
-  *without quoting it*. Deleting the model handed the job to pydantic's generic
-  extra-forbidden path, which embeds `input_value=` — and the CLI prints the
-  whole message to stderr. The test still passed, because the secret appearing
-  in the error message happened to satisfy `match="api_key"`. A test that
-  passes for the wrong reason is worse than no test; `load_config` now renders
-  validation failures as locations and reasons only, and
-  `test_rejected_values_are_not_echoed` checks the traceback too, because
-  `raise ... from exc` would put the original straight back.
-- **A watermark that advances past unhandled work.** `sweep` must move the mark
-  only over bugs it actually stored, and only to *that bug's* creation date.
-  Advancing to the newest task in the listing is the obvious implementation and
-  it silently skips every bug between the last one handled and the newest one
-  seen — permanently, because once the mark is past a bug's creation date the
-  search never offers it again. Also monotonic: a pass cut short by a 429 must
-  not rewind a mark a further-reaching pass had already set.
-  `test_the_watermark_does_not_pass_unhandled_bugs` fails loudly on both.
 - **Launchpad's search defaults exclude closed bugs.** See §1. The ones it hides
   are the ones whose resolution is the ground truth.
-- **A progress bar on the wrong console corrupts the output.** Rich moves a live
-  region out of the way of `Console.print` only for *its own* console. A bar on
-  stderr while verdicts print to stdout is two programs drawing on one
-  terminal, and the bar lands in the middle of a report. `_progress()` therefore
-  takes the console: stderr when `--json`/`--markdown` is writing a document to
-  stdout, otherwise stdout alongside the verdicts. Also off entirely when the
-  target is not a terminal, so `2>log` gets no control codes.
-- **`total=None` does not clear a Rich task's total.** Both `Progress.reset` and
-  `Progress.update` read it as "leave the total alone", so re-purposing a task
-  from a counted phase to an uncountable one drew `clustering 0/7` — a bar
-  measuring seven of something no longer being counted. Remove and re-add the
-  task instead. One task per command, too: adding a second leaves the first
-  drawing itself, which stuck `searching Launchpad 0/?` above the real bar for
-  a whole sweep.
-- **`jaccard([], []) == 1.0`.** A bug with only `apt.log` has no log *events*,
-  so two unrelated reports scored a perfect match. Absence of evidence is not
-  evidence of similarity.
-- **pydantic's default `extra="ignore"`** dropped a whole field with no
-  complaint from pydantic or mypy. `Frozen` now sets `extra="forbid"`.
-- **`functools.cached_property` does not work on a `slots=True` dataclass.**
-- **`str.splitlines()` splits on bare `\r`**, which defeated
-  `collapse_carriage_returns` entirely and stored 440 progress fragments as
-  separate events.
-- **The fixture recorder can destroy its own manifest.** Re-running it after
-  `/tmp` is cleaned keeps the committed fixtures and used to delete their
-  provenance notes. Fixed, but check `MANIFEST.md` entry count matches the
-  fixture count.
 - **Directory-based log grouping is unsafe.** `/var/log/dist-upgrade` is
   archived wholesale, so a `YYYYMMDD-HHMM` directory can hold a `main.log` from
   June beside an `apt.log` from January. `check_coherence()` handles it; do not
   reintroduce trust in the directory name.
-- **Hardcoded counts in tests** (`assert len(paths) == 3`) break the moment the
-  corpus grows. Assert properties.
-- **Vertex indices and package ids are both small integers**, so confusing them
-  type-checks, runs, and produces plausible-looking package names. `mypy` will
-  not catch it: `PkgId` is an `int` alias. If a list of packages looks right
-  but *oddly* right, resolve it through two different interners and compare.
-- **Unrelated `IntEnum`s compare equal by value.** `root.dep in BLAME_EDGES`
-  tests a `DepType` against a set of `EdgeKind` members; it type-checks, and it
-  silently selects `RECOMMENDS` and `DEPENDS` because they share the integers 1
-  and 6 with `BREAKS` and `UNSATISFIABLE`. Membership tests across two enums are
-  always a bug even when the result looks sensible. `Cause` and `LogSource` are
-  safe here only because they are `StrEnum`.
-- **Interned ids must never be a sort key or a tie-break.** Ids are assigned
-  in first-seen order, so any ordering that falls back to one depends on what
-  was ingested beforehand. This has now bitten four times: `canonical_digest`
-  sorting node indices, `Root.cascade`'s BFS frontier, `detect_oscillations`
-  tie-breaking equal reversal counts on `pkg_id` (which decided whether the
-  title said `gedit` or `gir1.2-peas-1.0`), and a `set` of forcing packages
-  indexed with `[0]`. Sort by name. The giveaway is output that is stable in
-  *content* but not in *order* — check the order explicitly, because a set
-  comparison will pass.
 - **A successful upgrade needs a positive finding.** A clean resolve is not a
   quiet one: apt breaks and repairs packages as it searches, so a working
   upgrade's trace still holds holdbacks and unsatisfiable virtuals. Without
@@ -587,12 +491,6 @@ changed an earlier bug's answer.
   "not modified" stamped 23 unread bugs as confirmed-current on the first run.
   `TriageSearch.complete` exists for this; a pass that hit the cap may update
   what it saw and must not touch what it did not.
-- **An empty restriction is not the absence of a restriction.**
-  `stale_bug_ids(limit, among=[])` meaning "no candidates" and `among=None`
-  meaning "no filter" are one typo apart, and a falsy check conflates them. It
-  made a deep refresh aimed at three specific bugs spend its whole budget on
-  the four oldest bugs in the store instead. Same shape as the `is_duplicate`
-  trap: distinguish empty from unknown.
 - **`third_party` the column is not `is_candidate_invalid` the verdict.** The
   column is `any(finding is THIRD_PARTY_PIN)`; the verdict is *primary cause
   only*. Using the column put three bugs in `candidate-invalid` whose real
@@ -601,31 +499,7 @@ changed an earlier bug's answer.
   Invalid. This is the inversion the whole tool exists to correct, reproduced
   by reaching for the convenient column. `TriageRow.candidate_invalid` is the
   one to use.
-- **`ALTER TABLE ADD COLUMN` lands the column after `payload`.** SQLite keeps
-  large values in overflow pages, so a column added behind a 54KB blob costs
-  more to scan than one in front of it — measured over 8,000 synthetic runs,
-  22.7ms against 10.0ms, with a separate narrow table at 17.9ms. Small in
-  absolute terms, so decide on schema grounds; but a "narrow projection" that
-  reads trailing columns is not as narrow as it looks.
-- **Naive timestamps from the store crash staleness arithmetic.** A
-  `checked_at` without a zone subtracts against `datetime.now(UTC)` as a
-  `TypeError` and takes the whole command down. Normalise at the parse
-  boundary, not at each use.
 
 ## Where things live
 
-| Concern | File |
-| --- | --- |
-| apt verbs and patterns | `src/uru_doctor/apt/grammar.py` |
-| state blob decoding | `src/uru_doctor/apt/state.py` |
-| roots, cascades, causes | `src/uru_doctor/apt/roots.py` |
-| oscillation detection | `src/uru_doctor/apt/livelock.py` |
-| translated messages | `src/uru_doctor/i18n.py` |
-| parse order, coherence | `src/uru_doctor/ingest.py` |
-| rules and provenance | `src/uru_doctor/rules/` |
-| ranking policy | `src/uru_doctor/diagnose.py` |
-| signatures and clusters | `src/uru_doctor/dedup.py` |
-| worklist buckets | `src/uru_doctor/worklist.py` |
-| Launchpad triage state | `bug_state` table in `src/uru_doctor/store.py` |
-| title templates | `src/uru_doctor/title.py` |
-| fixture provenance | `tests/record_fixtures.py`, `tests/fixtures/MANIFEST.md` |
+The concern-to-file map lives in [AGENTS.md](../../../AGENTS.md).

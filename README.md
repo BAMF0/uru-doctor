@@ -444,17 +444,11 @@ State lives in `.uru-doctor/` at the corpus root: the record store that
 and the attachment cache that `fetch` and `sweep` fill. The `[paths] state_dir`
 option moves it. `diagnose` and `title` leave nothing behind.
 
-The corpus-wide commands are built to stay usable at a corpus of thousands,
-which in practice means one rule: `queue`, `refresh` and `dedup`'s default
-output read indexed columns and never deserialise a stored record. Measured,
-because the difference is not visible in the output — validating a payload
-costs 0.6ms against 0.02ms for a projected row, so at ten thousand runs it is
-six seconds and half a gigabyte of JSON against a fifth of a second.
-Clustering is a hash bucket over two indexed signature columns and is linear;
-only `dedup --markdown`, which quotes titles and per-run facts, needs the
-records themselves. A test asserts that the projections do not select
-`payload`, since a refactor adding one convenient field would undo this
-silently.
+The corpus-wide commands are built to stay usable at a corpus of thousands:
+`queue`, `refresh` and `dedup`'s default output read indexed columns only, and
+clustering is a linear hash bucket over two indexed signature columns. Only
+`dedup --markdown`, which quotes titles and per-run facts, needs the stored
+records themselves.
 
 Logs read from disk are redacted by default (hostnames, usernames, home paths,
 emails, IPs) because the Markdown report quotes log lines verbatim for pasting
@@ -469,35 +463,11 @@ uv run ruff check src tests
 uv run mypy src/uru_doctor
 ```
 
-The test corpus is 47 recorded fixtures from real Launchpad bugs in six
-languages, with provenance in `tests/fixtures/MANIFEST.md`. The lexer is held
-at **100% coverage over 40,404 lines of real apt logs across sixteen traces**:
-not 99.9%, because an unrecognised line is a silently dropped fact rather than
-a visible error.
-
-One trace is held out of that gate, and it is the only one. LP#2168919's
-`apt.log` carries four lines of the upgrader's *own* user-facing error,
-interleaved by `_stopAptResolverLog()` restoring stdout before `view.error`
-runs. That is upgrader prose rather than an apt verb, in a gettext domain that
-is not installed on a machine which merely has apt, so the forward-translation
-that handles every other translated message cannot reach it — and enumerating
-prose in ninety languages is the one repair this codebase refuses. The
-exclusion is pinned by a test asserting the gap is exactly those four lines, so
-it cannot absorb a new one. The honest fix is to classify an interleaved
-upgrader block as *not a resolver verb*, and it is not written yet.
-
-Ground truth for the recorded bugs is checked against outcomes that are
-independent of this tool: the upstream fix, the bug's resolution, the log read
-by hand, in that order. Triager tags are the weakest evidence and sometimes
-wrong. Bug 2155743 is tagged `third-party-packages` and has 46 foreign packages
-installed, none of which is the cause. Bug 2169214 is the same inversion
-produced by the tool itself: it was diagnosed `third_party_pin` and flagged
-candidate-Invalid on a machine with 139 foreign packages, when the cause was a
-`kubuntu-desktop` metapackage the upgrader could not install.
-
 `.opencode/skills/triage-new-bug/` holds the workflow for validating the tool
 against a new bug, including the ordered checks that have to pass before a
-verdict means anything.
+verdict means anything. [AGENTS.md](AGENTS.md) holds the rest of the
+contributor guidance: the test-corpus policy and coverage gates, the design
+invariants a change must preserve, and the traps that have already bitten.
 
 `uru-doctor` is written largely in conjunction with Claude Opus 5.5 using
 OpenCode.
