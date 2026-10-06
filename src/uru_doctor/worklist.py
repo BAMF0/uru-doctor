@@ -204,6 +204,22 @@ def _masters(clusters: Sequence[Cluster]) -> dict[str, tuple[str, str]]:
     return index
 
 
+def _duplicate_root(bug_id: int, links: Mapping[int, int]) -> int:
+    """The end of a bug's duplicate chain, as far as the store knows it.
+
+    Two masters with the same root are one Launchpad cluster seen twice, so
+    comparing roots rather than masters is what keeps "Launchpad filed this
+    under the cluster's root, the logs name a member of it" from reading as
+    a disagreement. A cycle in the stored links is corruption, not
+    information; the walk stops at it rather than hanging.
+    """
+    seen = {bug_id}
+    while (nxt := links.get(bug_id)) is not None and nxt not in seen:
+        seen.add(nxt)
+        bug_id = nxt
+    return bug_id
+
+
 def classify(
     rows: Iterable[TriageRow],
     clusters: Sequence[Cluster] = (),
@@ -217,7 +233,10 @@ def classify(
        would silently file a closed bug as outstanding work.
     2. A disagreement about the master is reported even for a closed bug,
        because "Launchpad says this duplicates A, the logs say B" does not stop
-       mattering once somebody has closed it.
+       mattering once somebody has closed it. The disagreement is about
+       *which cluster*, not the choice of master within one: when both
+       masters sit in the same Launchpad duplicate chain, the grouping
+       agrees and Launchpad has already acted, so the row is done.
     3. Resolved and already-duplicate bugs drop out next, so no later rule can
        propose work on a bug nobody needs to touch.
     4. Only then the actionable tiers, strongest first.
@@ -231,6 +250,12 @@ def classify(
     projected = list(rows)
     labels = {row.run_key: row.label for row in projected}
     diagnosed = {row.run_key: row.diagnosed for row in projected}
+    bug_ids = {row.run_key: row.bug_id for row in projected}
+    dup_links: dict[int, int] = {}
+    for row in projected:
+        if row.bug_id is None or row.state is None or row.state.duplicate_of is None:
+            continue
+        dup_links[row.bug_id] = row.state.duplicate_of
 
     items: list[Item] = []
     done_by_status: Counter[str] = Counter()
@@ -267,12 +292,22 @@ def classify(
         if state.is_duplicate and lp_master is None and row.bug_id is not None:
             deep_unknown.append(row.bug_id)
 
-        # 2 -- the two verdicts disagree about the master.
+        # 2 -- the two verdicts disagree about the master. "Disagree" is
+        # about the cluster, not the choice of master within it: when the
+        # master the logs name is itself filed under Launchpad's master (at
+        # any depth), both verdicts put the bug in the same Launchpad
+        # cluster and there is nothing to reconcile.
+        tool_master = bug_ids.get(master_key)
         if (
             lp_master is not None
             and master_key
             and not is_master
             and f"LP#{lp_master}" != master_label
+            and (
+                tool_master is None
+                or _duplicate_root(lp_master, dup_links)
+                != _duplicate_root(tool_master, dup_links)
+            )
         ):
             items.append(
                 Item(

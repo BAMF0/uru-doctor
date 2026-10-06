@@ -157,6 +157,47 @@ class TestBuckets:
         rows = [row(1), row(2, is_duplicate=True, duplicate_of=1)]
         assert bucket_of(rows, 2, one_cluster(1, 2)) == Bucket.DONE
 
+    def test_a_master_in_the_same_launchpad_cluster_is_not_a_conflict(self) -> None:
+        """Launchpad filed the bug under the root; the logs name a member of it.
+
+        LP#2169341's shape: Launchpad files the bug under LP#2169321 while the
+        logs put it under LP#2168938 -- which is itself filed as a duplicate
+        of LP#2169321. Both verdicts name the same cluster; only the choice
+        of master differs, and that is not a conflict.
+        """
+        rows = [
+            row(1, is_duplicate=True, duplicate_of=99),
+            row(2, is_duplicate=True, duplicate_of=99),
+        ]
+        worklist = classify(rows, one_cluster(1, 2))  # type: ignore[arg-type]
+        item = next(i for i in worklist.items if i.row.bug_id == 2)
+        assert item.bucket == Bucket.DONE
+        assert worklist.counts[Bucket.DUPLICATE_CONFLICT] == 0
+
+    def test_a_transitively_shared_cluster_is_not_a_conflict(self) -> None:
+        rows = [
+            row(1, is_duplicate=True, duplicate_of=7),
+            row(7, is_duplicate=True, duplicate_of=99),
+            row(2, is_duplicate=True, duplicate_of=99),
+        ]
+        assert bucket_of(rows, 2, one_cluster(1, 2)) == Bucket.DONE
+
+    def test_launchpads_master_inside_the_tools_cluster_is_not_a_conflict(self) -> None:
+        """The reverse direction: Launchpad's master duplicates the tool's."""
+        rows = [
+            row(1),
+            row(99, is_duplicate=True, duplicate_of=1),
+            row(2, is_duplicate=True, duplicate_of=99),
+        ]
+        assert bucket_of(rows, 2, one_cluster(1, 2)) == Bucket.DONE
+
+    def test_masters_in_divergent_chains_remain_a_conflict(self) -> None:
+        rows = [
+            row(1, is_duplicate=True, duplicate_of=5),
+            row(2, is_duplicate=True, duplicate_of=99),
+        ]
+        assert bucket_of(rows, 2, one_cluster(1, 2)) == Bucket.DUPLICATE_CONFLICT
+
     def test_no_cluster_is_not_read_as_disagreement(self) -> None:
         """Absence of evidence is not evidence of disagreement.
 
