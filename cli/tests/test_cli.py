@@ -1912,6 +1912,91 @@ class TestTodo:
         assert by_id[2169028]["cause"] is not None
 
 
+class TestClean:
+    """Reclaiming the attachment cache.
+
+    No Launchpad involved: the cache is a directory plus a table, built here
+    by hand. What is being tested is that the report is honest, that
+    ``--yes`` deletes exactly what the report named, and that usable logs
+    survive everything but ``--all``.
+    """
+
+    @staticmethod
+    def _setup(state: Path) -> Path:
+        """A cache with one kept log, one useless download, one orphan."""
+        cache = state / "attachments"
+        cache.mkdir(parents=True)
+        log = cache / "1-apt.log"
+        log.write_bytes(fixture_text("apt/lp2150339-apt.log")[:64_000].encode())
+        junk = cache / "2-screenshot-of-the-error"
+        junk.write_bytes(b"\x89PNG\r\n\x1a\n" * 200)
+        orphan = cache / "3-anything"
+        orphan.write_bytes(b"orphaned")
+        with Store.open(state) as store:
+            store.attachment_put(1, "apt.log", None, log, log.stat().st_size)
+            store.attachment_put(2, "screenshot-of-the-error", None, junk, junk.stat().st_size)
+            store.commit()
+        return cache
+
+    def test_reports_without_deleting_by_default(self, tmp_path: Path) -> None:
+        state = tmp_path / "state"
+        cache = self._setup(state)
+        result = runner.invoke(app, ["clean", "--config", _conf(tmp_path, state)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "unusable content" in result.output
+        assert "orphan files" in result.output
+        assert "--yes" in result.output
+        assert (cache / "2-screenshot-of-the-error").is_file()
+        assert (cache / "3-anything").is_file()
+
+    def test_yes_deletes_the_reported_entries(self, tmp_path: Path) -> None:
+        state = tmp_path / "state"
+        cache = self._setup(state)
+        result = runner.invoke(app, ["clean", "--yes", "--config", _conf(tmp_path, state)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "reclaimed" in result.output
+        assert (cache / "1-apt.log").is_file(), "usable logs are not touched"
+        assert not (cache / "2-screenshot-of-the-error").exists()
+        assert not (cache / "3-anything").exists()
+        with Store.open(state) as store:
+            assert [r.name for r in store.attachment_rows()] == ["apt.log"]
+
+    def test_all_clears_usable_logs_and_says_so(self, tmp_path: Path) -> None:
+        state = tmp_path / "state"
+        cache = self._setup(state)
+        result = runner.invoke(
+            app, ["clean", "--all", "--yes", "--config", _conf(tmp_path, state)]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert "re-ingesting means re-downloading" in result.output
+        assert not (cache / "1-apt.log").exists()
+        with Store.open(state) as store:
+            assert store.attachment_rows() == []
+
+    def test_json_reports_the_plan_then_the_deletion(self, tmp_path: Path) -> None:
+        state = tmp_path / "state"
+        self._setup(state)
+        config = _conf(tmp_path, state)
+        report = json.loads(
+            runner.invoke(app, ["clean", "--json", "--config", config]).stdout
+        )
+        assert report["deleted"] is None
+        assert report["reclaimable"]["unusable_files"] == 1
+        assert report["reclaimable"]["orphan_files"] == 1
+        assert report["kept"]["files"] == 1
+        done = json.loads(
+            runner.invoke(app, ["clean", "--json", "--yes", "--config", config]).stdout
+        )
+        assert done["deleted"] == {"files": 2, "rows": 1}
+
+    def test_a_missing_cache_dir_is_not_an_error(self, tmp_path: Path) -> None:
+        result = runner.invoke(
+            app, ["clean", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert "nothing to clean" in result.output
+
+
 class TestRefresh:
     """Re-reading Launchpad's verdict on bugs already stored.
 

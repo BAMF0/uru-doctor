@@ -143,6 +143,7 @@ Changes must preserve these. Most are enforced by tests; all are deliberate.
 | title templates | `src/uru_doctor/title.py` |
 | library config (ingest/apt/rules/dedup/title/report) | `src/uru_doctor/config.py` |
 | one-shot interning backend | `src/uru_doctor/memory.py` |
+| attachment-cache audit (the `clean` plan) | `src/uru_doctor/cache.py` |
 | public API surface | `src/uru_doctor/__init__.py` |
 | the commands | `cli/src/uru_doctor_cli/cli.py` |
 | read-only Launchpad client | `cli/src/uru_doctor_cli/lp.py` |

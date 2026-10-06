@@ -286,10 +286,12 @@ that lexed and no rule claimed, because those are different repairs.
 | `queue` | What still needs a decision, in buckets. `--bucket NAME` for one. |
 | `todo` | What you have already taken on: Triaged bugs, and your In Progress ones. |
 | `refresh` | Re-read Launchpad's status on stored bugs. Two requests. |
+| `clean` | Reclaim disk the attachment cache is wasting. Reports; `--yes` deletes. |
 
-Every command takes `-h`/`--help`. The thirteen that answer a question also
+Every command takes `-h`/`--help`. The fourteen that answer a question also
 take `--json`: `diagnose`, `ingest`, `fetch`, `sweep`, `dedup`, `related`,
-`history`, `coverage`, `show`, `stats`, `queue`, `todo` and `refresh`.
+`history`, `coverage`, `show`, `stats`, `queue`, `todo`, `refresh` and
+`clean`.
 
 ## Behaviour
 

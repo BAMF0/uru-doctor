@@ -345,6 +345,19 @@ class ClusterFacts:
 
 
 @dataclass(frozen=True, slots=True)
+class CachedAttachment:
+    """One row of the ``attachments`` table: a cached download and its ETag."""
+
+    bug_id: int
+    name: str
+    """The attachment's title on Launchpad, e.g. ``apt.log``."""
+    etag: str | None
+    path: Path
+    size: int
+    """Bytes recorded at fetch time. The file, when present, is the truth."""
+
+
+@dataclass(frozen=True, slots=True)
 class TriageRow:
     """One run, projected to just what a worklist needs to classify it.
 
@@ -1487,6 +1500,27 @@ class Store:
             yield (cid, str(row["canonical"]), row["cause"], members)
 
     # -- attachment cache ---------------------------------------------------
+
+    def attachment_rows(self) -> list[CachedAttachment]:
+        """Every cached-attachment row, for auditing the cache."""
+        return [
+            CachedAttachment(
+                bug_id=int(r["bug_id"]),
+                name=str(r["name"]),
+                etag=None if r["etag"] is None else str(r["etag"]),
+                path=Path(str(r["path"])),
+                size=int(r["size"]),
+            )
+            for r in self._conn.execute(
+                "SELECT bug_id, name, etag, path, size FROM attachments"
+            )
+        ]
+
+    def attachment_drop(self, bug_id: int, name: str) -> None:
+        """Forget one cached attachment. The file's fate is the caller's."""
+        self._conn.execute(
+            "DELETE FROM attachments WHERE bug_id = ? AND name = ?", (bug_id, name)
+        )
 
     def attachment_etag(self, bug_id: int, name: str) -> tuple[str | None, Path | None]:
         row = self._conn.execute(

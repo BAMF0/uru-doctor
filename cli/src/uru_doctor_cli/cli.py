@@ -57,6 +57,7 @@ from rich.table import Table
 
 import uru_doctor.rules  # noqa: F401  -- import registers every rule in RULES
 from uru_doctor import __version__ as LIBRARY_VERSION
+from uru_doctor.cache import CleanPlan, plan_clean, resolve
 from uru_doctor.dedup import Cluster, Tier, build_signature, cluster_runs, summarise, tier_index
 from uru_doctor.diagnose import DiagnosisResult, diagnose, explain
 from uru_doctor.ingest import IngestResult, ingest_attachments, ingest_directory
@@ -2887,6 +2888,165 @@ def todo(
         return
 
     _print_todo(plate, me, worklist, stale, rows)
+
+
+def _fmt_bytes(size: int) -> str:
+    """``217055232`` to ``207.0 MB``; bytes under a kilobyte print as-is."""
+    value = float(size)
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if value < 1024 or unit == "TB":
+            return f"{int(value)} B" if unit == "B" else f"{value:.1f} {unit}"
+        value /= 1024
+    raise AssertionError("unreachable")
+
+
+def _print_clean(plan: CleanPlan, cache_dir: Path, everything: bool) -> None:
+    """What a clean would reclaim, and what it deliberately keeps."""
+    out.print(f"attachment cache: {cache_dir}")
+    if plan.unusable:
+        out.print(
+            f"  unusable content  {plural(len(plan.unusable), 'file'):>10}  "
+            f"{_fmt_bytes(plan.unusable_bytes):>9}  [dim]can never produce a run[/]"
+        )
+    if plan.orphans:
+        out.print(
+            f"  orphan files      {plural(len(plan.orphans), 'file'):>10}  "
+            f"{_fmt_bytes(plan.orphan_bytes):>9}  [dim]no attachments row tracks them[/]"
+        )
+    if plan.stale:
+        out.print(
+            f"  stale rows        {plural(len(plan.stale), 'row'):>10}  "
+            f"{'':>9}  [dim]the file is already gone[/]"
+        )
+    if plan.forced:
+        out.print(
+            f"  usable logs       {plural(len(plan.forced), 'file'):>10}  "
+            f"{_fmt_bytes(plan.forced_bytes):>9}  "
+            "[dim]runs were diagnosed from these; re-ingesting means re-downloading[/]"
+        )
+    if plan.empty:
+        note = (
+            f"{plural(len(plan.kept), 'cached attachment')}, "
+            f"{_fmt_bytes(plan.kept_bytes)}, all usable"
+            if plan.kept
+            else "nothing cached"
+        )
+        out.print(f"[green]nothing to clean[/] [dim]-- {note}[/]")
+        return
+    if plan.kept:
+        out.print(
+            f"[dim]kept: {plural(len(plan.kept), 'usable attachment')}, "
+            f"{_fmt_bytes(plan.kept_bytes)}[/]"
+        )
+    out.print(
+        f"\nreclaimable: {_fmt_bytes(plan.reclaimable_bytes)} in "
+        f"{plural(plan.reclaimable_files, 'file')}, {plural(plan.rows_dropped, 'row')}. "
+        f"Run `uru-doctor clean{' --all' if everything else ''} --yes` to reclaim."
+    )
+
+
+@app.command(rich_help_panel="Act on the corpus")
+def clean(
+    yes: Annotated[
+        bool, typer.Option("--yes", "-y", help="Actually delete. Default: report only.")
+    ] = False,
+    everything: Annotated[
+        bool,
+        typer.Option("--all", help="Clear the whole cache, usable logs included."),
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable plan.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """Reclaim disk the attachment cache is wasting.
+
+    Three kinds of entry are reclaimed without tradeoffs: orphan files no
+    ``attachments`` row tracks, rows whose file is already gone, and bytes
+    that can never produce a run (screenshots, tarballs) -- re-verified with
+    the same sniff the fetcher applies. ``--all`` also clears the logs your
+    runs were diagnosed from; every command still works without them, but
+    re-ingesting those bugs means re-downloading from Launchpad, and an
+    attachment deleted upstream is gone for good.
+
+    Reports by default; ``--yes`` deletes.
+
+    \b
+    Examples:
+      uru-doctor clean             # what would be reclaimed?
+      uru-doctor clean --yes
+      uru-doctor clean --all --yes
+    """
+    config = _config(config_path)
+    cache_dir = config.paths.state_dir / "attachments"
+    with _state_store(config) as store:
+        plan = plan_clean(store.attachment_rows(), cache_dir, everything=everything)
+        deleted: dict[str, int] | None = None
+        if yes and not plan.empty:
+            files = rows_dropped = 0
+            for file in plan.orphans:
+                try:
+                    file.unlink()
+                    files += 1
+                except OSError:
+                    pass
+            for row in (*plan.unusable, *plan.forced):
+                target = resolve(row, cache_dir)
+                if target is not None:
+                    try:
+                        target.unlink()
+                        files += 1
+                    except OSError:
+                        # A file that will not unlink becomes an orphan when
+                        # its row drops below; the next clean picks it up.
+                        pass
+                store.attachment_drop(row.bug_id, row.name)
+                rows_dropped += 1
+            for row in plan.stale:
+                store.attachment_drop(row.bug_id, row.name)
+                rows_dropped += 1
+            store.commit()
+            deleted = {"files": files, "rows": rows_dropped}
+
+    if as_json:
+        _write(
+            json.dumps(
+                {
+                    "schema": JSON_SCHEMA_VERSION,
+                    "cache_dir": str(cache_dir),
+                    "everything": everything,
+                    "reclaimable": {
+                        "unusable_files": len(plan.unusable),
+                        "unusable_bytes": plan.unusable_bytes,
+                        "orphan_files": len(plan.orphans),
+                        "orphan_bytes": plan.orphan_bytes,
+                        "stale_rows": len(plan.stale),
+                        "usable_files": len(plan.forced),
+                        "usable_bytes": plan.forced_bytes,
+                        "total_files": plan.reclaimable_files,
+                        "total_rows": plan.rows_dropped,
+                        "total_bytes": plan.reclaimable_bytes,
+                    },
+                    "kept": {"files": len(plan.kept), "bytes": plan.kept_bytes},
+                    "deleted": deleted,
+                },
+                indent=2,
+            )
+            + "\n",
+            out_path,
+            label="clean",
+        )
+        return
+
+    if deleted is not None:
+        _print_clean(plan, cache_dir, everything)
+        out.print(
+            f"\n[green]reclaimed {_fmt_bytes(plan.reclaimable_bytes)}[/] in "
+            f"{plural(deleted['files'], 'file')}; dropped {plural(deleted['rows'], 'row')}"
+        )
+    else:
+        _print_clean(plan, cache_dir, everything)
 
 
 @app.callback(invoke_without_command=True)
