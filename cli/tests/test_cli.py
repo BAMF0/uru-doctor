@@ -1833,6 +1833,85 @@ class TestQueue:
         assert victim["master"] in conflict["action"]
 
 
+class TestTodo:
+    """The plate: bugs already accepted as work.
+
+    The filter itself is pinned in ``test_worklist.py``; what is tested here
+    is the wiring -- that recorded status *and* assignee reach the listing,
+    that "me" comes from the config or the flag, and that the command is
+    honest when it cannot know whose work is whose.
+    """
+
+    @staticmethod
+    def _conf_with_user(tmp_path: Path, state: Path, user: str) -> str:
+        path = tmp_path / f"uru-doctor-{user or 'unset'}.toml"
+        path.write_text(
+            f'[paths]\nstate_dir = "{state}"\n\n[launchpad]\nuser = "{user}"\n'
+        )
+        return str(path)
+
+    def test_empty_store_says_so(self, tmp_path: Path) -> None:
+        result = runner.invoke(
+            app, ["todo", "--config", _conf(tmp_path, tmp_path / "state")]
+        )
+        assert result.exit_code == EXIT_FAIL
+        assert "empty" in result.output
+
+    def test_triaged_lists_without_a_configured_user(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        TestQueue._state(swept, 2150339, status="Triaged", assignee="")
+        TestQueue._state(swept, 2151847, status="New")
+        result = runner.invoke(app, ["todo", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "LP#2150339" in result.output
+        assert "LP#2151847" not in result.output
+        assert "launchpad.user is not set" in result.output
+
+    def test_in_progress_lists_only_for_the_configured_user(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        TestQueue._state(swept, 2169028, status="In Progress", assignee="bamf0")
+        mine = self._conf_with_user(tmp_path, swept, "bamf0")
+        result = runner.invoke(app, ["todo", "--config", mine])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "LP#2169028" in result.output
+
+        theirs = self._conf_with_user(tmp_path, swept, "mvo")
+        result = runner.invoke(app, ["todo", "--config", theirs])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "LP#2169028" not in result.output
+
+    def test_the_flag_overrides_the_config(self, tmp_path: Path, swept: Path) -> None:
+        TestQueue._state(swept, 2169028, status="In Progress", assignee="bamf0")
+        result = runner.invoke(
+            app,
+            ["todo", "--assignee", "bamf0", "--config", _conf(tmp_path, swept)],
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        assert "LP#2169028" in result.output
+
+    def test_json_carries_the_plate_and_the_freshness(
+        self, tmp_path: Path, swept: Path
+    ) -> None:
+        TestQueue._state(swept, 2150339, status="Triaged", assignee="")
+        TestQueue._state(swept, 2169028, status="In Progress", assignee="bamf0")
+        result = runner.invoke(
+            app,
+            ["todo", "--json", "--assignee", "bamf0", "--config", _conf(tmp_path, swept)],
+        )
+        assert result.exit_code == EXIT_OK, result.output
+        doc = json.loads(result.stdout)
+        assert doc["schema"] == 1
+        assert doc["assignee"] == "bamf0"
+        assert doc["counts"] == {"in_progress": 1, "triaged": 1}
+        assert "stale" in doc["launchpad_state"]
+        by_id = {item["bug_id"]: item for item in doc["items"]}
+        assert by_id[2150339]["assignee"] == ""
+        assert by_id[2169028]["assignee"] == "bamf0"
+        assert by_id[2169028]["cause"] is not None
+
+
 class TestRefresh:
     """Re-reading Launchpad's verdict on bugs already stored.
 
@@ -1942,6 +2021,19 @@ class TestRefresh:
         assert "Won't Fix" in result.output
         with Store.open(swept) as store:
             assert store.bug_states()[2169028].status == "Won't Fix"
+
+    def test_an_assignee_is_recorded_from_the_listing(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The task entry carries it; recording it costs no requests."""
+        task = self._task(2169028, "Triaged")
+        task["assignee_link"] = f"{self.API}/~bamf0"
+        transport, _ = self._transport([task])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2169028].assignee == "bamf0"
 
     def test_a_newly_marked_duplicate_is_noticed(
         self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch

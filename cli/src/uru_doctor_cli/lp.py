@@ -117,6 +117,15 @@ class BugRef:
     expensive question; only :meth:`Launchpad.bug` can answer it.
     """
 
+    assignee: str | None = None
+    """The task's assignee, without the leading ``~``.
+
+    ``None`` means the entry did not say (only a hand-built entry does not);
+    an empty string means Launchpad says the task is *unassigned*. The two
+    are different facts and are not collapsed: unknown can become either
+    answer on the next listing, and unassigned overwrites a stale name.
+    """
+
 
 #: Why ``omit_duplicates=false`` is passed explicitly.
 #:
@@ -252,6 +261,13 @@ def _bug_id_from_link(link: str | None) -> int | None:
         return None
     tail = link.rstrip("/").rsplit("/", 1)[-1]
     return int(tail) if tail.isdigit() else None
+
+
+def _person_name(link: object) -> str | None:
+    """``.../devel/~bamf0`` to ``bamf0``; anything empty to ``None``."""
+    if not isinstance(link, str) or not link:
+        return None
+    return link.rstrip("/").rsplit("/", 1)[-1].lstrip("~") or None
 
 
 def _parse_created(raw: str | None) -> datetime | None:
@@ -458,6 +474,14 @@ class Launchpad:
                         status=str(entry.get("status") or ""),
                         created=_parse_created(entry.get("date_created")),
                         title=str(entry.get("title") or ""),
+                        # The key is always present on a real entry, and null
+                        # there means *unassigned* -- a fact (''), not silence
+                        # (None). Only a hand-built entry can omit it.
+                        assignee=(
+                            None
+                            if "assignee_link" not in entry
+                            else (_person_name(entry.get("assignee_link")) or "")
+                        ),
                     )
                 )
             next_link = payload.get("next_collection_link")

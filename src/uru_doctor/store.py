@@ -198,11 +198,18 @@ CREATE INDEX IF NOT EXISTS idx_cluster_members_run ON cluster_members(run_key);
 -- looked. `duplicate_of` names the master and is only filled by a deep
 -- refresh, because the bug *task* entry a search returns carries no duplicate
 -- link at all -- only the bug resource does, at one request per bug.
+--
+-- `assignee` is likewise tri-state, but in text: a name is the task's
+-- assignee, '' means Launchpad says the task is *unassigned*, and NULL means
+-- nobody recorded it. The task entry a search returns carries it, so sweeps
+-- and cheap refreshes learn it for free while the per-bug deep pass never
+-- does. "Unassigned" and "unknown" are different facts and are not merged.
 CREATE TABLE IF NOT EXISTS bug_state (
     bug_id       INTEGER NOT NULL PRIMARY KEY,
     status       TEXT    NOT NULL DEFAULT '',
     duplicate_of INTEGER,
     is_duplicate INTEGER,
+    assignee     TEXT,
     checked_at   TEXT    NOT NULL
 );
 
@@ -270,6 +277,15 @@ class BugState:
     are learned by different means at very different prices: a search reveals
     *that* a bug is a duplicate for one request per fifty bugs, while *which*
     bug it duplicates costs one request each.
+    """
+
+    assignee: str | None = None
+    """The task's assignee (Launchpad username, no ``~``).
+
+    ``None`` means nobody has recorded it -- distinct from ``""``, which
+    means Launchpad says the task is *unassigned*. Only ``searchTasks``
+    entries carry the assignee, so sweeps and cheap refreshes learn it for
+    free while the per-bug deep pass never does.
     """
 
     checked_at: str = ""
@@ -549,6 +565,11 @@ class Store:
             self._conn.execute(f"ALTER TABLE runs ADD COLUMN {name} {ddl}")
         if added:
             self._backfill_projection()
+
+        # Additive too: pre-existing rows read back NULL, which is "never
+        # recorded" -- honestly distinct from '' ("Launchpad says unassigned").
+        if "assignee" not in self._columns("bug_state"):
+            self._conn.execute("ALTER TABLE bug_state ADD COLUMN assignee TEXT")
 
         # Finding a grammar gap must not mean deserialising every payload: the
         # corpus is scanned for this on every ``stats``.
@@ -1115,6 +1136,11 @@ class Store:
         look", never "there is nothing there" -- and writing one over a known
         value is how `fetch` would have blanked the status of every bug a
         previous sweep had already read.
+
+        The assignee follows the same rule. A pass that never asks for it --
+        the per-bug deep pass, ``fetch`` -- writes ``None`` and preserves what
+        a listing recorded, while a listing that saw the task *unassigned*
+        writes ``''``: a fact, not an absence, so it overwrites.
         """
         rows = [
             (
@@ -1122,6 +1148,7 @@ class Store:
                 state.status,
                 state.duplicate_of,
                 None if state.is_duplicate is None else int(state.is_duplicate),
+                state.assignee,
                 state.checked_at or _now(),
             )
             for state in states
@@ -1130,12 +1157,14 @@ class Store:
             return 0
         self._conn.executemany(
             """
-            INSERT INTO bug_state (bug_id, status, duplicate_of, is_duplicate, checked_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO bug_state
+                (bug_id, status, duplicate_of, is_duplicate, assignee, checked_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(bug_id) DO UPDATE SET
                 status       = COALESCE(NULLIF(excluded.status, ''), bug_state.status),
                 duplicate_of = COALESCE(excluded.duplicate_of, bug_state.duplicate_of),
                 is_duplicate = COALESCE(excluded.is_duplicate, bug_state.is_duplicate),
+                assignee     = COALESCE(excluded.assignee, bug_state.assignee),
                 checked_at   = excluded.checked_at
             """,
             rows,
@@ -1209,10 +1238,12 @@ class Store:
                 status=str(r["status"] or ""),
                 duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
                 is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
+                assignee=None if r["assignee"] is None else str(r["assignee"]),
                 checked_at=str(r["checked_at"] or ""),
             )
             for r in self._conn.execute(
-                "SELECT bug_id, status, duplicate_of, is_duplicate, checked_at FROM bug_state"
+                "SELECT bug_id, status, duplicate_of, is_duplicate, assignee, checked_at "
+                "FROM bug_state"
             )
         }
 
@@ -1353,7 +1384,7 @@ class Store:
                    r.third_party, r.evidence_complete, r.current_title,
                    r.duplicate_count, r.lex_lines, r.lex_unmatched,
                    s.bug_id AS state_bug, s.status, s.duplicate_of,
-                   s.is_duplicate, s.checked_at
+                   s.is_duplicate, s.assignee, s.checked_at
               FROM runs r
               LEFT JOIN bug_state s ON s.bug_id = r.bug_id
         """
@@ -1381,6 +1412,7 @@ class Store:
                     status=str(r["status"] or ""),
                     duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
                     is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
+                    assignee=None if r["assignee"] is None else str(r["assignee"]),
                     checked_at=str(r["checked_at"] or ""),
                 )
             )

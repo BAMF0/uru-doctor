@@ -85,11 +85,11 @@ Changes must preserve these. Most are enforced by tests; all are deliberate.
 - **Redaction is on by default** for logs read from disk (hostnames, usernames,
   home paths, emails, IPs) — the Markdown report quotes log lines verbatim for
   pasting into public bugs.
-- **Corpus-wide commands read indexed columns only.** `queue`, `refresh` and
-  `dedup`'s default output never deserialise a stored record; a test asserts
-  the projections do not select `payload`, because a refactor adding one
-  convenient field would undo this silently. Only `dedup --markdown` needs the
-  records themselves.
+- **Corpus-wide commands read indexed columns only.** `queue`, `todo`,
+  `refresh` and `dedup`'s default output never deserialise a stored record; a
+  test asserts the projections do not select `payload`, because a refactor
+  adding one convenient field would undo this silently. Only `dedup
+  --markdown` needs the records themselves.
 - **The four "broken" counts are different numbers.** On bug 2150245: apt
   reports 22, observed broken is 434, blame-edge targets are 148, graph nodes
   are 964. All four are correct answers to different questions; reports label
@@ -138,7 +138,7 @@ Changes must preserve these. Most are enforced by tests; all are deliberate.
 | rules and provenance | `src/uru_doctor/rules/` |
 | ranking policy | `src/uru_doctor/diagnose.py` |
 | signatures and clusters | `src/uru_doctor/dedup.py` |
-| worklist buckets | `src/uru_doctor/worklist.py` |
+| worklist buckets, the `todo` filter | `src/uru_doctor/worklist.py` |
 | Launchpad triage state | `bug_state` table in `src/uru_doctor/store.py` |
 | title templates | `src/uru_doctor/title.py` |
 | library config (ingest/apt/rules/dedup/title/report) | `src/uru_doctor/config.py` |

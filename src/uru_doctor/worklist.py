@@ -411,3 +411,34 @@ def classify(
         unchecked=unchecked,
         deep_unknown=tuple(sorted(deep_unknown)),
     )
+
+
+def todo(items: Iterable[Item], *, assignee: str = "") -> tuple[Item, ...]:
+    """Bugs already taken on: every Triaged, plus the caller's In Progress.
+
+    The inverse of the buckets. The worklist files these as ``DONE`` because
+    somebody has already taken a view; this is the view for that somebody.
+
+    Triaged is the project's backlog -- anybody may pick it up, so the
+    assignee does not narrow it. In Progress belongs to a person, so it is
+    listed only when the recorded assignee is the caller; an assignee nobody
+    has recorded cannot match, which is the conservative reading, and an
+    empty ``assignee`` matches nobody at all.
+
+    Ordered with the caller's own work first, then the shared backlog, by
+    bug id within each group -- a stable fact, never an interned id.
+    """
+    mine: list[Item] = []
+    triaged: list[Item] = []
+    for item in items:
+        state = item.row.state
+        if item.row.status == "In Progress":
+            if assignee and state is not None and state.assignee == assignee:
+                mine.append(item)
+        elif item.row.status == "Triaged":
+            triaged.append(item)
+
+    def order(item: Item) -> tuple[int, str]:
+        return (item.row.bug_id or 0, item.row.run_key)
+
+    return (*sorted(mine, key=order), *sorted(triaged, key=order))

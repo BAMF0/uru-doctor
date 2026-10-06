@@ -439,14 +439,27 @@ def test_config_has_no_second_attachment_table() -> None:
     assert json.dumps(LaunchpadConfig().model_dump(), default=str)
 
 
-def _task(bug_id: int, status: str = "New", created: str = "2026-09-29T10:00:00+00:00") -> dict:
-    """One ``searchTasks`` entry, shaped like the real API's."""
-    return {
+def _task(
+    bug_id: int,
+    status: str = "New",
+    created: str = "2026-09-29T10:00:00+00:00",
+    assignee: str | None = None,
+) -> dict:
+    """One ``searchTasks`` entry, shaped like the real API's.
+
+    The default omits ``assignee_link``, as only a hand-built entry would;
+    ``assignee=""`` sends the explicit null the API sends for an *unassigned*
+    task -- the distinction ``BugRef.assignee`` preserves.
+    """
+    entry = {
         "bug_link": f"{API}/bugs/{bug_id}",
         "status": status,
         "date_created": created,
         "title": f'Bug #{bug_id} in ubuntu-release-upgrader (Ubuntu): "upgrade failed"',
     }
+    if assignee is not None:
+        entry["assignee_link"] = f"{API}/~{assignee}" if assignee else None
+    return entry
 
 
 class TestSearchTasks:
@@ -469,6 +482,21 @@ class TestSearchTasks:
         assert [r.bug_id for r in refs] == [2168863, 2168919]
         assert {r.status for r in refs} == {"New", "Won't Fix"}
         assert all(r.created is not None for r in refs)
+
+    def test_an_assignee_link_becomes_a_username(self) -> None:
+        refs, _ = self._search({"entries": [_task(1, assignee="bamf0")]})
+        assert refs[0].assignee == "bamf0"
+
+    def test_a_null_assignee_is_unassigned_not_unknown(self) -> None:
+        """The API sends the key with a null value; that is a fact ('')."""
+        refs, _ = self._search({"entries": [_task(1, assignee="")]})
+        assert refs[0].assignee == ""
+
+    def test_an_absent_assignee_key_is_unknown_not_unassigned(self) -> None:
+        """Only a hand-built entry omits the key -- verified against the live
+        API, whose task entries always carry ``assignee_link``."""
+        refs, _ = self._search({"entries": [_task(1)]})
+        assert refs[0].assignee is None
 
     def test_closed_statuses_are_requested_explicitly(self) -> None:
         """Launchpad's default omits closed bugs, and that is the wrong default.

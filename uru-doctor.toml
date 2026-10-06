@@ -107,6 +107,12 @@ api_base = "https://api.launchpad.net/devel"
 # tracks the CLI package version, so this line changes when that does.
 user_agent = "uru-doctor/0.2.0 (+https://launchpad.net/ubuntu/+source/ubuntu-release-upgrader)"
 
+# Your Launchpad username, without the `~`. The client is anonymous -- there
+# is no credential to derive it from -- so this is how `uru-doctor todo`
+# knows which In Progress bugs are yours. Empty means unset: Triaged bugs
+# still list, and the command says why the In Progress half is missing.
+user = ""
+
 # Minimum gap between requests, in seconds.
 #
 # Measured, not guessed: below roughly two seconds the API starts answering

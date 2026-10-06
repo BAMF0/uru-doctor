@@ -26,7 +26,7 @@ from uru_doctor.dedup import Tier, cluster_runs, tier_index, tier_name
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Signature
 from uru_doctor.store import CLOSED_STATUSES, BugState, Store, TriageRow
-from uru_doctor.worklist import Bucket, classify
+from uru_doctor.worklist import Bucket, classify, todo
 
 NOW = datetime(2026, 10, 5, 12, 0, tzinfo=UTC)
 
@@ -39,6 +39,7 @@ def row(
     evidence_complete: bool = True,
     duplicate_of: int | None = None,
     is_duplicate: bool | None = None,
+    assignee: str | None = None,
     checked: datetime | None = NOW,
     state: bool = True,
 ) -> TriageRow:
@@ -60,6 +61,7 @@ def row(
                 status=status,
                 duplicate_of=duplicate_of,
                 is_duplicate=is_duplicate,
+                assignee=assignee,
                 checked_at=checked.isoformat() if checked else "",
             )
             if state
@@ -277,6 +279,58 @@ class TestBuckets:
         assert {i.row.bug_id for i in worklist.items} == {1, 2, 3, 4, 5, 6}
 
 
+class TestTodo:
+    """The plate: Triaged is anybody's, In Progress is a person's.
+
+    One premise per test, same as the buckets: this filter is the only thing
+    standing between "accepted work" and a list of everything Launchpad has
+    not closed.
+    """
+
+    @staticmethod
+    def plate(rows: list[TriageRow], assignee: str = "me") -> list[int | None]:
+        return [item.row.bug_id for item in todo(classify(rows).items, assignee=assignee)]
+
+    def test_triaged_is_listed_with_no_assignee_recorded(self) -> None:
+        assert self.plate([row(1, status="Triaged")]) == [1]
+
+    def test_triaged_is_listed_for_any_assignee(self) -> None:
+        """The backlog is the project's, not the assignee's."""
+        assert self.plate([row(1, status="Triaged", assignee="someone-else")]) == [1]
+
+    def test_triaged_is_listed_when_unassigned(self) -> None:
+        assert self.plate([row(1, status="Triaged", assignee="")]) == [1]
+
+    def test_in_progress_is_listed_when_it_is_mine(self) -> None:
+        assert self.plate([row(1, status="In Progress", assignee="me")]) == [1]
+
+    def test_in_progress_someone_elses_is_not_my_work(self) -> None:
+        assert self.plate([row(1, status="In Progress", assignee="someone-else")]) == []
+
+    def test_in_progress_unassigned_is_not_mine(self) -> None:
+        assert self.plate([row(1, status="In Progress", assignee="")]) == []
+
+    def test_in_progress_with_an_unrecorded_assignee_cannot_match(self) -> None:
+        """Unknown is not unassigned, and neither is mine."""
+        assert self.plate([row(1, status="In Progress")]) == []
+
+    def test_without_a_name_no_in_progress_is_listed(self) -> None:
+        rows = [row(1, status="In Progress", assignee="me"), row(2, status="Triaged")]
+        assert self.plate(rows, assignee="") == [2]
+
+    @pytest.mark.parametrize("status", ["New", "Incomplete", "Confirmed", "Fix Released"])
+    def test_other_statuses_are_not_on_the_plate(self, status: str) -> None:
+        assert self.plate([row(1, status=status, assignee="me")]) == []
+
+    def test_my_work_sorts_ahead_of_the_shared_backlog(self) -> None:
+        rows = [
+            row(9, status="Triaged"),
+            row(5, status="Triaged"),
+            row(3, status="In Progress", assignee="me"),
+        ]
+        assert self.plate(rows) == [3, 5, 9]
+
+
 def vars_of(item: TriageRow) -> dict[str, object]:
     """Field values of a slotted frozen dataclass, for building variants."""
     return {
@@ -372,6 +426,42 @@ class TestBugState:
         assert store.bug_states()[1].is_duplicate is None
         store.put_bug_states([BugState(bug_id=1, status="New", is_duplicate=False)])
         assert store.bug_states()[1].is_duplicate is False
+
+    def test_assignee_round_trips(self, store: Store) -> None:
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="bamf0")])
+        assert store.bug_states()[1].assignee == "bamf0"
+
+    def test_a_pass_that_never_asks_keeps_the_assignee(self, store: Store) -> None:
+        """The deep pass and ``fetch`` have no assignee to offer.
+
+        ``None`` is "I did not look": writing it must not erase what a
+        listing recorded, or every deep refresh would unassign the corpus.
+        """
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="bamf0")])
+        store.put_bug_states([BugState(bug_id=1, status="In Progress", duplicate_of=9)])
+        state = store.bug_states()[1]
+        assert state.status == "In Progress"
+        assert state.assignee == "bamf0"
+
+    def test_unassigned_overwrites_a_stale_name(self, store: Store) -> None:
+        """``""`` is a fact, not an absence: Launchpad says nobody holds it."""
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="bamf0")])
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="")])
+        assert store.bug_states()[1].assignee == ""
+
+    def test_reassignment_overwrites(self, store: Store) -> None:
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="bamf0")])
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="mvo")])
+        assert store.bug_states()[1].assignee == "mvo"
+
+    def test_assignee_is_projected_into_triage_rows(
+        self, store: Store, interner: Interner
+    ) -> None:
+        store.put_run(make_run(store, interner, bug_id=1))
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", assignee="bamf0")])
+        (projected,) = store.triage_rows()
+        assert projected.state is not None
+        assert projected.state.assignee == "bamf0"
 
     def test_touch_confirms_without_changing(self, store: Store) -> None:
         store.put_bug_states([BugState(bug_id=1, status="New", checked_at="2026-01-01")])

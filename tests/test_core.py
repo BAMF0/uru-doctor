@@ -35,7 +35,7 @@ from uru_doctor.models import (
     UpgradeRun,
     unpack_u32,
 )
-from uru_doctor.store import SCHEMA_VERSION, Store
+from uru_doctor.store import SCHEMA_VERSION, BugState, Store
 
 # ---------------------------------------------------------------------------
 # Sections
@@ -717,6 +717,7 @@ class TestAdditiveMigration:
                 "duplicate_count",
             ):
                 raw.execute(f"ALTER TABLE runs DROP COLUMN {column}")
+            raw.execute("ALTER TABLE bug_state DROP COLUMN assignee")
             raw.execute("CREATE TABLE IF NOT EXISTS llm_cache (fingerprint TEXT PRIMARY KEY)")
             raw.execute("UPDATE meta SET value='1' WHERE key='schema_version'")
             raw.commit()
@@ -760,6 +761,28 @@ class TestAdditiveMigration:
         for _ in range(3):
             with Store.open(state) as store:
                 assert store.coverage_totals() == (1, 1, 900, 10)
+
+    def test_a_pre_assignee_store_reads_unknown_not_unassigned(
+        self, tmp_path: Path
+    ) -> None:
+        """The migration must not conflate the two.
+
+        Rows predating the column get NULL -- "nobody recorded it" -- which
+        is honestly different from '' ("Launchpad says unassigned"), and the
+        ``todo`` filter depends on the difference.
+        """
+        state = tmp_path / "noassignee"
+        self._legacy(state)
+        with Store.open(state) as store:
+            store.put_bug_states([BugState(bug_id=4242, status="Triaged")])
+            store.commit()
+        with Store.open(state) as store:
+            recorded = store.bug_states()[4242]
+            assert recorded.assignee is None
+            store.put_bug_states([BugState(bug_id=4242, status="Triaged", assignee="bamf0")])
+            store.commit()
+        with Store.open(state) as store:
+            assert store.bug_states()[4242].assignee == "bamf0"
 
     def test_the_llm_cache_is_dropped(self, tmp_path: Path) -> None:
         """The subsystem was never built and contradicts the design claim.

@@ -49,6 +49,15 @@ class LaunchpadConfig(BaseModel):
     test is what makes a version bump update the file too.
     """
 
+    user: str = ""
+    """Your Launchpad username, without the ``~``.
+
+    The client is anonymous -- there is no credential to derive it from -- so
+    this is how ``todo`` knows which In Progress bugs are yours. Empty means
+    unset: Triaged bugs still list, and the command says why the In Progress
+    half is missing.
+    """
+
     max_retries: int = Field(5, ge=0)
     backoff_base_s: float = Field(2.0, gt=0)
     """Exponential backoff base. Observed 429s need tens of seconds, not milliseconds."""

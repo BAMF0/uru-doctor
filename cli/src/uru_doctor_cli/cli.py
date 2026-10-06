@@ -67,7 +67,8 @@ from uru_doctor.report import RunEntry, plural, render_corpus, render_run, rende
 from uru_doctor.rules.registry import all_rules, rules_digest
 from uru_doctor.store import BugState, Store, run_key_for
 from uru_doctor.title import ProposedTitle, propose_title
-from uru_doctor.worklist import BUCKET_HELP, Bucket, Worklist, classify
+from uru_doctor.worklist import BUCKET_HELP, Bucket, Item, Worklist, classify
+from uru_doctor.worklist import todo as pick_todo
 from uru_doctor_cli import __version__ as CLI_VERSION
 from uru_doctor_cli.config import CliConfig as Config
 from uru_doctor_cli.config import load_cli_config as load_config
@@ -1931,6 +1932,7 @@ def sweep(
                         bug_id=ref.bug_id,
                         status=ref.status,
                         is_duplicate=ref.is_duplicate,
+                        assignee=ref.assignee,
                         checked_at=datetime.now(UTC).isoformat(),
                     )
                     for ref in found
@@ -1982,6 +1984,7 @@ def sweep(
                             status=ref.status,
                             duplicate_of=record.duplicate_of,
                             is_duplicate=ref.is_duplicate,
+                            assignee=ref.assignee,
                             checked_at=datetime.now(UTC).isoformat(),
                         )
                     ]
@@ -2240,6 +2243,7 @@ def refresh(
                     bug_id=ref.bug_id,
                     status=ref.status,
                     is_duplicate=ref.is_duplicate,
+                    assignee=ref.assignee,
                     checked_at=stamp,
                 )
                 for ref in seen
@@ -2735,6 +2739,154 @@ def _print_worklist(
         out.print(
             f"[dim]{plural(worklist.unchecked, 'bug')} never checked against Launchpad[/]"
         )
+
+
+def _todo_json(
+    plate: Sequence[Item],
+    me: str,
+    worklist: Worklist,
+    now: datetime,
+    stale: bool,
+) -> dict[str, object]:
+    """The machine-readable plate. Same freshness block as the worklist."""
+    items = list(plate)
+    return {
+        "schema": JSON_SCHEMA_VERSION,
+        "generated_at": now.isoformat(),
+        "launchpad_state": {
+            "newest_check": (
+                worklist.newest_check.isoformat() if worklist.newest_check else None
+            ),
+            "oldest_check": (
+                worklist.oldest_check.isoformat() if worklist.oldest_check else None
+            ),
+            "never_checked": worklist.unchecked,
+            "stale": stale,
+        },
+        "assignee": me or None,
+        "counts": {
+            "in_progress": sum(1 for i in items if i.row.status == "In Progress"),
+            "triaged": sum(1 for i in items if i.row.status == "Triaged"),
+        },
+        "items": [
+            {
+                "key": item.row.run_key,
+                "bug_id": item.row.bug_id,
+                "status": item.row.status,
+                "assignee": item.row.state.assignee if item.row.state else None,
+                "cause": item.row.cause.value if item.row.cause else None,
+                "title": item.row.current_title or None,
+                "checked_at": item.row.state.checked_at if item.row.state else None,
+            }
+            for item in items
+        ],
+    }
+
+
+def _print_todo(
+    plate: Sequence[Item], me: str, worklist: Worklist, stale: bool, max_rows: int
+) -> None:
+    """The plate, for a terminal."""
+    out.print(f"[bold]{plural(len(plate), 'bug')} on your plate[/]")
+    out.print(_freshness(worklist, stale))
+    if not me:
+        out.print(
+            "[yellow]launchpad.user is not set -- In Progress bugs cannot be "
+            "matched to you, so only Triaged are listed[/]"
+        )
+    if not plate:
+        out.print("\n[green]nothing taken on[/]")
+        return
+
+    out.print()
+    table = Table(box=None, pad_edge=False)
+    table.add_column("bug")
+    table.add_column("status", style="dim")
+    table.add_column("assignee", style="dim")
+    table.add_column("cause", style="dim")
+    table.add_column("title", overflow="fold")
+    for item in plate[:max_rows]:
+        state = item.row.state
+        table.add_row(
+            item.label,
+            item.row.status,
+            (state.assignee or "—") if state else "?",
+            item.row.cause.value if item.row.cause else "none",
+            item.row.current_title,
+        )
+    out.print(table)
+    if len(plate) > max_rows:
+        out.print(
+            f"[dim]… showing {max_rows} of {len(plate)}; `--limit {len(plate)}` for all[/]"
+        )
+
+
+@app.command(rich_help_panel="Act on the corpus")
+def todo(
+    assignee: Annotated[
+        str | None,
+        typer.Option(
+            "--assignee",
+            "-a",
+            metavar="NAME",
+            help="Whose plate. Default: launchpad.user from the config.",
+        ),
+    ] = None,
+    limit: Annotated[
+        int | None,
+        typer.Option("--limit", "-n", metavar="N", help="Rows listed. Counts stay exact."),
+    ] = None,
+    do_refresh: Annotated[
+        bool, typer.Option("--refresh", help="Re-read Launchpad statuses first.")
+    ] = False,
+    as_json: Annotated[
+        bool, typer.Option("--json", help="Emit a machine-readable list.")
+    ] = False,
+    out_path: OutOption = None,
+    config_path: ConfigOption = None,
+) -> None:
+    """What you have already taken on: Triaged bugs, and your In Progress ones.
+
+    The inverse of ``queue``: these bugs have had their decision. Every
+    Triaged bug in the corpus is listed -- the backlog is anybody's to pick
+    up -- plus the In Progress bugs assigned to you, since somebody else's
+    in-flight work is not your list. The client is anonymous, so "you" comes
+    from ``launchpad.user`` in the config, or from ``--assignee``.
+
+    Reads the store, so it is exactly as current as the last ``refresh`` --
+    the same rule as ``queue``, and the same flag fixes it.
+
+    \b
+    Examples:
+      uru-doctor todo
+      uru-doctor todo --refresh
+      uru-doctor todo --assignee bamf0
+    """
+    if do_refresh:
+        refresh(as_json=False, out_path=None, config_path=config_path)
+        out.print()
+
+    config = _config(config_path)
+    me = assignee if assignee is not None else config.launchpad.user
+    rows = limit if limit is not None else config.queue.max_rows
+    with _state_store(config) as store:
+        if not store.run_keys(primary_only=True):
+            _fail("the store is empty; run `uru-doctor sweep` first")
+        worklist = _worklist(store, config)
+
+    plate = pick_todo(worklist.items, assignee=me)
+    now = datetime.now(UTC)
+    stale = worklist.stale(now=now, after_days=config.queue.stale_after_days)
+
+    if as_json:
+        _write(
+            json.dumps(_todo_json(plate, me, worklist, now, stale), indent=2) + "\n",
+            out_path,
+            label="todo",
+        )
+        return
+
+    _print_todo(plate, me, worklist, stale, rows)
 
 
 @app.callback(invoke_without_command=True)
