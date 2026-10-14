@@ -784,6 +784,33 @@ class TestAdditiveMigration:
         with Store.open(state) as store:
             assert store.bug_states()[4242].assignee == "bamf0"
 
+    def test_a_pre_importance_store_reads_unread_not_undecided(
+        self, tmp_path: Path
+    ) -> None:
+        """Rows predating the columns get NULL -- "no listing has looked".
+
+        That is honestly different from ``Undecided``, which is a judgement
+        Launchpad *records*; conflating them would rank never-read bugs as
+        though a triager had assessed them.
+        """
+        state = tmp_path / "pre-importance"
+        with Store.open(state) as store:
+            store.put_run(
+                UpgradeRun(bug_id=7, lex=LexCoverage(lines=10, matched=10))
+            )
+            store.put_bug_states([BugState(bug_id=7, status="Triaged")])
+            store.commit()
+        with sqlite3.connect(state / "uru-doctor.db") as raw:
+            raw.execute("ALTER TABLE bug_state DROP COLUMN importance")
+            raw.execute("ALTER TABLE bug_state DROP COLUMN title")
+            raw.commit()
+        with Store.open(state) as store:
+            recorded = store.bug_states()[7]
+            assert recorded.importance == ""
+            assert recorded.title == ""
+            (projected,) = store.triage_rows()
+            assert projected.importance == ""
+
     def test_the_llm_cache_is_dropped(self, tmp_path: Path) -> None:
         """The subsystem was never built and contradicts the design claim.
 

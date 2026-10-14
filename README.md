@@ -237,7 +237,10 @@ asking only for bugs *modified* since the last pass makes the steady state two
 requests however large the corpus is. Bugs the search does not return were not
 modified, which is positive evidence that what is already recorded is still
 current — provided the listing reached the end, which the tool checks, because
-this package has more bugs than any listing will page through.
+this package has more bugs than any listing will page through. The same entry
+carries each bug's importance and current title, so a retitle — the change this
+tool exists to propose — is noticed here rather than a year later, and `todo`
+can order your plate by what Launchpad says matters.
 
 Check how much of the corpus was actually read:
 
@@ -284,8 +287,8 @@ that lexed and no rule claimed, because those are different repairs.
 | | |
 | --- | --- |
 | `queue` | What still needs a decision, in buckets. `--bucket NAME` for one. |
-| `todo` | What you have already taken on: Triaged bugs, and your In Progress ones. |
-| `refresh` | Re-read Launchpad's status on stored bugs. Two requests. |
+| `todo` | What you have taken on: Triaged bugs and your In Progress ones, by importance. |
+| `refresh` | Re-read Launchpad's status, importance and titles on stored bugs. Two requests. |
 | `clean` | Reclaim disk the attachment cache is wasting. Reports; `--yes` deletes. |
 
 Every command takes `-h`/`--help`. The fourteen that answer a question also
@@ -346,8 +349,9 @@ a table of its own, keyed by bug rather than by run, and refreshing it never
 rewrites a stored `UpgradeRun`. A diagnosis has to stay reproducible from the
 record, and a record edited after the fact by a network call is not that. So
 `UpgradeRun.bug_status` keeps its own meaning — what Launchpad said when the
-bug was ingested — and the table holds what it says now. Neither is ever an
-input to a diagnosis or a signature.
+bug was ingested — and the table holds what it says now: status, duplicate
+links, assignee, importance, and the title a retitle changes. Neither is ever
+an input to a diagnosis or a signature.
 
 ## Exit status
 

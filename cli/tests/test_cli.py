@@ -1194,12 +1194,20 @@ class TestSweep:
 
     API = "https://api.launchpad.net/devel"
 
-    def _task(self, bug_id: int, status: str = "New", day: int = 29) -> dict[str, object]:
+    def _task(
+        self,
+        bug_id: int,
+        status: str = "New",
+        day: int = 29,
+        *,
+        importance: str = "Undecided",
+    ) -> dict[str, object]:
         return {
             "bug_link": f"{self.API}/bugs/{bug_id}",
             "status": status,
             "date_created": f"2026-09-{day:02d}T10:00:00+00:00",
             "title": f"Bug #{bug_id} in ubuntu-release-upgrader (Ubuntu)",
+            "importance": importance,
         }
 
     def _transport(
@@ -1330,6 +1338,24 @@ class TestSweep:
         self._patch(monkeypatch, transport)
         runner.invoke(app, ["sweep", "--config", _conf(tmp_path, tmp_path / "state")])
         assert sorted(fetched) == [1, 2]
+
+    def test_importance_and_title_are_recorded(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """They ride the same entry as the status, so they cost no requests.
+
+        The title stored here is the listing's copy, which ``refresh`` keeps
+        moving; the ingest-time copy on the run is the frozen one.
+        """
+        transport, _ = self._transport([self._task(1, importance="Medium")])
+        self._patch(monkeypatch, transport)
+        state = tmp_path / "state"
+        result = runner.invoke(app, ["sweep", "--config", _conf(tmp_path, state)])
+        assert result.exit_code == EXIT_OK, result.output
+        with Store.open(state) as store:
+            recorded = store.bug_states()[1]
+        assert recorded.importance == "Medium"
+        assert recorded.title == "Bug #1 in ubuntu-release-upgrader (Ubuntu)"
 
     def test_already_known_bugs_are_not_refetched(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -1911,6 +1937,36 @@ class TestTodo:
         assert by_id[2169028]["assignee"] == "bamf0"
         assert by_id[2169028]["cause"] is not None
 
+    def test_importance_groups_the_listing(self, tmp_path: Path, swept: Path) -> None:
+        """The plate is ordered by what matters, not by arrival."""
+        TestQueue._state(swept, 2150339, status="Triaged", importance="Low")
+        TestQueue._state(swept, 2169028, status="Triaged", importance="Critical")
+        TestQueue._state(swept, 2151847, status="New")
+        result = runner.invoke(app, ["todo", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "Critical" in result.output
+        assert "Low" in result.output
+        assert result.output.index("Critical") < result.output.index("Low")
+        assert result.output.index("LP#2169028") < result.output.index("LP#2150339")
+
+    def test_unread_rows_are_named_and_nudged(self, tmp_path: Path, swept: Path) -> None:
+        """A corpus predating importance tracking is told how to learn it."""
+        TestQueue._state(swept, 2150339, status="Triaged")
+        result = runner.invoke(app, ["todo", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "not yet read" in result.output
+        assert "refresh --all" in result.output
+
+    def test_json_carries_importance(self, tmp_path: Path, swept: Path) -> None:
+        TestQueue._state(swept, 2150339, status="Triaged", importance="Medium")
+        payload = json.loads(
+            runner.invoke(
+                app, ["todo", "--json", "--config", _conf(tmp_path, swept)]
+            ).stdout
+        )
+        by_id = {item["bug_id"]: item for item in payload["items"]}
+        assert by_id[2150339]["importance"] == "Medium"
+
 
 class TestClean:
     """Reclaiming the attachment cache.
@@ -2059,12 +2115,15 @@ class TestRefresh:
 
         return (httpx.MockTransport(handler), calls)
 
-    def _task(self, bug_id: int, status: str = "New") -> dict[str, object]:
+    def _task(
+        self, bug_id: int, status: str = "New", *, importance: str = "Undecided"
+    ) -> dict[str, object]:
         return {
             "bug_link": f"{self.API}/bugs/{bug_id}",
             "status": status,
             "date_created": "2026-09-29T10:00:00+00:00",
             "title": f"Bug #{bug_id}",
+            "importance": importance,
         }
 
     def _patch(self, monkeypatch: pytest.MonkeyPatch, transport: httpx.MockTransport) -> None:
@@ -2119,6 +2178,70 @@ class TestRefresh:
         assert result.exit_code == EXIT_OK, result.output
         with Store.open(swept) as store:
             assert store.bug_states()[2169028].assignee == "bamf0"
+
+    def test_importance_is_recorded_from_the_listing(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Same entry, same price; it is what orders the plate."""
+        transport, _ = self._transport([self._task(2169028, "Triaged", importance="High")])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        with Store.open(swept) as store:
+            assert store.bug_states()[2169028].importance == "High"
+
+    def test_a_retitle_is_recorded_and_reported(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A retitle is the change this tool exists to propose; see it land."""
+        task = self._task(2169028, "Triaged")
+        task["title"] = "noble\u2192resolute: lintian deadlocks the resolver"
+        transport, _ = self._transport([task])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "retitled" in result.output
+        assert "Bug #2169028" in result.output
+        with Store.open(swept) as store:
+            assert (
+                store.bug_states()[2169028].title
+                == "noble\u2192resolute: lintian deadlocks the resolver"
+            )
+
+    def test_an_unchanged_title_is_not_a_retitle(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The listing always carries a title; repeating it is not a change."""
+        transport, _ = self._transport([self._task(2169028, "Triaged")])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "retitled" not in result.output
+
+    def test_a_first_title_is_a_backfill_not_a_retitle(
+        self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Nothing was recorded before, so nothing *changed*.
+
+        The predicate exists so a corpus collected before titles were tracked
+        backfills quietly rather than reporting the whole store as retitled.
+        """
+        import sqlite3
+
+        with sqlite3.connect(swept / "uru-doctor.db") as raw:
+            raw.execute("UPDATE bug_state SET title='' WHERE bug_id=2169028")
+        task = self._task(2169028, "Triaged")
+        task["title"] = "noble\u2192resolute: lintian deadlocks the resolver"
+        transport, _ = self._transport([task])
+        self._patch(monkeypatch, transport)
+        result = runner.invoke(app, ["refresh", "--config", _conf(tmp_path, swept)])
+        assert result.exit_code == EXIT_OK, result.output
+        assert "retitled" not in result.output
+        with Store.open(swept) as store:
+            assert (
+                store.bug_states()[2169028].title
+                == "noble\u2192resolute: lintian deadlocks the resolver"
+            )
 
     def test_a_newly_marked_duplicate_is_noticed(
         self, tmp_path: Path, swept: Path, monkeypatch: pytest.MonkeyPatch

@@ -1934,6 +1934,8 @@ def sweep(
                         status=ref.status,
                         is_duplicate=ref.is_duplicate,
                         assignee=ref.assignee,
+                        importance=ref.importance,
+                        title=ref.title,
                         checked_at=datetime.now(UTC).isoformat(),
                     )
                     for ref in found
@@ -1986,6 +1988,8 @@ def sweep(
                             duplicate_of=record.duplicate_of,
                             is_duplicate=ref.is_duplicate,
                             assignee=ref.assignee,
+                            importance=ref.importance,
+                            title=ref.title,
                             checked_at=datetime.now(UTC).isoformat(),
                         )
                     ]
@@ -2190,6 +2194,11 @@ def refresh(
     Bugs the search does not return were not modified, which is positive
     evidence that what is already recorded is still current.
 
+    The same entry carries each bug's importance and current title, so both
+    are recorded with the status. A retitle on Launchpad -- the change this
+    tool exists to propose -- shows up here, which is how ``todo`` and
+    ``queue --titles`` stop showing the title a bug was ingested under.
+
     \b
     Examples:
       uru-doctor refresh            # one request, usually
@@ -2212,6 +2221,7 @@ def refresh(
         now = datetime.now(UTC)
         stamp = now.isoformat()
         changed: list[tuple[int, str, str]] = []
+        retitled: list[tuple[int, str, str]] = []
         newly_duplicate: list[int] = []
         resolved: list[tuple[int, int]] = []
         before = store.bug_states()
@@ -2245,6 +2255,8 @@ def refresh(
                     status=ref.status,
                     is_duplicate=ref.is_duplicate,
                     assignee=ref.assignee,
+                    importance=ref.importance,
+                    title=ref.title,
                     checked_at=stamp,
                 )
                 for ref in seen
@@ -2255,6 +2267,10 @@ def refresh(
                     changed.append((state.bug_id, was.status if was else "", state.status))
                 if state.is_duplicate and not (was and was.is_duplicate):
                     newly_duplicate.append(state.bug_id)
+                # A first listing backfills the title; only a change against a
+                # previously recorded one is a retitle worth reporting.
+                if was is not None and was.title and state.title != was.title:
+                    retitled.append((state.bug_id, was.title, state.title))
             store.put_bug_states(states)
 
             # A bug the listing did not return was not modified since the
@@ -2339,6 +2355,10 @@ def refresh(
                         {"bug_id": bug_id, "was": before_status, "now": after_status}
                         for bug_id, before_status, after_status in changed
                     ],
+                    "retitled": [
+                        {"bug_id": bug_id, "was": was_title, "now": now_title}
+                        for bug_id, was_title, now_title in retitled
+                    ],
                     "newly_duplicate": newly_duplicate,
                     "masters_resolved": [
                         {"bug_id": b, "duplicate_of": m} for b, m in resolved
@@ -2369,6 +2389,17 @@ def refresh(
             out.print(f"[dim]… and {len(changed) - config.queue.max_rows} more[/]")
     else:
         out.print("[dim]no status changed[/]")
+    if retitled:
+        out.print(f"[green]{plural(len(retitled), 'bug')} retitled[/] since the last read")
+        table = Table(box=None, pad_edge=False)
+        table.add_column("bug")
+        table.add_column("was", style="dim", overflow="fold")
+        table.add_column("now", overflow="fold")
+        for bug_id, was_title, now_title in retitled[: config.queue.max_rows]:
+            table.add_row(f"LP#{bug_id}", was_title, now_title)
+        out.print(table)
+        if len(retitled) > config.queue.max_rows:
+            out.print(f"[dim]… and {len(retitled) - config.queue.max_rows} more[/]")
     if newly_duplicate:
         out.print(
             f"[yellow]{plural(len(newly_duplicate), 'bug')} newly marked a duplicate:[/] "
@@ -2774,6 +2805,7 @@ def _todo_json(
                 "key": item.row.run_key,
                 "bug_id": item.row.bug_id,
                 "status": item.row.status,
+                "importance": item.row.importance or None,
                 "assignee": item.row.state.assignee if item.row.state else None,
                 "cause": item.row.cause.value if item.row.cause else None,
                 "title": item.row.current_title or None,
@@ -2787,7 +2819,7 @@ def _todo_json(
 def _print_todo(
     plate: Sequence[Item], me: str, worklist: Worklist, stale: bool, max_rows: int
 ) -> None:
-    """The plate, for a terminal."""
+    """The plate, for a terminal: own work first, grouped by importance."""
     out.print(f"[bold]{plural(len(plate), 'bug')} on your plate[/]")
     out.print(_freshness(worklist, stale))
     if not me:
@@ -2798,28 +2830,52 @@ def _print_todo(
     if not plate:
         out.print("\n[green]nothing taken on[/]")
         return
-
-    out.print()
-    table = Table(box=None, pad_edge=False)
-    table.add_column("bug")
-    table.add_column("status", style="dim")
-    table.add_column("assignee", style="dim")
-    table.add_column("cause", style="dim")
-    table.add_column("title", overflow="fold")
-    for item in plate[:max_rows]:
-        state = item.row.state
-        table.add_row(
-            item.label,
-            item.row.status,
-            (state.assignee or "—") if state else "?",
-            item.row.cause.value if item.row.cause else "none",
-            item.row.current_title,
-        )
-    out.print(table)
-    if len(plate) > max_rows:
+    if any(not item.row.importance for item in plate):
         out.print(
-            f"[dim]… showing {max_rows} of {len(plate)}; `--limit {len(plate)}` for all[/]"
+            "[dim]some rows predate importance tracking -- "
+            "`uru-doctor refresh --all` reads it once[/]"
         )
+
+    # The plate arrives ordered mine-first and by importance within each half
+    # (uru_doctor.worklist.todo), so grouping is a consecutive run split.
+    groups: list[tuple[str, str, list[Item]]] = []
+    for item in plate:
+        importance = item.row.importance or "not yet read"
+        if groups and groups[-1][0] == item.row.status and groups[-1][1] == importance:
+            groups[-1][2].append(item)
+        else:
+            groups.append((item.row.status, importance, [item]))
+
+    section = ""
+    for status, importance, items in groups:
+        if status != section:
+            section = status
+            out.print()
+            if status == "In Progress":
+                out.rule("[bold]In Progress[/] -- yours", align="left")
+            else:
+                out.rule("[bold]Triaged[/]", align="left")
+                out.print("[dim]the shared backlog -- anybody may pick these up[/]")
+        out.print(f"\n  [bold]{importance}[/]  [dim]{len(items)}[/]")
+        table = Table(box=None, pad_edge=False)
+        table.add_column("bug")
+        table.add_column("assignee", style="dim")
+        table.add_column("cause", style="dim")
+        table.add_column("title", overflow="fold")
+        for item in items[:max_rows]:
+            state = item.row.state
+            table.add_row(
+                item.label,
+                (state.assignee or "—") if state else "?",
+                item.row.cause.value if item.row.cause else "none",
+                item.row.current_title,
+            )
+        out.print(table)
+        if len(items) > max_rows:
+            out.print(
+                f"[dim]  … showing {max_rows} of {len(items)}; "
+                f"`--limit {len(items)}` for this group[/]"
+            )
 
 
 @app.command(rich_help_panel="Act on the corpus")
@@ -2835,7 +2891,12 @@ def todo(
     ] = None,
     limit: Annotated[
         int | None,
-        typer.Option("--limit", "-n", metavar="N", help="Rows listed. Counts stay exact."),
+        typer.Option(
+            "--limit",
+            "-n",
+            metavar="N",
+            help="Rows listed per importance group. Counts stay exact.",
+        ),
     ] = None,
     do_refresh: Annotated[
         bool, typer.Option("--refresh", help="Re-read Launchpad statuses first.")
@@ -2854,8 +2915,12 @@ def todo(
     in-flight work is not your list. The client is anonymous, so "you" comes
     from ``launchpad.user`` in the config, or from ``--assignee``.
 
-    Reads the store, so it is exactly as current as the last ``refresh`` --
-    the same rule as ``queue``, and the same flag fixes it.
+    Grouped by Launchpad importance, your own In Progress bugs first -- the
+    question a plate answers is "what first". Reads the store, so it is
+    exactly as current as the last ``refresh`` -- the same rule as ``queue``,
+    and the same flag fixes it. Importance and current titles arrive with
+    that read; a corpus collected before they were recorded shows its rows
+    as unread until one ``refresh --all`` passes over it.
 
     \b
     Examples:

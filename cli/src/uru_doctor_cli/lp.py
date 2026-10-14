@@ -126,6 +126,13 @@ class BugRef:
     answer on the next listing, and unassigned overwrites a stale name.
     """
 
+    importance: str = ""
+    """``Critical``, ``High``, ``Medium``, ``Low``, ``Wishlist`` or ``Undecided``.
+
+    Every task entry carries it, so a listing learns it for free; empty only
+    on a hand-built entry.
+    """
+
 
 #: Why ``omit_duplicates=false`` is passed explicitly.
 #:
@@ -482,6 +489,7 @@ class Launchpad:
                             if "assignee_link" not in entry
                             else (_person_name(entry.get("assignee_link")) or "")
                         ),
+                        importance=str(entry.get("importance") or ""),
                     )
                 )
             next_link = payload.get("next_collection_link")

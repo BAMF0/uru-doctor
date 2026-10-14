@@ -26,7 +26,7 @@ from uru_doctor.dedup import Tier, cluster_runs, tier_index, tier_name
 from uru_doctor.intern import Interner
 from uru_doctor.models import Cause, Signature
 from uru_doctor.store import CLOSED_STATUSES, BugState, Store, TriageRow
-from uru_doctor.worklist import Bucket, classify, todo
+from uru_doctor.worklist import Bucket, classify, importance_rank, todo
 
 NOW = datetime(2026, 10, 5, 12, 0, tzinfo=UTC)
 
@@ -40,6 +40,8 @@ def row(
     duplicate_of: int | None = None,
     is_duplicate: bool | None = None,
     assignee: str | None = None,
+    importance: str = "",
+    title: str = "",
     checked: datetime | None = NOW,
     state: bool = True,
 ) -> TriageRow:
@@ -62,6 +64,8 @@ def row(
                 duplicate_of=duplicate_of,
                 is_duplicate=is_duplicate,
                 assignee=assignee,
+                importance=importance,
+                title=title,
                 checked_at=checked.isoformat() if checked else "",
             )
             if state
@@ -330,6 +334,55 @@ class TestTodo:
         ]
         assert self.plate(rows) == [3, 5, 9]
 
+    def test_importance_orders_within_a_group(self) -> None:
+        """"What first" is the question a plate answers."""
+        rows = [
+            row(1, status="Triaged", importance="Low"),
+            row(2, status="Triaged", importance="Critical"),
+            row(3, status="Triaged", importance="Medium"),
+        ]
+        assert self.plate(rows) == [2, 3, 1]
+
+    def test_bug_id_breaks_an_importance_tie(self) -> None:
+        """The tie-break is a stable fact, never an interned id."""
+        rows = [
+            row(9, status="Triaged", importance="High"),
+            row(5, status="Triaged", importance="High"),
+        ]
+        assert self.plate(rows) == [5, 9]
+
+    def test_my_work_sorts_ahead_regardless_of_importance(self) -> None:
+        """Finishing what you started outranks starting something bigger."""
+        rows = [
+            row(9, status="Triaged", importance="Critical"),
+            row(3, status="In Progress", assignee="me", importance="Low"),
+        ]
+        assert self.plate(rows) == [3, 9]
+
+    def test_unread_sorts_after_undecided(self) -> None:
+        """No listing is not an importance; see :func:`importance_rank`."""
+        rows = [
+            row(1, status="Triaged"),
+            row(2, status="Triaged", importance="Undecided"),
+        ]
+        assert self.plate(rows) == [2, 1]
+
+
+class TestImportanceRank:
+    """One ordering, owned by the library so no renderer can invent another."""
+
+    def test_launchpads_order_is_kept(self) -> None:
+        ordered = ["Critical", "High", "Medium", "Low", "Wishlist", "Undecided"]
+        assert [importance_rank(i) for i in ordered] == list(range(len(ordered)))
+
+    def test_unread_sorts_after_everything_named(self) -> None:
+        """Ranking it above ``Undecided`` would dress up ignorance as urgency."""
+        assert importance_rank("") > importance_rank("Undecided")
+
+    def test_an_unrecognised_value_sorts_last_rather_than_crashing(self) -> None:
+        """A new importance Launchpad adds tomorrow must not break the plate."""
+        assert importance_rank("from-the-future") > importance_rank("Undecided")
+
 
 def vars_of(item: TriageRow) -> dict[str, object]:
     """Field values of a slotted frozen dataclass, for building variants."""
@@ -462,6 +515,81 @@ class TestBugState:
         (projected,) = store.triage_rows()
         assert projected.state is not None
         assert projected.state.assignee == "bamf0"
+
+    def test_importance_and_title_round_trip(self, store: Store) -> None:
+        store.put_bug_states(
+            [BugState(bug_id=1, status="Triaged", importance="High", title="a title")]
+        )
+        state = store.bug_states()[1]
+        assert state.importance == "High"
+        assert state.title == "a title"
+
+    def test_a_pass_that_did_not_list_keeps_importance_and_title(
+        self, store: Store
+    ) -> None:
+        """The deep pass has neither to offer; its '' must not erase them.
+
+        Same rule as the status: '' is "I did not look", and the per-bug pass
+        would otherwise strip the ordering off the whole corpus one bug at a
+        time.
+        """
+        store.put_bug_states(
+            [BugState(bug_id=1, status="New", importance="Critical", title="a title")]
+        )
+        store.put_bug_states([BugState(bug_id=1, status="New", duplicate_of=9)])
+        state = store.bug_states()[1]
+        assert state.importance == "Critical"
+        assert state.title == "a title"
+
+    def test_a_retitle_overwrites(self, store: Store) -> None:
+        """The title here is the copy that moves; the change is the point."""
+        store.put_bug_states(
+            [BugState(bug_id=1, status="New", title="Ubgrade does not work")]
+        )
+        store.put_bug_states(
+            [
+                BugState(
+                    bug_id=1,
+                    status="Triaged",
+                    title="noble\u2192resolute: foo is held back",
+                )
+            ]
+        )
+        assert store.bug_states()[1].title == "noble\u2192resolute: foo is held back"
+
+    def test_importance_is_projected_into_triage_rows(
+        self, store: Store, interner: Interner
+    ) -> None:
+        store.put_run(make_run(store, interner, bug_id=1))
+        store.put_bug_states([BugState(bug_id=1, status="Triaged", importance="Low")])
+        (projected,) = store.triage_rows()
+        assert projected.importance == "Low"
+
+    def test_a_refreshed_title_wins_over_the_ingest_title(
+        self, store: Store, interner: Interner
+    ) -> None:
+        """The ingest-time title is a snapshot; the listing's is the present."""
+        run = make_run(store, interner, bug_id=1).model_copy(
+            update={"current_title": "Ubgrade does not work"}
+        )
+        store.put_run(run)
+        store.put_bug_states(
+            [BugState(bug_id=1, status="Triaged", title="noble\u2192resolute: foo is held back")]
+        )
+        (projected,) = store.triage_rows()
+        assert projected.current_title == "noble\u2192resolute: foo is held back"
+
+    def test_the_ingest_title_is_the_fallback_until_a_listing(
+        self, store: Store, interner: Interner
+    ) -> None:
+        """A bug no listing has reached keeps the only title ever seen."""
+        run = make_run(store, interner, bug_id=1).model_copy(
+            update={"current_title": "Ubgrade does not work"}
+        )
+        store.put_run(run)
+        store.put_bug_states([BugState(bug_id=1, status="Triaged")])
+        (projected,) = store.triage_rows()
+        assert projected.current_title == "Ubgrade does not work"
 
     def test_touch_confirms_without_changing(self, store: Store) -> None:
         store.put_bug_states([BugState(bug_id=1, status="New", checked_at="2026-01-01")])

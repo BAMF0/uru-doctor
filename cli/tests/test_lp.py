@@ -444,6 +444,7 @@ def _task(
     status: str = "New",
     created: str = "2026-09-29T10:00:00+00:00",
     assignee: str | None = None,
+    importance: str = "Undecided",
 ) -> dict:
     """One ``searchTasks`` entry, shaped like the real API's.
 
@@ -456,6 +457,7 @@ def _task(
         "status": status,
         "date_created": created,
         "title": f'Bug #{bug_id} in ubuntu-release-upgrader (Ubuntu): "upgrade failed"',
+        "importance": importance,
     }
     if assignee is not None:
         entry["assignee_link"] = f"{API}/~{assignee}" if assignee else None
@@ -497,6 +499,11 @@ class TestSearchTasks:
         API, whose task entries always carry ``assignee_link``."""
         refs, _ = self._search({"entries": [_task(1)]})
         assert refs[0].assignee is None
+
+    def test_importance_is_parsed(self) -> None:
+        """Every entry carries it, so the plate can be ordered for free."""
+        refs, _ = self._search({"entries": [_task(1, importance="Critical")]})
+        assert refs[0].importance == "Critical"
 
     def test_closed_statuses_are_requested_explicitly(self) -> None:
         """Launchpad's default omits closed bugs, and that is the wrong default.

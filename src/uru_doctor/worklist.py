@@ -77,6 +77,35 @@ class Bucket(StrEnum):
 UNRECORDED_STATUSES: frozenset[str] = frozenset({"New", "Incomplete"})
 
 
+#: Launchpad's importances, most urgent first.
+#:
+#: Kept in the library for the same reason as :data:`BUCKET_HELP`: the
+#: terminal view and ``--json`` must not be able to order the same plate two
+#: ways. ``Undecided`` is included because it is a value Launchpad stores;
+#: "no listing has read it" is not, and sorts after everything named.
+IMPORTANCE_ORDER: tuple[str, ...] = (
+    "Critical",
+    "High",
+    "Medium",
+    "Low",
+    "Wishlist",
+    "Undecided",
+)
+
+
+def importance_rank(importance: str) -> int:
+    """Sort key for a Launchpad importance; anything unread sorts last.
+
+    "Never read" is not an importance, and ranking it above ``Undecided``
+    would dress up ignorance as urgency -- the unread row would sit at the
+    top of a plate precisely because nobody had looked at it.
+    """
+    try:
+        return IMPORTANCE_ORDER.index(importance)
+    except ValueError:
+        return len(IMPORTANCE_ORDER)
+
+
 #: One line per bucket, explaining what the rows in it have in common.
 #:
 #: Kept beside the enum rather than in the renderer because the terminal view,
@@ -425,8 +454,11 @@ def todo(items: Iterable[Item], *, assignee: str = "") -> tuple[Item, ...]:
     has recorded cannot match, which is the conservative reading, and an
     empty ``assignee`` matches nobody at all.
 
-    Ordered with the caller's own work first, then the shared backlog, by
-    bug id within each group -- a stable fact, never an interned id.
+    Ordered with the caller's own work first, then the shared backlog. Within
+    each group the order is Launchpad's importance -- "what first" is the
+    question a plate answers -- then bug id, a stable fact, never an interned
+    id. Bugs no listing has read sort after ``Undecided``; see
+    :func:`importance_rank`.
     """
     mine: list[Item] = []
     triaged: list[Item] = []
@@ -438,7 +470,7 @@ def todo(items: Iterable[Item], *, assignee: str = "") -> tuple[Item, ...]:
         elif item.row.status == "Triaged":
             triaged.append(item)
 
-    def order(item: Item) -> tuple[int, str]:
-        return (item.row.bug_id or 0, item.row.run_key)
+    def order(item: Item) -> tuple[int, int, str]:
+        return (importance_rank(item.row.importance), item.row.bug_id or 0, item.row.run_key)
 
     return (*sorted(mine, key=order), *sorted(triaged, key=order))

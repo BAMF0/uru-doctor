@@ -204,12 +204,20 @@ CREATE INDEX IF NOT EXISTS idx_cluster_members_run ON cluster_members(run_key);
 -- nobody recorded it. The task entry a search returns carries it, so sweeps
 -- and cheap refreshes learn it for free while the per-bug deep pass never
 -- does. "Unassigned" and "unknown" are different facts and are not merged.
+--
+-- `importance` and `title` ride the same entries and follow the status rule:
+-- '' means "this pass did not look", never "there is none" -- the deep pass
+-- and `fetch` learn neither, and must not blank what a listing recorded. The
+-- title here is the copy that moves when somebody retitles the bug, which the
+-- runs table's ingest-time `current_title` deliberately does not.
 CREATE TABLE IF NOT EXISTS bug_state (
     bug_id       INTEGER NOT NULL PRIMARY KEY,
     status       TEXT    NOT NULL DEFAULT '',
     duplicate_of INTEGER,
     is_duplicate INTEGER,
     assignee     TEXT,
+    importance   TEXT,
+    title        TEXT,
     checked_at   TEXT    NOT NULL
 );
 
@@ -286,6 +294,24 @@ class BugState:
     means Launchpad says the task is *unassigned*. Only ``searchTasks``
     entries carry the assignee, so sweeps and cheap refreshes learn it for
     free while the per-bug deep pass never does.
+    """
+
+    importance: str = ""
+    """``Critical``, ``High``, ``Medium``, ``Low``, ``Wishlist`` or ``Undecided``.
+
+    Empty means this pass did not look, following the status rule: the same
+    task entries carry it, so sweeps and cheap refreshes learn it for free
+    while the deep pass and ``fetch`` write ``""`` and preserve what a
+    listing recorded. A display and ordering input only -- never an input to
+    a diagnosis or a signature, like every field of this table.
+    """
+
+    title: str = ""
+    """The bug's current title on Launchpad, as of the last listing that saw it.
+
+    Empty means never listed. This is the copy that moves when somebody
+    retitles the bug -- the change this tool exists to propose -- while the
+    run record's ``current_title`` stays frozen at ingest time. Display only.
     """
 
     checked_at: str = ""
@@ -391,6 +417,8 @@ class TriageRow:
 
     evidence_complete: bool
     current_title: str
+    """The freshest title known: the refreshed ``bug_state`` copy when a
+    listing has seen the bug, else the title frozen into the run at ingest."""
     duplicate_count: int
     lex_lines: int
     lex_unmatched: int
@@ -400,6 +428,11 @@ class TriageRow:
     @property
     def status(self) -> str:
         return self.state.status if self.state else ""
+
+    @property
+    def importance(self) -> str:
+        """Launchpad's importance, ``""`` when no listing has read it."""
+        return self.state.importance if self.state else ""
 
     @property
     def candidate_invalid(self) -> bool:
@@ -583,6 +616,13 @@ class Store:
         # recorded" -- honestly distinct from '' ("Launchpad says unassigned").
         if "assignee" not in self._columns("bug_state"):
             self._conn.execute("ALTER TABLE bug_state ADD COLUMN assignee TEXT")
+
+        # Same rule for the two facts a listing carries that predate these
+        # columns: NULL reads back as '', "no listing has looked", and the
+        # projection falls back to the ingest-time title until one does.
+        for column in ("importance", "title"):
+            if column not in self._columns("bug_state"):
+                self._conn.execute(f"ALTER TABLE bug_state ADD COLUMN {column} TEXT")
 
         # Finding a grammar gap must not mean deserialising every payload: the
         # corpus is scanned for this on every ``stats``.
@@ -1154,6 +1194,10 @@ class Store:
         the per-bug deep pass, ``fetch`` -- writes ``None`` and preserves what
         a listing recorded, while a listing that saw the task *unassigned*
         writes ``''``: a fact, not an absence, so it overwrites.
+
+        Importance and title follow the status rule: only a listing carries
+        them, so a pass that did not list the bug writes ``''`` and preserves,
+        and a listing that did always has both to write.
         """
         rows = [
             (
@@ -1162,6 +1206,8 @@ class Store:
                 state.duplicate_of,
                 None if state.is_duplicate is None else int(state.is_duplicate),
                 state.assignee,
+                state.importance,
+                state.title,
                 state.checked_at or _now(),
             )
             for state in states
@@ -1171,13 +1217,16 @@ class Store:
         self._conn.executemany(
             """
             INSERT INTO bug_state
-                (bug_id, status, duplicate_of, is_duplicate, assignee, checked_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+                (bug_id, status, duplicate_of, is_duplicate, assignee,
+                 importance, title, checked_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(bug_id) DO UPDATE SET
                 status       = COALESCE(NULLIF(excluded.status, ''), bug_state.status),
                 duplicate_of = COALESCE(excluded.duplicate_of, bug_state.duplicate_of),
                 is_duplicate = COALESCE(excluded.is_duplicate, bug_state.is_duplicate),
                 assignee     = COALESCE(excluded.assignee, bug_state.assignee),
+                importance   = COALESCE(NULLIF(excluded.importance, ''), bug_state.importance),
+                title        = COALESCE(NULLIF(excluded.title, ''), bug_state.title),
                 checked_at   = excluded.checked_at
             """,
             rows,
@@ -1252,11 +1301,13 @@ class Store:
                 duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
                 is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
                 assignee=None if r["assignee"] is None else str(r["assignee"]),
+                importance=str(r["importance"] or ""),
+                title=str(r["title"] or ""),
                 checked_at=str(r["checked_at"] or ""),
             )
             for r in self._conn.execute(
-                "SELECT bug_id, status, duplicate_of, is_duplicate, assignee, checked_at "
-                "FROM bug_state"
+                "SELECT bug_id, status, duplicate_of, is_duplicate, assignee, "
+                "importance, title, checked_at FROM bug_state"
             )
         }
 
@@ -1394,10 +1445,11 @@ class Store:
         """
         sql = """
             SELECT r.run_key, r.bug_id, r.attempt, r.source_dir, r.top_cause,
-                   r.third_party, r.evidence_complete, r.current_title,
+                   r.third_party, r.evidence_complete,
+                   COALESCE(NULLIF(s.title, ''), r.current_title) AS current_title,
                    r.duplicate_count, r.lex_lines, r.lex_unmatched,
                    s.bug_id AS state_bug, s.status, s.duplicate_of,
-                   s.is_duplicate, s.assignee, s.checked_at
+                   s.is_duplicate, s.assignee, s.importance, s.title, s.checked_at
               FROM runs r
               LEFT JOIN bug_state s ON s.bug_id = r.bug_id
         """
@@ -1426,6 +1478,8 @@ class Store:
                     duplicate_of=None if r["duplicate_of"] is None else int(r["duplicate_of"]),
                     is_duplicate=None if r["is_duplicate"] is None else bool(r["is_duplicate"]),
                     assignee=None if r["assignee"] is None else str(r["assignee"]),
+                    importance=str(r["importance"] or ""),
+                    title=str(r["title"] or ""),
                     checked_at=str(r["checked_at"] or ""),
                 )
             )

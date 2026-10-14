@@ -138,8 +138,8 @@ Changes must preserve these. Most are enforced by tests; all are deliberate.
 | rules and provenance | `src/uru_doctor/rules/` |
 | ranking policy | `src/uru_doctor/diagnose.py` |
 | signatures and clusters | `src/uru_doctor/dedup.py` |
-| worklist buckets, the `todo` filter | `src/uru_doctor/worklist.py` |
-| Launchpad triage state | `bug_state` table in `src/uru_doctor/store.py` |
+| worklist buckets, the `todo` filter, the importance ordering | `src/uru_doctor/worklist.py` |
+| Launchpad triage state (status, duplicates, assignee, importance, title) | `bug_state` table in `src/uru_doctor/store.py` |
 | title templates | `src/uru_doctor/title.py` |
 | library config (ingest/apt/rules/dedup/title/report) | `src/uru_doctor/config.py` |
 | one-shot interning backend | `src/uru_doctor/memory.py` |
